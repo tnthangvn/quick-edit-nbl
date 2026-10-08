@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Spec Studio — Workbench</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/spec-studio/tokens.css">
+<link rel="stylesheet" href="ds/spec-studio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+.wf-reset{border:0;background:transparent;font:inherit;color:inherit;margin:0;text-align:left;cursor:pointer}
+.wf-rowbtn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:0;height:100%;border:0;background:transparent;font:inherit;color:inherit;text-align:left;cursor:pointer;border-radius:4px}
+.wf-rowbtn:focus-visible{outline:2px solid var(--color-ring);outline-offset:2px}
+@keyframes wf-up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes wf-swap{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+@keyframes wf-row{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+@keyframes wf-flash{0%{background:var(--color-primary-soft)}100%{background:transparent}}
+@keyframes wf-caret{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes wf-dot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+@keyframes wf-indet{from{transform:translateX(-110%)}to{transform:translateX(360%)}}
+@keyframes wf-ring{from{box-shadow:0 0 0 0 var(--color-primary-soft)}to{box-shadow:0 0 0 8px transparent}}
+.wf-stagger > *{animation:wf-up .34s var(--ease-out) both}
+.wf-stagger > *:nth-child(2){animation-delay:40ms}.wf-stagger > *:nth-child(3){animation-delay:80ms}.wf-stagger > *:nth-child(4){animation-delay:120ms}.wf-stagger > *:nth-child(5){animation-delay:160ms}.wf-stagger > *:nth-child(6){animation-delay:200ms}
+.wf-msg{animation:wf-up .3s var(--ease-out) both}
+.wf-swap{animation:wf-swap .32s var(--ease-out) both}
+.wf-row{animation:wf-row .36s var(--ease-out) both}
+.wf-flash{animation:wf-flash 1.6s var(--ease-out) both}
+.wf-caret{display:inline-block;width:2px;height:16px;margin-left:1px;background:var(--color-primary);vertical-align:-3px;animation:wf-caret 1s steps(1) infinite}
+.wf-dots{display:inline-flex;gap:4px;align-items:center;height:20px}
+.wf-dots span{width:6px;height:6px;border-radius:9999px;background:var(--color-muted-foreground);animation:wf-dot 1.2s var(--ease-in-out) infinite}
+.wf-dots span:nth-child(2){animation-delay:.15s}.wf-dots span:nth-child(3){animation-delay:.3s}
+.wf-progress{position:absolute;left:0;right:0;bottom:-1px;height:2px;overflow:hidden;pointer-events:none}
+.wf-progress::after{content:"";position:absolute;top:0;bottom:0;left:0;width:28%;border-radius:2px;background:var(--color-primary);animation:wf-indet 1.2s var(--ease-in-out) infinite}
+.wf-pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border:1px solid var(--color-border);border-radius:9999px;background:var(--color-card);font-size:12px;line-height:16px;color:var(--color-muted-foreground);transition:color .15s var(--ease-out),border-color .15s var(--ease-out)}
+.wf-pill.is-busy{color:var(--color-primary);border-color:var(--color-info-border)}
+.wf-send-ring{animation:wf-ring 1.4s var(--ease-out) infinite}
+.wf-toastwrap{position:absolute;right:24px;bottom:24px;z-index:30}
+.wf-modelmenu{position:absolute;left:0;bottom:calc(100% + 4px);min-width:220px;z-index:40}
+@media (prefers-reduced-motion: reduce){.wf *,.wf *::before,.wf *::after{animation-duration:1ms !important;animation-iteration-count:1 !important;transition-duration:1ms !important}}
+</style>
+</helmet>
+
+<div class="wf" data-theme="{{theme}}" style="position: relative; height: 100vh; min-height: 820px; display: grid; grid-template-columns: {{cols}}; grid-template-rows: 48px minmax(0, 1fr); background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); overflow: hidden; transition: grid-template-columns .22s var(--ease-out);">
+
+  <!-- Header -->
+  <header class="ss-header" style="grid-column: 1 / -1; position: relative;">
+    <button type="button" class="ss-iconbtn" aria-label="Bật/tắt sidebar" title="Bật/tắt sidebar" onClick="{{toggleSidebar}}">
+      <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg>
+    </button>
+    <span class="ss-header__mark" aria-hidden="true">§</span>
+    <span class="ss-header__name">Spec Studio</span>
+    <span class="ss-header__path">~/projects/quick-edit-nbl/specs</span>
+    <span style="flex: 1;"></span>
+    <span class="wf-pill {{syncPillCls}}">
+      <sc-if value="{{anySyncing}}" hint-placeholder-val="{{ false }}">
+        <svg class="ss-icon ss-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
+      </sc-if>
+      <sc-if value="{{notSyncing}}" hint-placeholder-val="{{ true }}">
+        <svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg>
+      </sc-if>
+      <span>{{syncPillText}}</span>
+    </span>
+    <a href="Settings.dc.html" class="ss-iconbtn" aria-label="Settings" title="Settings">
+      <svg class="ss-icon" data-icon="settings" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+    </a>
+    <sc-if value="{{running}}" hint-placeholder-val="{{ false }}">
+      <span class="wf-progress" aria-hidden="true"></span>
+    </sc-if>
+  </header>
+
+  <!-- Sidebar: expanded -->
+  <sc-if value="{{sidebarOpen}}" hint-placeholder-val="{{ true }}">
+    <aside class="ss-sidebar" style="width: auto; min-width: 0; overflow: hidden;" aria-label="Danh sách spec">
+      <div class="ss-sidebar__head">
+        <label class="ss-check" data-state="{{allState}}">
+          <input type="checkbox" checked="{{allChecked}}" onChange="{{toggleAll}}" aria-label="Chọn tất cả spec">
+          <span class="ss-check__box" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="ss-check__mark" d="{{allMark}}" pathLength="1"></path></svg></span>
+        </label>
+        <span class="ss-overline">Specs</span>
+        <span class="ss-sidebar__count">{{ctxText}}</span>
+        <span style="flex: 1;"></span>
+        <button type="button" class="ss-iconbtn ss-iconbtn--sm" aria-label="Spec mới" title="Spec mới">
+          <svg class="ss-icon" data-icon="plus" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+        </button>
+      </div>
+      <div class="ss-sidebar__list wf-stagger" role="list">
+        <sc-for list="{{specs}}" as="item" hint-placeholder-count="5">
+          <div class="ss-spec {{item.cls}}" role="listitem">
+            <label class="ss-check" data-state="{{item.cbState}}">
+              <input type="checkbox" checked="{{item.checked}}" onChange="{{item.toggle}}" aria-label="Đính kèm {{item.name}} vào context">
+              <span class="ss-check__box" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="ss-check__mark" d="M4 8.25 6.75 11 12 5.5" pathLength="1"></path></svg></span>
+            </label>
+            <button type="button" class="wf-rowbtn" onClick="{{item.select}}" aria-current="{{item.current}}">
+              <svg class="ss-icon ss-spec__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+              <span class="ss-spec__name">{{item.name}}</span>
+            </button>
+            <span class="ss-status ss-status--compact ss-status--{{item.status}}" title="{{item.statusLabel}}" role="img" aria-label="{{item.statusLabel}}">
+              <sc-if value="{{item.isSynced}}" hint-placeholder-val="{{ true }}"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+              <sc-if value="{{item.isSyncing}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+              <sc-if value="{{item.isUnsaved}}" hint-placeholder-val="{{ false }}"><span class="ss-dot"></span></sc-if>
+              <sc-if value="{{item.isError}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg></sc-if>
+            </span>
+            <a href="SpecMenu.dc.html" class="ss-iconbtn ss-iconbtn--sm ss-spec__menu" aria-label="Thao tác với {{item.name}}" title="Rename · Force Sync · Delete">
+              <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+            </a>
+          </div>
+        </sc-for>
+      </div>
+      <div class="ss-sidebar__foot" style="display: flex; align-items: center; gap: 8px;">
+        <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg>
+        <span style="font-family: var(--font-mono);">Drive Sync · nbl-7f3a</span>
+      </div>
+    </aside>
+  </sc-if>
+
+  <!-- Sidebar: collapsed -->
+  <sc-if value="{{sidebarClosed}}" hint-placeholder-val="{{ false }}">
+    <aside class="ss-sidebar is-collapsed" style="width: auto;" aria-label="Sidebar thu gọn">
+      <button type="button" class="ss-iconbtn" aria-label="Mở sidebar" title="Mở sidebar" onClick="{{toggleSidebar}}">
+        <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+      </button>
+      <span style="font-size: 11px; color: var(--color-muted-foreground);">{{specCount}}</span>
+    </aside>
+  </sc-if>
+
+  <!-- Main column -->
+  <main style="display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; padding: 12px 16px 16px;">
+
+    <!-- Workspace: editor -->
+    <sc-if value="{{showEditor}}" hint-placeholder-val="{{ true }}">
+      <section class="ss-editor wf-swap" style="flex: 1; min-height: 0;">
+        <div class="ss-editor__tabbar">
+          <div class="ss-editor__tab is-on">
+            <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg>
+            <span>{{selected}}</span>
+          </div>
+          <span style="flex: 1;"></span>
+          <span class="ss-status ss-status--{{selStatus}}">
+            <sc-if value="{{selSyncing}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+            <sc-if value="{{selNotSyncing}}" hint-placeholder-val="{{ true }}"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+            <span>{{selStatusLabel}}</span>
+          </span>
+          <span style="font-size: 12px; color: var(--color-muted-foreground); padding: 0 8px;">Autosave · Markdown</span>
+        </div>
+        <div class="ss-editor__body" aria-label="Monaco Editor">
+          <sc-for list="{{lines}}" as="line" hint-placeholder-count="10">
+            <div class="ss-line {{line.rowCls}}">
+              <span class="ss-line__no">{{line.no}}</span>
+              <span class="ss-line__text"><span class="{{line.cls}}">{{line.text}}</span><sc-if value="{{line.cursor}}" hint-placeholder-val="{{ false }}"><span class="wf-caret" aria-hidden="true"></span></sc-if></span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <!-- Workspace: diff review -->
+    <sc-if value="{{showDiff}}" hint-placeholder-val="{{ false }}">
+      <section class="ss-diff wf-swap" style="flex: 1; min-height: 0;">
+        <div class="ss-diffbar" role="toolbar" aria-label="Duyệt thay đổi của Agent">
+          <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><path d="M11 18H8a2 2 0 0 1-2-2V9"></path></svg>
+          <span class="ss-diffbar__title">Agent đề xuất sửa <code>{{selected}}</code></span>
+          <span class="ss-diffbar__stat"><span class="is-add">+3</span> <span class="is-del">−2</span></span>
+          <span style="flex: 1;"></span>
+          <button type="button" class="ss-btn ss-btn--secondary ss-btn--sm" onClick="{{reject}}" disabled="{{busySaving}}">
+            <svg class="ss-icon" data-icon="x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+            <span>Reject</span>
+          </button>
+          <button type="button" class="ss-btn ss-btn--primary ss-btn--sm {{approveCls}}" onClick="{{approve}}" disabled="{{busySaving}}" style="min-width: 136px;">
+            <sc-if value="{{approveIdle}}" hint-placeholder-val="{{ true }}"><svg class="ss-icon" data-icon="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+            <sc-if value="{{approveLoading}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+            <sc-if value="{{approveDone}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+            <span>{{approveLabel}}</span>
+          </button>
+        </div>
+        <div class="ss-diff__heads"><span>Original</span><span>Proposed</span></div>
+        <div class="ss-diff__grid">
+          <sc-for list="{{diffRows}}" as="row" hint-placeholder-count="7">
+            <div class="ss-dline wf-row {{row.lCls}}" style="animation-delay: {{row.delay}};"><span class="ss-line__no">{{row.ln}}</span><span class="ss-dline__sign">{{row.lSign}}</span><span class="ss-line__text">{{row.left}}</span></div>
+            <div class="ss-dline wf-row {{row.rCls}}" style="animation-delay: {{row.delay}};"><span class="ss-line__no">{{row.rn}}</span><span class="ss-dline__sign">{{row.rSign}}</span><span class="ss-line__text">{{row.right}}</span></div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <!-- Chat log -->
+    <div style="display: flex; flex-direction: column; gap: 8px; max-height: 210px; overflow: auto; padding-bottom: 2px;" aria-live="polite">
+      <sc-if value="{{noMessages}}" hint-placeholder-val="{{ false }}">
+        <div class="wf-msg" style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-muted-foreground);">
+          <span class="ss-msg__avatar" aria-hidden="true"><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg></span>
+          <span>{{ctxHint}}</span>
+        </div>
+      </sc-if>
+      <sc-for list="{{messages}}" as="m" hint-placeholder-count="0">
+        <sc-if value="{{m.isUser}}" hint-placeholder-val="{{ false }}">
+          <div class="ss-msg ss-msg--user wf-msg">{{m.text}}</div>
+        </sc-if>
+        <sc-if value="{{m.isTool}}" hint-placeholder-val="{{ false }}">
+          <div class="ss-msg ss-msg--tool wf-msg">
+            <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><path d="M11 18H8a2 2 0 0 1-2-2V9"></path></svg>
+            <code>{{m.text}}</code>
+            <span class="ss-msg__toolnote">{{m.note}}</span>
+            <span class="ss-status ss-status--{{m.status}}">
+              <sc-if value="{{m.running}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+              <sc-if value="{{m.done}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+              <sc-if value="{{m.pending}}" hint-placeholder-val="{{ false }}"><span class="ss-dot"></span></sc-if>
+              <span>{{m.label}}</span>
+            </span>
+          </div>
+        </sc-if>
+        <sc-if value="{{m.isAgent}}" hint-placeholder-val="{{ false }}">
+          <div class="ss-msg ss-msg--assistant wf-msg">
+            <span class="ss-msg__avatar" aria-hidden="true"><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg></span>
+            <div class="ss-msg__body">{{m.text}}</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{m.isThinking}}" hint-placeholder-val="{{ false }}">
+          <div class="ss-msg ss-msg--assistant wf-msg">
+            <span class="ss-msg__avatar" aria-hidden="true"><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg></span>
+            <span class="wf-dots" aria-label="Agent đang xử lý"><span></span><span></span><span></span></span>
+          </div>
+        </sc-if>
+      </sc-for>
+    </div>
+
+    <!-- Quick Setting Toolbar -->
+    <div class="ss-toolbar" style="position: relative;">
+      <div class="ss-seg" role="radiogroup" aria-label="Chế độ Agent">
+        <button type="button" role="radio" aria-checked="{{isApi}}" class="ss-seg__opt {{apiCls}}" onClick="{{setApi}}">
+          <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>
+          API Key
+        </button>
+        <button type="button" role="radio" aria-checked="{{isCli}}" class="ss-seg__opt {{cliCls}}" onClick="{{setCli}}">
+          <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" x2="20" y1="19" y2="19"></line></svg>
+          CLI Agent
+        </button>
+      </div>
+      <div class="ss-select ss-select--sm is-mono {{modelOpenCls}}" style="width: 200px;">
+        <button type="button" class="ss-select__trigger" aria-haspopup="listbox" aria-expanded="{{modelOpen}}" onClick="{{toggleModel}}">
+          <span class="ss-select__value">{{model}}</span>
+          <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+        </button>
+        <sc-if value="{{modelOpen}}" hint-placeholder-val="{{ false }}">
+          <div class="ss-dd ss-dd--top wf-modelmenu">
+            <div class="ss-dd__list" role="listbox" aria-label="{{modelListLabel}}">
+              <sc-for list="{{modelOptions}}" as="o" hint-placeholder-count="4">
+                <button type="button" role="option" aria-selected="{{o.sel}}" class="ss-dd__opt wf-reset {{o.cls}}" style="width: 100%;" onClick="{{o.pick}}">
+                  <span class="ss-dd__check"><sc-if value="{{o.sel}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></span>
+                  <span class="ss-dd__label">{{o.label}}</span>
+                  <span class="ss-dd__hint">{{o.hint}}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+      <span style="flex: 1;"></span>
+      <span class="ss-toolbar__ctx">
+        <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg>
+        {{ctxText}}
+      </span>
+      <a href="Settings.dc.html" class="ss-iconbtn ss-iconbtn--sm" aria-label="Cấu hình Agent" title="Cấu hình Agent">
+        <svg class="ss-icon" data-icon="settings" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      </a>
+    </div>
+
+    <!-- Composer -->
+    <div class="ss-composer {{composerCls}}">
+      <label for="wf-prompt" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Yêu cầu cho Agent</label>
+      <textarea id="wf-prompt" rows="2" placeholder="Yêu cầu Agent sửa spec…" value="{{prompt}}" onChange="{{onPrompt}}" onKeyDown="{{onKey}}" disabled="{{running}}"></textarea>
+      <div class="ss-composer__bar">
+        <span class="ss-composer__hint"><kbd class="ss-kbd">⌘</kbd><kbd class="ss-kbd">Enter</kbd> để gửi</span>
+        <span style="flex: 1;"></span>
+        <sc-if value="{{running}}" hint-placeholder-val="{{ false }}">
+          <button type="button" class="ss-btn ss-btn--secondary ss-btn--sm" onClick="{{stop}}">
+            <svg class="ss-icon" data-icon="x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+            <span>Dừng</span>
+          </button>
+        </sc-if>
+        <sc-if value="{{notRunning}}" hint-placeholder-val="{{ true }}">
+          <button type="button" class="ss-btn ss-btn--primary ss-btn--sm {{sendCls}}" onClick="{{send}}" disabled="{{sendDisabled}}">
+            <svg class="ss-icon" data-icon="send-horizontal" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.714 3.048a.498.498 0 0 0-.683.627l2.843 7.627a2 2 0 0 1 0 1.396l-2.842 7.627a.498.498 0 0 0 .682.627l18-8.5a.5.5 0 0 0 0-.904z"></path><path d="M6 12h16"></path></svg>
+            <span>Send</span>
+          </button>
+        </sc-if>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <sc-if value="{{showToast}}" hint-placeholder-val="{{ false }}">
+    <div class="wf-toastwrap">
+      <div class="ss-toast ss-toast--{{toast.variant}}" role="status">
+        <sc-if value="{{toast.loading}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin ss-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+        <sc-if value="{{toast.done}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop ss-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+        <sc-if value="{{toast.info}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></sc-if>
+        <div class="ss-toast__text">
+          <p class="ss-toast__title">{{toast.title}}</p>
+          <p class="ss-toast__desc">{{toast.desc}}</p>
+        </div>
+        <button type="button" class="ss-iconbtn ss-iconbtn--sm ss-toast__close" aria-label="Đóng thông báo" onClick="{{closeToast}}">
+          <svg class="ss-icon" data-icon="x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.timers = [];
+    this.state = {
+      selected: 'sidebar.md',
+      collapsed: false,
+      mode: 'api',
+      model: 'gemini-1.5-pro',
+      modelOpen: false,
+      prompt: 'Bổ sung mục kéo thả và badge trạng thái đồng bộ cho sidebar.md',
+      phase: 'idle',
+      saveStep: 'idle',
+      applied: false,
+      messages: [],
+      toast: null,
+      specs: [
+        { name: 'overview.md', status: 'synced', checked: true },
+        { name: 'sidebar.md', status: 'synced', checked: true },
+        { name: 'settings-dialog.md', status: 'syncing', checked: false },
+        { name: 'nbl-sync.md', status: 'error', checked: false },
+        { name: 'tool-calling.md', status: 'synced', checked: false }
+      ]
+    };
+  }
+  componentWillUnmount() { this.clear(); }
+  clear() { this.timers.forEach(function (t) { clearTimeout(t); }); this.timers = []; }
+  later(ms, fn) { this.timers.push(setTimeout(fn, ms)); }
+  setSpec(name, patch) {
+    this.setState(function (s) { return { specs: s.specs.map(function (x) { return x.name === name ? Object.assign({}, x, patch) : x; }) }; });
+  }
+  push(msg) { this.setState(function (s) { return { messages: s.messages.concat([msg]) }; }); }
+  patchMsg(id, patch) {
+    this.setState(function (s) { return { messages: s.messages.map(function (m) { return m.id === id ? Object.assign({}, m, patch) : m; }) }; });
+  }
+  dropThinking() { this.setState(function (s) { return { messages: s.messages.filter(function (m) { return m.kind !== 'thinking'; }) }; }); }
+  send() {
+    var s = this.state;
+    if (s.phase === 'running' || !s.prompt.trim()) return;
+    var self = this, file = s.selected;
+    this.clear();
+    var ctx = s.specs.filter(function (x) { return x.checked; }).map(function (x) { return x.name; });
+    this.setState({ phase: 'running', prompt: '', modelOpen: false, toast: null, applied: false, saveStep: 'idle',
+      messages: [{ id: 'u', kind: 'user', text: s.prompt }, { id: 'th', kind: 'thinking' }] });
+    this.later(700, function () {
+      self.dropThinking();
+      self.push({ id: 't1', kind: 'tool', text: 'read_spec(' + (ctx[0] || file) + ')', note: ctx.length + ' spec trong context', status: 'syncing', label: 'Đang đọc' });
+    });
+    this.later(1500, function () {
+      self.patchMsg('t1', { status: 'synced', label: 'Xong' });
+      self.push({ id: 't2', kind: 'tool', text: 'propose_spec_update(' + file + ')', note: 'Đang soạn thay đổi…', status: 'syncing', label: 'Đang soạn' });
+    });
+    this.later(2700, function () {
+      self.patchMsg('t2', { status: 'unsaved', label: 'Chờ duyệt', note: '+3 −2 dòng' });
+      self.push({ id: 'a1', kind: 'agent', text: 'Mình đề xuất thêm mục Kéo thả và Sync Status Badge, bỏ dòng TBD. Kiểm tra diff phía trên rồi bấm Approve & Save.' });
+      self.setState({ phase: 'review' });
+    });
+  }
+  approve() {
+    var self = this, file = this.state.selected;
+    if (this.state.saveStep !== 'idle') return;
+    this.setState({ saveStep: 'loading' });
+    this.later(900, function () { self.setState({ saveStep: 'done' }); });
+    this.later(1500, function () {
+      self.setState({ phase: 'idle', saveStep: 'idle', applied: true,
+        toast: { variant: 'info', title: 'Đã lưu ' + file, desc: 'Đang đồng bộ lên NotebookLM…', kind: 'loading' } });
+      self.setSpec(file, { status: 'syncing' });
+      self.patchMsg('t2', { status: 'synced', label: 'Đã lưu', note: 'Approve & Save' });
+    });
+    this.later(3600, function () {
+      self.setSpec(file, { status: 'synced' });
+      self.setState({ toast: { variant: 'info', title: 'Đã đồng bộ lên NotebookLM', desc: file + ' · Drive Sync · vừa xong', kind: 'done' } });
+    });
+    this.later(7600, function () { self.setState({ toast: null }); });
+  }
+  reject() {
+    this.clear();
+    this.patchMsg('t2', { status: 'error', label: 'Đã huỷ', note: 'Giữ nguyên file cũ' });
+    this.setState({ phase: 'idle', saveStep: 'idle', prompt: 'Bổ sung mục kéo thả và badge trạng thái đồng bộ cho sidebar.md' });
+  }
+  stop() {
+    this.clear();
+    this.dropThinking();
+    this.push({ id: 'st' + Date.now(), kind: 'agent', text: 'Đã dừng. Chưa có thay đổi nào được ghi.' });
+    this.setState({ phase: 'idle', prompt: 'Bổ sung mục kéo thả và badge trạng thái đồng bộ cho sidebar.md' });
+  }
+  renderVals() {
+    var self = this, s = this.state;
+    var theme = this.props.theme ?? 'light';
+    var STATUS_LABEL = { synced: 'Synced', unsaved: 'Unsaved', syncing: 'Syncing…', error: 'Error' };
+    var checkedCount = s.specs.filter(function (x) { return x.checked; }).length;
+    var all = checkedCount === s.specs.length, some = checkedCount > 0 && !all;
+    var specs = s.specs.map(function (x) {
+      var sel = x.name === s.selected;
+      return Object.assign({}, x, {
+        cls: (sel ? 'is-selected' : '') + (x.checked ? ' is-checked' : ''),
+        cbState: x.checked ? 'checked' : 'off',
+        current: sel ? 'true' : 'false',
+        statusLabel: STATUS_LABEL[x.status],
+        isSynced: x.status === 'synced', isSyncing: x.status === 'syncing', isUnsaved: x.status === 'unsaved', isError: x.status === 'error',
+        select: function () { if (s.phase !== 'running') self.setState({ selected: x.name }); },
+        toggle: function (e) { var v = e && e.target ? e.target.checked : !x.checked; self.setSpec(x.name, { checked: v }); }
+      });
+    });
+    var sel = s.specs.filter(function (x) { return x.name === s.selected; })[0] || s.specs[0];
+    var before = [
+      ['## 3.2. Sidebar (Bên trái) — Quản lý Danh mục Spec', 'tk-h'],
+      ['', ''],
+      ['* **Toggle Sidebar Icon:** Nút thu gọn.', ''],
+      ['* **Danh sách file Spec:**', ''],
+      ['  - *Click chọn xem:* Mở file trên Monaco Editor.', ''],
+      ['  - *Checkbox:* Đính kèm spec vào context của Agent.', ''],
+      ['* Badge trạng thái (TBD)', ''],
+      ['', ''],
+      ['### Context Action Menu (3 chấm)', 'tk-h'],
+      ['* Delete · Rename · Force Sync', '']
+    ];
+    var after = [
+      ['## 3.2. Sidebar (Bên trái) — Quản lý Danh mục Spec', 'tk-h', false],
+      ['', '', false],
+      ['* **Toggle Sidebar Icon:** Nút thu gọn / mở rộng sidebar.', '', true],
+      ['* **Danh sách file Spec:**', '', false],
+      ['  - *Click chọn xem:* Mở file trên Monaco Editor.', '', false],
+      ['  - *Checkbox:* Đính kèm spec vào context của Agent.', '', false],
+      ['  - *Kéo thả:* Sắp xếp lại thứ tự spec.', '', true],
+      ['* **Sync Status Badge:** Synced · Unsaved · Syncing… · Error.', '', true],
+      ['', '', false],
+      ['### Context Action Menu (3 chấm)', 'tk-h', false],
+      ['* Delete · Rename · Force Sync', '', false]
+    ];
+    var src = (s.applied && s.selected === 'sidebar.md') ? after : before;
+    var lines = src.map(function (l, i) {
+      return { no: i + 1, text: l[0], cls: l[1], rowCls: (l[2] && s.applied ? 'wf-flash' : '') + (i === 2 && !s.applied ? ' is-cursor' : ''), cursor: i === 2 && !s.applied && s.phase === 'idle' };
+    });
+    var rows = [
+      { k: 'same', l: '## 3.2. Sidebar (Bên trái) — Quản lý Danh mục Spec', r: '## 3.2. Sidebar (Bên trái) — Quản lý Danh mục Spec' },
+      { k: 'same', l: '', r: '' },
+      { k: 'chg', l: '* **Toggle Sidebar Icon:** Nút thu gọn.', r: '* **Toggle Sidebar Icon:** Nút thu gọn / mở rộng sidebar.' },
+      { k: 'same', l: '* **Danh sách file Spec:**', r: '* **Danh sách file Spec:**' },
+      { k: 'same', l: '  - *Click chọn xem:* Mở file trên Monaco Editor.', r: '  - *Click chọn xem:* Mở file trên Monaco Editor.' },
+      { k: 'same', l: '  - *Checkbox:* Đính kèm spec vào context của Agent.', r: '  - *Checkbox:* Đính kèm spec vào context của Agent.' },
+      { k: 'add', r: '  - *Kéo thả:* Sắp xếp lại thứ tự spec.' },
+      { k: 'chg', l: '* Badge trạng thái (TBD)', r: '* **Sync Status Badge:** Synced · Unsaved · Syncing… · Error.' },
+      { k: 'same', l: '', r: '' },
+      { k: 'same', l: '### Context Action Menu (3 chấm)', r: '### Context Action Menu (3 chấm)' }
+    ];
+    var ln = 0, rn = 0;
+    var diffRows = rows.map(function (r, i) {
+      var hasL = r.l != null, hasR = r.r != null;
+      if (hasL) ln++; if (hasR) rn++;
+      var lCls = r.k === 'same' ? '' : (hasL ? 'is-del' : 'is-empty');
+      var rCls = r.k === 'same' ? '' : (hasR ? 'is-add' : 'is-empty');
+      return { left: hasL ? r.l : '', right: hasR ? r.r : '', ln: hasL ? ln : '', rn: hasR ? rn : '', lCls: lCls, rCls: rCls,
+        lSign: lCls === 'is-del' ? '−' : '', rSign: rCls === 'is-add' ? '+' : '', delay: (i * 45) + 'ms' };
+    });
+    var models = s.mode === 'api'
+      ? [{ v: 'gemini-1.5-pro', h: 'Google' }, { v: 'gemini-2.0-flash', h: 'Google' }, { v: 'claude-sonnet-4', h: 'Anthropic' }, { v: 'gpt-4o', h: 'OpenAI' }, { v: 'deepseek-chat', h: 'DeepSeek' }]
+      : [{ v: 'claude-code', h: 'CLI' }, { v: 'aider', h: 'CLI' }, { v: 'custom-script', h: 'Shell' }];
+    var anySyncing = s.specs.some(function (x) { return x.status === 'syncing'; });
+    var syncedCount = s.specs.filter(function (x) { return x.status === 'synced'; }).length;
+    var t = s.toast;
+    var messages = s.messages.map(function (m) {
+      return Object.assign({}, m, {
+        isUser: m.kind === 'user', isTool: m.kind === 'tool', isAgent: m.kind === 'agent', isThinking: m.kind === 'thinking',
+        running: m.status === 'syncing', done: m.status === 'synced', pending: m.status === 'unsaved' || m.status === 'error'
+      });
+    });
+    return {
+      theme: theme,
+      cols: s.collapsed ? '48px minmax(0, 1fr)' : '264px minmax(0, 1fr)',
+      sidebarOpen: !s.collapsed, sidebarClosed: s.collapsed,
+      toggleSidebar: function () { self.setState({ collapsed: !s.collapsed }); },
+      specs: specs, specCount: String(s.specs.length),
+      allState: all ? 'checked' : some ? 'mixed' : 'off', allChecked: all,
+      allMark: some ? 'M4.5 8h7' : 'M4 8.25 6.75 11 12 5.5',
+      toggleAll: function () { var v = !all; self.setState({ specs: s.specs.map(function (x) { return Object.assign({}, x, { checked: v }); }) }); },
+      ctxText: checkedCount ? checkedCount + ' spec trong context' : s.specs.length + ' file',
+      ctxHint: checkedCount ? 'Agent sẽ đọc ' + checkedCount + ' spec đã tick. Gõ yêu cầu rồi bấm Send.' : 'Tick spec ở Sidebar để đưa vào context của Agent.',
+      selected: s.selected,
+      selStatus: sel.status, selStatusLabel: STATUS_LABEL[sel.status], selSyncing: sel.status === 'syncing', selNotSyncing: sel.status !== 'syncing',
+      showEditor: s.phase !== 'review', showDiff: s.phase === 'review',
+      lines: lines, diffRows: diffRows,
+      busySaving: s.saveStep !== 'idle',
+      approveIdle: s.saveStep === 'idle', approveLoading: s.saveStep === 'loading', approveDone: s.saveStep === 'done',
+      approveLabel: s.saveStep === 'loading' ? 'Đang lưu…' : s.saveStep === 'done' ? 'Đã lưu' : 'Approve & Save',
+      approveCls: s.saveStep === 'loading' ? 'is-loading' : s.saveStep === 'done' ? 'is-success' : '',
+      approve: function () { self.approve(); }, reject: function () { self.reject(); },
+      messages: messages, noMessages: s.messages.length === 0,
+      running: s.phase === 'running', notRunning: s.phase !== 'running',
+      isApi: s.mode === 'api' ? 'true' : 'false', isCli: s.mode === 'cli' ? 'true' : 'false',
+      apiCls: s.mode === 'api' ? 'is-on' : '', cliCls: s.mode === 'cli' ? 'is-on' : '',
+      setApi: function () { self.setState({ mode: 'api', model: 'gemini-1.5-pro', modelOpen: false }); },
+      setCli: function () { self.setState({ mode: 'cli', model: 'claude-code', modelOpen: false }); },
+      model: s.model, modelOpen: s.modelOpen, modelOpenCls: s.modelOpen ? 'is-open' : '',
+      modelListLabel: s.mode === 'api' ? 'Model' : 'CLI profile',
+      toggleModel: function () { self.setState({ modelOpen: !s.modelOpen }); },
+      modelOptions: models.map(function (m) {
+        var on = m.v === s.model;
+        return { label: m.v, hint: m.h, sel: on, cls: on ? 'is-selected is-active' : '', pick: function () { self.setState({ model: m.v, modelOpen: false }); } };
+      }),
+      prompt: s.prompt,
+      onPrompt: function (e) { self.setState({ prompt: e.target.value }); },
+      onKey: function (e) { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); self.send(); } },
+      send: function () { self.send(); }, stop: function () { self.stop(); },
+      sendDisabled: !s.prompt.trim(),
+      sendCls: s.prompt.trim() && s.phase === 'idle' && s.messages.length === 0 ? 'wf-send-ring' : '',
+      composerCls: s.phase === 'running' ? 'is-busy' : '',
+      anySyncing: anySyncing, notSyncing: !anySyncing,
+      syncPillCls: anySyncing ? 'is-busy' : '',
+      syncPillText: anySyncing ? 'Đang đồng bộ NotebookLM…' : 'NotebookLM · ' + syncedCount + '/' + s.specs.length + ' synced',
+      showToast: !!t,
+      toast: t ? { variant: t.variant, title: t.title, desc: t.desc, loading: t.kind === 'loading', done: t.kind === 'done', info: t.kind === 'info' } : { variant: 'info', title: '', desc: '', loading: false, done: false, info: false },
+      closeToast: function () { self.setState({ toast: null }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

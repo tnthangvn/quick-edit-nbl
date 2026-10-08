@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Spec Studio — Trạng thái sync</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/spec-studio/tokens.css">
+<link rel="stylesheet" href="ds/spec-studio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+@keyframes wf-up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes wf-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes wf-pulse{from{box-shadow:0 0 0 0 var(--color-info-border)}to{box-shadow:0 0 0 8px transparent}}
+@keyframes wf-shake{0%,100%{transform:none}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.wf-card{border:1px solid var(--color-border);border-radius:8px;background:var(--color-card);padding:20px;display:flex;flex-direction:column;gap:16px}
+.wf-h{margin:0;font-size:14px;line-height:20px;font-weight:600}
+.wf-sub{margin:0;font-size:12px;line-height:16px;color:var(--color-muted-foreground)}
+.wf-row{display:grid;grid-template-columns:120px 40px minmax(0,1fr);align-items:center;gap:12px;font-size:13px;line-height:18px}
+.wf-row p{margin:0;color:var(--color-muted-foreground)}
+.wf-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;position:relative}
+.wf-step{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;position:relative;z-index:1}
+.wf-node{width:32px;height:32px;border-radius:9999px;display:grid;place-items:center;border:1.5px solid var(--color-input);background:var(--color-card);color:var(--color-muted-foreground);transition:background-color .2s var(--ease-out),border-color .2s var(--ease-out),color .2s var(--ease-out)}
+.wf-step.is-active .wf-node{border-color:var(--color-primary);color:var(--color-primary);animation:wf-pulse 1.2s var(--ease-out) infinite}
+.wf-step.is-done .wf-node{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-primary-foreground)}
+.wf-step.is-fail .wf-node{background:var(--color-destructive);border-color:var(--color-destructive);color:var(--color-destructive-foreground);animation:wf-shake .3s var(--ease-out)}
+.wf-step__t{font-size:13px;line-height:18px;font-weight:500}
+.wf-step__d{font-family:var(--font-mono);font-size:11px;line-height:16px;color:var(--color-muted-foreground)}
+.wf-track{position:absolute;top:16px;left:16.66%;right:16.66%;height:2px;background:var(--color-border);border-radius:2px;overflow:hidden}
+.wf-track i{position:absolute;inset:0;background:var(--color-primary);transform-origin:left;transition:transform .5s var(--ease-out)}
+.wf-banner{display:flex;gap:12px;align-items:flex-start;padding:12px 12px 12px 16px;border:1px solid var(--color-error-border);border-radius:8px;background:var(--color-error-soft);animation:wf-up .3s var(--ease-out) both}
+.wf-banner .ss-icon{color:var(--color-error);margin-top:2px}
+.wf-stack > *{animation:wf-up .34s var(--ease-out) both}
+.wf-stack > *:nth-child(2){animation-delay:80ms}.wf-stack > *:nth-child(3){animation-delay:160ms}
+@media (prefers-reduced-motion: reduce){.wf *,.wf *::before,.wf *::after{animation-duration:1ms !important;animation-iteration-count:1 !important;transition-duration:1ms !important}}
+</style>
+</helmet>
+
+<div class="wf" data-theme="{{theme}}" style="min-height: 100vh; box-sizing: border-box; padding: 40px 48px; background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans);">
+  <div style="max-width: 1344px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span class="ss-header__mark" aria-hidden="true">§</span>
+      <h1 style="margin: 0; font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em;">Trạng thái đồng bộ NotebookLM</h1>
+      <span style="flex: 1;"></span>
+      <a href="Main.dc.html" class="ss-btn ss-btn--ghost ss-btn--sm" style="text-decoration: none;">Về Workbench</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px;">
+      <!-- Badges -->
+      <section class="wf-card" aria-labelledby="wf-b">
+        <div><h2 id="wf-b" class="wf-h">Badge trạng thái của spec</h2><p class="wf-sub">Dạng đầy đủ ở tab editor, dạng gọn (chỉ icon) trong Sidebar.</p></div>
+        <div class="wf-row">
+          <span class="ss-status ss-status--synced"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span>Synced</span></span>
+          <span class="ss-status ss-status--synced ss-status--compact" role="img" aria-label="Synced"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+          <p>File local trùng với source trên NotebookLM. Màu gray: yên, không cần nhìn.</p>
+        </div>
+        <div class="wf-row">
+          <span class="ss-status ss-status--unsaved"><span class="ss-dot"></span><span>Unsaved</span></span>
+          <span class="ss-status ss-status--unsaved ss-status--compact" role="img" aria-label="Unsaved"><span class="ss-dot"></span></span>
+          <p>Có thay đổi chưa ghi xuống disk hoặc chưa sync. Chấm blue.</p>
+        </div>
+        <div class="wf-row">
+          <span class="ss-status ss-status--syncing"><svg class="ss-icon ss-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg><span>Syncing…</span></span>
+          <span class="ss-status ss-status--syncing ss-status--compact" role="img" aria-label="Syncing"><svg class="ss-icon ss-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></span>
+          <p>Pipeline đang chạy. Spinner blue, header hiện “Đang đồng bộ…”.</p>
+        </div>
+        <div class="wf-row">
+          <span class="ss-status ss-status--error"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg><span>Error</span></span>
+          <span class="ss-status ss-status--error ss-status--compact" role="img" aria-label="Error"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg></span>
+          <p>Lần sync gần nhất thất bại. Mở file sẽ thấy banner lỗi kèm cách xử lý.</p>
+        </div>
+      </section>
+
+      <!-- Pipeline -->
+      <section class="wf-card" aria-labelledby="wf-p">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+          <div style="flex: 1;"><h2 id="wf-p" class="wf-h">Pipeline sync</h2><p class="wf-sub">Chạy khi Approve (nếu bật Auto sync) hoặc Force Sync.</p></div>
+          <div class="ss-tabs ss-tabs--pill" role="tablist">
+            <button type="button" role="tab" aria-selected="{{driveSel}}" class="ss-tab {{driveCls}}" onClick="{{pickDrive}}">Drive Sync</button>
+            <button type="button" role="tab" aria-selected="{{rpcSel}}" class="ss-tab {{rpcCls}}" onClick="{{pickRpc}}">Cookie RPC</button>
+          </div>
+        </div>
+        <div class="wf-steps">
+          <div class="wf-track" aria-hidden="true"><i style="transform: scaleX({{trackScale}});"></i></div>
+          <sc-for list="{{steps}}" as="st" hint-placeholder-count="3">
+            <div class="wf-step {{st.cls}}">
+              <span class="wf-node" aria-hidden="true">
+                <sc-if value="{{st.showNum}}" hint-placeholder-val="{{ true }}"><span style="font-size: 12px; font-weight: 600;">{{st.n}}</span></sc-if>
+                <sc-if value="{{st.showSpin}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+                <sc-if value="{{st.showCheck}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+                <sc-if value="{{st.showX}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></sc-if>
+              </span>
+              <span class="wf-step__t">{{st.t}}</span>
+              <span class="wf-step__d">{{st.d}}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; padding-top: 4px; border-top: 1px solid var(--color-border);">
+          <label class="ss-check" data-state="{{failState}}" style="padding-top: 12px;">
+            <input type="checkbox" checked="{{fail}}" onChange="{{toggleFail}}">
+            <span class="ss-check__box" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="ss-check__mark" d="M4 8.25 6.75 11 12 5.5" pathLength="1"></path></svg></span>
+            <span class="ss-check__label">Giả lập lỗi ở bước 2</span>
+          </label>
+          <span style="flex: 1;"></span>
+          <span style="padding-top: 12px; font-size: 12px; color: var(--color-muted-foreground);">{{runText}}</span>
+          <button type="button" class="ss-btn ss-btn--tonal ss-btn--sm {{runCls}}" style="margin-top: 12px;" onClick="{{run}}" disabled="{{busy}}">
+            <svg class="ss-icon" data-icon="cloud-upload" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg>
+            <span>Force Sync</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Error banner -->
+      <section class="wf-card" aria-labelledby="wf-e">
+        <div><h2 id="wf-e" class="wf-h">Banner lỗi trong editor</h2><p class="wf-sub">Hiện trên đầu editor khi mở spec đang Error. Không tự ẩn.</p></div>
+        <div class="wf-banner" role="alert">
+          <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-size: 13px; line-height: 20px; font-weight: 600; color: var(--color-error);">Sync nbl-sync.md thất bại</span>
+            <span style="font-size: 13px; line-height: 18px; color: var(--color-muted-foreground);">NotebookLM trả về 401 ở bước DeleteSource. Cookie có thể đã hết hạn.</span>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button type="button" class="ss-btn ss-btn--outline ss-btn--sm"><svg class="ss-icon" data-icon="refresh-cw" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg><span>Thử lại</span></button>
+              <a href="Settings.dc.html" class="ss-btn ss-btn--ghost ss-btn--sm" style="text-decoration: none;">Mở Settings</a>
+            </div>
+          </div>
+        </div>
+        <div class="wf-banner" role="status" style="border-color: var(--color-warning-border); background: var(--color-warning-soft);">
+          <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--color-warning);"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-size: 13px; line-height: 20px; font-weight: 600; color: var(--color-warning);">Source trên NotebookLM mới hơn bản local</span>
+            <span style="font-size: 13px; line-height: 18px; color: var(--color-muted-foreground);">Ai đó đã sửa source 12 phút trước. Sync bây giờ sẽ ghi đè thay đổi đó.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Toasts -->
+      <section class="wf-card" aria-labelledby="wf-t">
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+          <div style="flex: 1;"><h2 id="wf-t" class="wf-h">Toast</h2><p class="wf-sub">Góc dưới phải, tối đa 3. Info ẩn sau 4 giây, warning 6 giây, error không tự ẩn.</p></div>
+          <button type="button" class="ss-btn ss-btn--ghost ss-btn--sm" onClick="{{replayToasts}}"><svg class="ss-icon" data-icon="refresh-cw" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg><span>Xem lại</span></button>
+        </div>
+        <div class="ss-toaster wf-stack" style="align-items: flex-end;" key="{{toastKey}}">
+          <div class="ss-toast ss-toast--info" role="status">
+            <svg class="ss-icon ss-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+            <div class="ss-toast__text"><p class="ss-toast__title">Đã đồng bộ sidebar.md</p><p class="ss-toast__desc">Drive Sync · vừa xong</p></div>
+          </div>
+          <div class="ss-toast ss-toast--warning" role="status">
+            <svg class="ss-icon ss-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+            <div class="ss-toast__text"><p class="ss-toast__title">Cookie NotebookLM sắp hết hạn</p><p class="ss-toast__desc">Còn 2 ngày. Cập nhật trong Settings để sync không bị gián đoạn.</p></div>
+            <a href="Settings.dc.html" class="ss-btn ss-btn--ghost ss-btn--sm ss-toast__action" style="text-decoration: none;">Mở</a>
+          </div>
+          <div class="ss-toast ss-toast--error" role="alert">
+            <svg class="ss-icon ss-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+            <div class="ss-toast__text"><p class="ss-toast__title">Sync thất bại</p><p class="ss-toast__desc">NotebookLM trả về 401. Kiểm tra lại Cookie trong Settings.</p></div>
+            <button type="button" class="ss-btn ss-btn--ghost ss-btn--sm ss-toast__action">Thử lại</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.timers = [];
+    this.state = { strategy: 'drive', step: -1, failed: false, fail: false, done: false, toastKey: 0 };
+  }
+  componentDidMount() { var self = this; this.timers.push(setTimeout(function () { self.run(); }, 600)); }
+  componentWillUnmount() { this.timers.forEach(function (t) { clearTimeout(t); }); }
+  run() {
+    var self = this;
+    this.timers.forEach(function (t) { clearTimeout(t); }); this.timers = [];
+    this.setState({ step: 0, failed: false, done: false });
+    this.timers.push(setTimeout(function () { self.setState({ step: 1 }); }, 900));
+    this.timers.push(setTimeout(function () {
+      if (self.state.fail) { self.setState({ failed: true }); return; }
+      self.setState({ step: 2 });
+    }, 1900));
+    this.timers.push(setTimeout(function () { if (!self.state.fail) self.setState({ step: 3, done: true }); }, 2900));
+  }
+  renderVals() {
+    var self = this, s = this.state;
+    var DEF = s.strategy === 'drive'
+      ? [['Ghi Google Doc', 'drive.files.update'], ['Refresh source', 'notebook.sources.sync'], ['Xác nhận', 'hash khớp local']]
+      : [['GetSources', 'tìm source trùng tên'], ['DeleteSource', 'xoá source cũ'], ['AddSource', 'nạp nội dung mới']];
+    var steps = DEF.map(function (d, i) {
+      var active = s.step === i && !s.failed, done = s.step > i, fail = s.failed && s.step === i;
+      return { n: i + 1, t: d[0], d: d[1], cls: fail ? 'is-fail' : done ? 'is-done' : active ? 'is-active' : '',
+        showNum: !active && !done && !fail, showSpin: active, showCheck: done, showX: fail };
+    });
+    var busy = s.step >= 0 && !s.done && !s.failed;
+    return {
+      theme: this.props.theme ?? 'light',
+      driveSel: s.strategy === 'drive' ? 'true' : 'false', rpcSel: s.strategy === 'rpc' ? 'true' : 'false',
+      driveCls: s.strategy === 'drive' ? 'is-on' : '', rpcCls: s.strategy === 'rpc' ? 'is-on' : '',
+      pickDrive: function () { self.setState({ strategy: 'drive' }); self.run(); },
+      pickRpc: function () { self.setState({ strategy: 'rpc' }); self.run(); },
+      steps: steps,
+      trackScale: String(Math.max(0, Math.min(1, (s.done ? 2 : Math.max(0, s.step)) / 2))),
+      fail: s.fail, failState: s.fail ? 'checked' : 'off',
+      toggleFail: function () { self.setState({ fail: !s.fail }); },
+      run: function () { self.run(); }, busy: busy, runCls: busy ? 'is-loading' : '',
+      runText: s.failed ? 'Lỗi ở bước 2 · spec chuyển Error' : s.done ? 'Xong · 2.9 s · spec chuyển Synced' : busy ? 'Đang chạy…' : '',
+      toastKey: String(s.toastKey),
+      replayToasts: function () { self.setState({ toastKey: s.toastKey + 1 }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

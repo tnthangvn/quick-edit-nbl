@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Spec Studio — Projects</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/spec-studio/tokens.css">
+<link rel="stylesheet" href="ds/spec-studio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+@keyframes wf-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes wf-fade{from{opacity:0}to{opacity:1}}
+@keyframes wf-pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes wf-slide{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+@keyframes wf-flash{0%{box-shadow:0 0 0 3px var(--color-primary-soft);border-color:var(--color-primary)}100%{box-shadow:0 0 0 0 transparent;border-color:var(--color-border)}}
+.wf-reset{border:0;background:transparent;font:inherit;color:inherit;margin:0;padding:0;text-align:left;cursor:pointer}
+.wf-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.wf-grid > *{animation:wf-up .36s var(--ease-out) both}
+.wf-grid > *:nth-child(2){animation-delay:40ms}.wf-grid > *:nth-child(3){animation-delay:80ms}.wf-grid > *:nth-child(4){animation-delay:120ms}.wf-grid > *:nth-child(5){animation-delay:160ms}.wf-grid > *:nth-child(6){animation-delay:200ms}.wf-grid > *:nth-child(7){animation-delay:240ms}
+.wf-card{position:relative;display:flex;flex-direction:column;gap:12px;min-height:176px;box-sizing:border-box;padding:16px;border:1px solid var(--color-border);border-radius:8px;background:var(--color-card);text-decoration:none;transition:border-color .15s var(--ease-out),box-shadow .15s var(--ease-out),transform .15s var(--ease-out)}
+.wf-card:hover{border-color:var(--color-input);box-shadow:var(--shadow-float);transform:translateY(-1px)}
+.wf-card:focus-visible{outline:2px solid var(--color-ring);outline-offset:2px}
+.wf-card.is-missing{opacity:.62}
+.wf-card.is-new{animation:wf-up .36s var(--ease-out) both,wf-flash 2.4s var(--ease-out) .3s both}
+.wf-new{align-items:center;justify-content:center;gap:8px;border-style:dashed;border-width:1.5px;color:var(--color-muted-foreground);cursor:pointer;font:inherit;width:100%}
+.wf-new:hover{color:var(--color-primary);border-color:var(--color-primary);background:var(--color-primary-soft)}
+.wf-new .ss-icon{transition:transform .22s var(--ease-out)}
+.wf-new:hover .ss-icon{transform:rotate(90deg)}
+.wf-tag{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:4px;background:var(--color-muted);color:var(--color-muted-foreground);font-size:12px;line-height:16px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.wf-tag.is-blue{background:var(--color-primary-soft);color:var(--color-primary)}
+.wf-tag.is-red{background:var(--color-destructive-soft);color:var(--color-destructive)}
+.wf-tag code{font-family:var(--font-mono);font-size:11px}
+.wf-search{position:relative;flex:1;max-width:360px}
+.wf-search .ss-icon{position:absolute;left:10px;top:9px;color:var(--color-muted-foreground);pointer-events:none}
+.wf-search input{padding-left:32px}
+.wf-backdrop{animation:wf-fade .2s var(--ease-out) both}
+.wf-dialog{animation:wf-pop .24s var(--ease-out) both}
+.wf-step{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-size:13px;line-height:18px;color:var(--color-muted-foreground)}
+.wf-step b{display:block;font-weight:500}
+.wf-step small{display:block;font-size:12px;line-height:16px;margin-top:2px}
+.wf-step.is-on{color:var(--color-foreground)}
+.wf-step.is-on b{font-weight:600}
+.wf-dot{flex:none;width:22px;height:22px;border-radius:9999px;display:grid;place-items:center;border:1.5px solid var(--color-input);font-size:11px;font-weight:600;background:var(--color-card);transition:all .2s var(--ease-out)}
+.wf-step.is-on .wf-dot{border-color:var(--color-primary);color:var(--color-primary);box-shadow:0 0 0 3px var(--color-primary-soft)}
+.wf-step.is-done .wf-dot{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-primary-foreground)}
+.wf-rail{position:absolute;left:10px;top:30px;bottom:30px;width:2px;background:var(--color-border);border-radius:2px;overflow:hidden}
+.wf-rail i{position:absolute;left:0;right:0;top:0;background:var(--color-primary);transition:height .3s var(--ease-out)}
+.wf-pane{animation:wf-slide .28s var(--ease-out) both;display:flex;flex-direction:column;gap:18px}
+.wf-opts{display:grid;gap:8px}
+.wf-opt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--color-border);border-radius:8px;background:var(--color-card);font:inherit;color:inherit;text-align:left;cursor:pointer;transition:border-color .15s var(--ease-out),box-shadow .15s var(--ease-out),background-color .15s var(--ease-out)}
+.wf-opt:hover{border-color:var(--color-input)}
+.wf-opt.is-on{border-color:var(--color-primary);box-shadow:0 0 0 3px var(--color-primary-soft)}
+.wf-opt:focus-visible{outline:2px solid var(--color-ring);outline-offset:2px}
+.wf-opt.is-off{opacity:.55;cursor:not-allowed}
+.wf-radio{width:16px;height:16px;flex:none;margin-top:1px;box-sizing:border-box;border:1.5px solid var(--color-input);border-radius:9999px;display:grid;place-items:center;transition:border-color .15s var(--ease-out)}
+.wf-radio::after{content:"";width:8px;height:8px;border-radius:9999px;background:var(--color-primary);transform:scale(0);transition:transform .18s var(--ease-out)}
+.wf-opt.is-on .wf-radio{border-color:var(--color-primary)}
+.wf-opt.is-on .wf-radio::after{transform:scale(1)}
+.wf-opt__t{font-size:13px;line-height:18px;font-weight:500}
+.wf-opt__d{font-size:12px;line-height:16px;color:var(--color-muted-foreground)}
+.wf-state{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:16px;white-space:nowrap}
+.wf-state.is-ok{color:var(--color-primary)}
+.wf-state.is-warn{color:var(--color-warning)}
+.wf-state.is-mute{color:var(--color-muted-foreground)}
+.wf-list{border:1px solid var(--color-border);border-radius:8px;background:var(--color-card);max-height:168px;overflow:auto;padding:4px}
+.wf-repo{display:flex;align-items:center;gap:10px;width:100%;min-height:36px;padding:0 10px;border-radius:6px;font-size:13px;transition:background-color .1s var(--ease-out)}
+.wf-repo:hover{background:var(--color-accent)}
+.wf-repo.is-on{background:var(--color-primary-soft)}
+.wf-repo code{font-family:var(--font-mono);font-size:12px}
+.wf-run{display:flex;align-items:center;gap:10px;font-size:13px;line-height:18px;animation:wf-up .24s var(--ease-out) both}
+.wf-run.is-wait{color:var(--color-muted-foreground)}
+.wf-sum{display:grid;grid-template-columns:140px minmax(0,1fr);gap:8px 16px;font-size:13px;line-height:18px}
+.wf-sum dt{color:var(--color-muted-foreground)}
+.wf-sum dd{margin:0}
+.wf-sum code{font-family:var(--font-mono);font-size:12px}
+.wf-toastwrap{position:absolute;right:24px;bottom:24px;z-index:60}
+@media (prefers-reduced-motion: reduce){.wf *,.wf *::before,.wf *::after{animation-duration:1ms !important;animation-iteration-count:1 !important;transition-duration:1ms !important}}
+</style>
+</helmet>
+
+<div class="wf" data-theme="{{theme}}" style="position: relative; min-height: 100vh; display: flex; flex-direction: column; background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans);">
+  <header class="ss-header">
+    <span class="ss-header__mark" aria-hidden="true">§</span>
+    <span class="ss-header__name">Spec Studio</span>
+    <span style="flex: 1;"></span>
+    <a href="Settings.dc.html" class="ss-iconbtn" aria-label="Settings" title="Settings">
+      <svg class="ss-icon" data-icon="settings" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+    </a>
+  </header>
+
+  <main style="flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; box-sizing: border-box; padding: 32px 24px 48px; display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 240px;">
+        <h1 style="margin: 0; font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em;">Projects</h1>
+        <p style="margin: 2px 0 0; font-size: 13px; line-height: 18px; color: var(--color-muted-foreground);">{{countText}}</p>
+      </div>
+      <button type="button" class="ss-btn ss-btn--outline">
+        <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg>
+        <span>Mở thư mục có sẵn</span>
+      </button>
+      <button type="button" class="ss-btn ss-btn--primary" onClick="{{openWizard}}">
+        <svg class="ss-icon" data-icon="plus" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+        <span>New Project</span>
+      </button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <div class="wf-search">
+        <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <label for="wf-q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Tìm project</label>
+        <input id="wf-q" class="ss-input" placeholder="Tìm theo tên hoặc đường dẫn…" value="{{q}}" onChange="{{onQ}}">
+      </div>
+      <div class="ss-tabs ss-tabs--pill" role="tablist" aria-label="Lọc theo nơi lưu trữ">
+        <sc-for list="{{filters}}" as="f" hint-placeholder-count="4">
+          <button type="button" role="tab" aria-selected="{{f.sel}}" class="ss-tab {{f.cls}}" onClick="{{f.pick}}">{{f.label}}</button>
+        </sc-for>
+      </div>
+      <span style="flex: 1;"></span>
+      <span style="font-size: 12px; color: var(--color-muted-foreground);">Sắp xếp: Mở gần nhất</span>
+    </div>
+
+    <div class="wf-grid" key="{{gridKey}}">
+      <button type="button" class="wf-card wf-new" onClick="{{openWizard}}">
+        <svg class="ss-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+        <span style="font-size: 13px; font-weight: 500;">New Project</span>
+        <span style="font-size: 12px;">Local · Git · Google Drive</span>
+      </button>
+      <sc-for list="{{shown}}" as="w" hint-placeholder-count="5">
+        <a href="Main.dc.html" class="wf-card {{w.cls}}" aria-label="Mở {{w.name}}">
+          <div style="display: flex; align-items: flex-start; gap: 8px;">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-foreground);">{{w.name}}</div>
+              <div style="font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--color-muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{w.path}}</div>
+            </div>
+            <span class="ss-iconbtn ss-iconbtn--sm" aria-hidden="true"><svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <span class="wf-tag {{w.storeCls}}">
+              <sc-if value="{{w.isGit}}" hint-placeholder-val="{{ true }}"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><path d="M11 18H8a2 2 0 0 1-2-2V9"></path></svg></sc-if>
+              <sc-if value="{{w.isDrive}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg></sc-if>
+              <sc-if value="{{w.isLocal}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg></sc-if>
+              <span>{{w.storeType}}</span><code>{{w.storeLabel}}</code>
+            </span>
+            <span class="wf-tag {{w.nblCls}}">NotebookLM · {{w.nbl}}</span>
+          </div>
+          <span style="flex: 1;"></span>
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; color: var(--color-muted-foreground); border-top: 1px solid var(--color-border); padding-top: 10px;">
+            <span>{{w.specs}} spec</span><span aria-hidden="true">·</span><span>{{w.opened}}</span>
+            <span style="flex: 1;"></span>
+            <span class="ss-status ss-status--{{w.status}}">
+              <sc-if value="{{w.okIcon}}" hint-placeholder-val="{{ true }}"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+              <sc-if value="{{w.dotIcon}}" hint-placeholder-val="{{ false }}"><span class="ss-dot"></span></sc-if>
+              <sc-if value="{{w.errIcon}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg></sc-if>
+              <span>{{w.statusLabel}}</span>
+            </span>
+          </div>
+        </a>
+      </sc-for>
+    </div>
+    <sc-if value="{{noResult}}" hint-placeholder-val="{{ false }}">
+      <p style="margin: 0; font-size: 13px; color: var(--color-muted-foreground);">Không có project nào khớp “{{q}}”.</p>
+    </sc-if>
+  </main>
+
+  <!-- Wizard -->
+  <sc-if value="{{wizardOpen}}" hint-placeholder-val="{{ false }}">
+    <div class="wf-backdrop" style="position: absolute; inset: 0; z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 56px 24px 24px; background: rgba(17, 24, 39, 0.45);">
+      <div class="ss-dialog wf-dialog" role="dialog" aria-modal="true" aria-labelledby="wf-np-title" style="width: 860px; max-width: 100%;">
+        <div class="ss-dialog__head">
+          <h2 id="wf-np-title" class="ss-dialog__title">New Project</h2>
+          <span style="flex: 1;"></span>
+          <button type="button" class="ss-iconbtn" aria-label="Đóng" onClick="{{closeWizard}}"><svg class="ss-icon" data-icon="x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+        </div>
+        <div style="display: grid; grid-template-columns: 200px minmax(0, 1fr); border-top: 1px solid var(--color-border);">
+          <!-- Stepper -->
+          <nav aria-label="Các bước" style="position: relative; padding: 16px 16px 16px 24px; border-right: 1px solid var(--color-border); background: var(--color-muted);">
+            <div style="position: relative;">
+              <span class="wf-rail" aria-hidden="true"><i style="height: {{railH}};"></i></span>
+              <sc-for list="{{steps}}" as="st" hint-placeholder-count="4">
+                <div class="wf-step {{st.cls}}" aria-current="{{st.current}}" style="position: relative;">
+                  <span class="wf-dot">
+                    <sc-if value="{{st.done}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+                    <sc-if value="{{st.notDone}}" hint-placeholder-val="{{ true }}">{{st.n}}</sc-if>
+                  </span>
+                  <span><b>{{st.t}}</b><small>{{st.d}}</small></span>
+                </div>
+              </sc-for>
+            </div>
+          </nav>
+
+          <div style="padding: 20px 24px; min-height: 440px; max-height: 560px; overflow: auto;">
+            <!-- Step 1 -->
+            <sc-if value="{{s1}}" hint-placeholder-val="{{ true }}">
+              <div class="wf-pane">
+                <div class="ss-field">
+                  <label class="ss-field__label" for="wf-name">Tên project</label>
+                  <input id="wf-name" class="ss-input" value="{{name}}" onChange="{{onName}}">
+                  <p class="ss-field__hint">Hiện trên màn Projects và Workspace Switcher.</p>
+                </div>
+                <div class="ss-field">
+                  <label class="ss-field__label" for="wf-desc">Mô tả <span style="font-weight: 400; color: var(--color-muted-foreground);">(tuỳ chọn)</span></label>
+                  <input id="wf-desc" class="ss-input" value="Spec cho workbench sửa .md bằng AI và sync NotebookLM" readonly="{{yes}}">
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- Step 2 -->
+            <sc-if value="{{s2}}" hint-placeholder-val="{{ false }}">
+              <div class="wf-pane">
+                <div class="ss-field">
+                  <span class="ss-field__label">Nơi lưu file .md</span>
+                  <div class="wf-opts" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+                    <sc-for list="{{stores}}" as="o" hint-placeholder-count="3">
+                      <button type="button" class="wf-opt {{o.cls}}" aria-pressed="{{o.on}}" onClick="{{o.pick}}">
+                        <span class="wf-radio" aria-hidden="true"></span>
+                        <span><span class="wf-opt__t">{{o.t}}</span><br><span class="wf-opt__d">{{o.d}}</span></span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <sc-if value="{{isLocal}}" hint-placeholder-val="{{ false }}">
+                  <div class="wf-pane" style="gap: 14px;">
+                    <div class="ss-field"><label class="ss-field__label" for="wf-lp">Thư mục làm việc</label><div style="display: flex; gap: 8px;"><input id="wf-lp" class="ss-input is-mono" value="~/projects/spec-studio" readonly="{{yes}}" style="flex: 1;"><button type="button" class="ss-btn ss-btn--outline">Chọn…</button></div></div>
+                    <div class="ss-field"><label class="ss-field__label" for="wf-sd">Thư mục spec</label><input id="wf-sd" class="ss-input is-mono" value="./specs" readonly="{{yes}}"></div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{isGit}}" hint-placeholder-val="{{ true }}">
+                  <div class="wf-pane" style="gap: 16px;">
+                    <div class="ss-field">
+                      <span class="ss-field__label">Provider</span>
+                      <div class="ss-tabs ss-tabs--pill" role="tablist" aria-label="Git provider" style="flex-wrap: wrap;">
+                        <sc-for list="{{providers}}" as="p" hint-placeholder-count="5">
+                          <button type="button" role="tab" aria-selected="{{p.sel}}" class="ss-tab {{p.cls}}" onClick="{{p.pick}}">{{p.label}}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <div class="ss-field">
+                      <span class="ss-field__label">Kết nối qua</span>
+                      <div class="wf-opts" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                        <sc-for list="{{connectors}}" as="c" hint-placeholder-count="4">
+                          <button type="button" class="wf-opt {{c.cls}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">
+                            <span class="wf-radio" aria-hidden="true"></span>
+                            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;">
+                              <span class="wf-opt__t">{{c.t}}</span>
+                              <span class="wf-opt__d" style="font-family: var(--font-mono);">{{c.d}}</span>
+                              <span class="wf-state {{c.stateCls}}">{{c.state}}</span>
+                            </span>
+                          </button>
+                        </sc-for>
+                      </div>
+                      <sc-if value="{{showLoginHint}}" hint-placeholder-val="{{ false }}">
+                        <p class="ss-field__hint">Chưa đăng nhập. Chạy <code style="font-family: var(--font-mono);">{{loginCmd}}</code> trong terminal rồi bấm Kiểm tra lại.</p>
+                      </sc-if>
+                    </div>
+
+                    <sc-if value="{{canList}}" hint-placeholder-val="{{ true }}">
+                      <div class="ss-field">
+                        <label class="ss-field__label" for="wf-rq">Repository</label>
+                        <div class="wf-search" style="max-width: none;">
+                          <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                          <input id="wf-rq" class="ss-input is-mono" placeholder="owner/repo" value="{{repoQ}}" onChange="{{onRepoQ}}">
+                        </div>
+                        <div class="wf-list" role="listbox" aria-label="Repository">
+                          <sc-for list="{{repos}}" as="r" hint-placeholder-count="5">
+                            <button type="button" role="option" aria-selected="{{r.on}}" class="wf-reset wf-repo {{r.cls}}" onClick="{{r.pick}}">
+                              <span class="ss-dd__check"><sc-if value="{{r.sel}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></span>
+                              <code style="flex: 1;">{{r.name}}</code>
+                              <span style="font-size: 12px; color: var(--color-muted-foreground);">{{r.meta}}</span>
+                            </button>
+                          </sc-for>
+                        </div>
+                        <p class="ss-field__hint">Lấy từ {{listSource}}.</p>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{needUrl}}" hint-placeholder-val="{{ false }}">
+                      <div class="ss-field"><label class="ss-field__label" for="wf-url">Repo URL</label><input id="wf-url" class="ss-input is-mono" value="git@git.company.vn:team/specs.git" readonly="{{yes}}"><p class="ss-field__hint">SSH chỉ clone/pull/push, không liệt kê repo và không tạo được Pull Request.</p></div>
+                    </sc-if>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+                      <div class="ss-field"><label class="ss-field__label" for="wf-br">Branch</label><div class="ss-select is-mono" style="width: 100%;"><button id="wf-br" type="button" class="ss-select__trigger"><span class="ss-select__value">main</span><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div>
+                      <div class="ss-field"><label class="ss-field__label" for="wf-sub">Thư mục spec trong repo</label><input id="wf-sub" class="ss-input is-mono" value="design-system/docs" readonly="{{yes}}"></div>
+                      <div class="ss-field"><label class="ss-field__label" for="wf-clone">Clone vào</label><input id="wf-clone" class="ss-input is-mono" value="{{clonePath}}" readonly="{{yes}}"></div>
+                    </div>
+
+                    <div class="ss-field">
+                      <span class="ss-field__label">Cách đẩy thay đổi sau khi Approve</span>
+                      <div class="wf-opts" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                        <button type="button" class="wf-opt {{pushCls}}" aria-pressed="{{pushOn}}" onClick="{{pickPush}}">
+                          <span class="wf-radio" aria-hidden="true"></span>
+                          <span><span class="wf-opt__t">Commit & push thẳng</span><br><span class="wf-opt__d">Lên branch đã chọn. Nhanh, hợp repo cá nhân.</span></span>
+                        </button>
+                        <button type="button" class="wf-opt {{prCls}}" aria-pressed="{{prOn}}" onClick="{{pickPr}}" disabled="{{prDisabled}}">
+                          <span class="wf-radio" aria-hidden="true"></span>
+                          <span><span class="wf-opt__t">Tạo {{prName}}</span><br><span class="wf-opt__d">{{prDesc}}</span></span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{isDrive}}" hint-placeholder-val="{{ false }}">
+                  <div class="wf-pane" style="gap: 14px;">
+                    <div class="ss-field"><label class="ss-field__label" for="wf-df">Thư mục Google Drive</label><input id="wf-df" class="ss-input is-mono" value="https://drive.google.com/drive/folders/1aBcD-specs" readonly="{{yes}}"><span class="wf-state is-ok"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Đọc/ghi được · 12 file .md · tài khoản tnthang…</span></div>
+                    <div class="ss-field"><label class="ss-field__label" for="wf-dl">Thư mục làm việc local</label><input id="wf-dl" class="ss-input is-mono" value="~/spec-studio/drive-specs" readonly="{{yes}}"></div>
+                    <div class="ss-field ss-field--inline"><span class="ss-field__label">Tải về khi mở Workspace</span><span class="ss-switch is-on" aria-hidden="true"><span class="ss-switch__thumb"></span></span></div>
+                    <div class="ss-field ss-field--inline"><span class="ss-field__label">Tải lên sau khi Approve</span><span class="ss-switch is-on" aria-hidden="true"><span class="ss-switch__thumb"></span></span></div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <!-- Step 3 -->
+            <sc-if value="{{s3}}" hint-placeholder-val="{{ false }}">
+              <div class="wf-pane">
+                <div class="ss-field">
+                  <label class="ss-field__label" for="wf-nb">Notebook URL hoặc ID</label>
+                  <div style="display: flex; gap: 8px;">
+                    <input id="wf-nb" class="ss-input is-mono" value="https://notebooklm.google.com/notebook/7f3a29c1-b04e-4d1a" readonly="{{yes}}" style="flex: 1;">
+                    <button type="button" class="ss-btn ss-btn--outline {{nbCls}}" onClick="{{checkNb}}" disabled="{{nbChecking}}" style="min-width: 116px;">
+                      <sc-if value="{{nbChecking}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+                      <span>{{nbLabel}}</span>
+                    </button>
+                  </div>
+                  <sc-if value="{{nbOk}}" hint-placeholder-val="{{ false }}">
+                    <span class="wf-state is-ok" style="animation: wf-up .24s var(--ease-out) both;"><svg class="ss-icon ss-pop" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Notebook “Spec Studio” · ID 7f3a29c1-b04e-4d1a · 4 source</span>
+                  </sc-if>
+                  <p class="ss-field__hint">Mỗi file spec ↔ một source cùng tên trong notebook.</p>
+                </div>
+                <div class="ss-field">
+                  <span class="ss-field__label">Sync Strategy</span>
+                  <div class="wf-opts" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+                    <button type="button" class="wf-opt {{driveSyncCls}}" onClick="{{pickDriveSync}}"><span class="wf-radio" aria-hidden="true"></span><span><span class="wf-opt__t">Google Drive Sync</span><br><span class="wf-opt__d">{{driveSyncDesc}}</span></span></button>
+                    <button type="button" class="wf-opt {{rpcCls}}" onClick="{{pickRpc}}"><span class="wf-radio" aria-hidden="true"></span><span><span class="wf-opt__t">Direct Cookie RPC</span><br><span class="wf-opt__d">Xoá source cũ rồi nạp lại. Cookie hết hạn sẽ lỗi.</span></span></button>
+                  </div>
+                </div>
+                <label class="ss-check" data-state="{{skipState}}">
+                  <input type="checkbox" checked="{{skip}}" onChange="{{toggleSkip}}">
+                  <span class="ss-check__box" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="ss-check__mark" d="M4 8.25 6.75 11 12 5.5" pathLength="1"></path></svg></span>
+                  <span class="ss-check__label">Bỏ qua, kết nối NotebookLM sau</span>
+                </label>
+              </div>
+            </sc-if>
+
+            <!-- Step 4 -->
+            <sc-if value="{{s4}}" hint-placeholder-val="{{ false }}">
+              <div class="wf-pane">
+                <sc-if value="{{notCreating}}" hint-placeholder-val="{{ true }}">
+                  <dl class="wf-sum">
+                    <dt>Tên</dt><dd>{{name}}</dd>
+                    <dt>Nơi lưu</dt><dd>{{sumStore}}</dd>
+                    <dt>Kết nối</dt><dd><code>{{sumConn}}</code></dd>
+                    <dt>Thư mục local</dt><dd><code>{{clonePath}}</code></dd>
+                    <dt>Sau khi Approve</dt><dd>{{sumPublish}}</dd>
+                    <dt>NotebookLM</dt><dd>{{sumNbl}}</dd>
+                  </dl>
+                </sc-if>
+                <sc-if value="{{creating}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; flex-direction: column; gap: 12px;" role="status" aria-live="polite">
+                    <sc-for list="{{runs}}" as="r" hint-placeholder-count="4">
+                      <div class="wf-run {{r.cls}}">
+                        <sc-if value="{{r.spin}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--color-primary);"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+                        <sc-if value="{{r.ok}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--color-primary);"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+                        <sc-if value="{{r.wait}}" hint-placeholder-val="{{ true }}"><span style="width: 16px; height: 16px; display: grid; place-items: center;"><span style="width: 6px; height: 6px; border-radius: 9999px; background: var(--color-input);"></span></span></sc-if>
+                        <span>{{r.t}}</span>
+                        <code style="font-family: var(--font-mono); font-size: 12px; color: var(--color-muted-foreground);">{{r.d}}</code>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+        <div class="ss-dialog__foot">
+          <span class="ss-dialog__path">~/.spec-studio/workspaces.json</span>
+          <span style="flex: 1;"></span>
+          <sc-if value="{{canBack}}" hint-placeholder-val="{{ false }}"><button type="button" class="ss-btn ss-btn--ghost" onClick="{{back}}">Quay lại</button></sc-if>
+          <button type="button" class="ss-btn ss-btn--primary {{nextCls}}" onClick="{{next}}" disabled="{{nextDisabled}}" style="min-width: 128px;">
+            <sc-if value="{{nextSpin}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+            <span>{{nextLabel}}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{showToast}}" hint-placeholder-val="{{ false }}">
+    <div class="wf-toastwrap">
+      <div class="ss-toast ss-toast--info" role="status">
+        <svg class="ss-icon ss-pop ss-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+        <div class="ss-toast__text"><p class="ss-toast__title">Đã tạo {{createdName}}</p><p class="ss-toast__desc">Bấm vào thẻ để mở Workspace.</p></div>
+        <button type="button" class="ss-iconbtn ss-iconbtn--sm ss-toast__close" aria-label="Đóng thông báo" onClick="{{closeToast}}"><svg class="ss-icon" data-icon="x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Giao diện"},"openOnStart":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.timers = [];
+    this.state = {
+      q: '', filter: 'all', open: null, step: 1, name: 'Spec Studio Design', store: 'git', provider: 'github', conn: 'cli',
+      repoQ: '', repo: 'tnthangvn/quick-edit-nbl', publish: 'pr', nb: 'idle', nblStrategy: 'drive', skip: false,
+      run: -1, toast: false, newId: null, gridKey: 0,
+      items: [
+        { id: 'a', name: 'Quick Edit NBL', path: '/var/www/free-time/quick-edit-nbl', type: 'git', label: 'tnthangvn/quick-edit-nbl@main', nbl: 'Spec Studio', specs: 6, opened: '5 phút trước', status: 'synced', statusLabel: 'Synced' },
+        { id: 'b', name: 'Auto Content Pipeline', path: '~/projects/auto-content', type: 'drive', label: 'Specs/AutoContent', nbl: 'Content Ops', specs: 12, opened: 'Hôm qua', status: 'unsaved', statusLabel: '2 chưa tải lên' },
+        { id: 'c', name: 'Internal API Docs', path: '~/work/api-docs', type: 'git', label: 'gitlab.company.vn/platform/api-docs@develop', nbl: null, specs: 24, opened: '3 ngày trước', status: 'synced', statusLabel: 'Synced' },
+        { id: 'd', name: 'Personal Notes', path: '~/notes/specs', type: 'local', label: './specs', nbl: 'My Notes', specs: 3, opened: '2 tuần trước', status: 'synced', statusLabel: 'Synced' },
+        { id: 'e', name: 'Old Prototype', path: '/tmp/old-proto', type: 'local', label: './specs', nbl: null, specs: 0, opened: '2 tháng trước', status: 'error', statusLabel: 'Không tìm thấy thư mục', missing: true }
+      ]
+    };
+  }
+  componentWillUnmount() { this.timers.forEach(function (t) { clearTimeout(t); }); }
+  later(ms, fn) { this.timers.push(setTimeout(fn, ms)); }
+  create() {
+    var self = this, s = this.state;
+    this.setState({ run: 0 });
+    [700, 1300, 1800, 2400].forEach(function (ms, i) { self.later(ms, function () { self.setState({ run: i + 1 }); }); });
+    this.later(2900, function () {
+      var label = s.store === 'git' ? (s.provider === 'gitlab' ? 'gitlab.com/' : '') + s.repo + '@main' : s.store === 'drive' ? 'Specs/' + s.name : './specs';
+      var item = { id: 'n' + Date.now(), name: s.name, path: self.clonePath(), type: s.store, label: label, nbl: s.skip ? null : 'Spec Studio', specs: 6, opened: 'Vừa tạo', status: 'synced', statusLabel: 'Synced' };
+      self.setState(function (st) { return { open: false, step: 1, run: -1, newId: item.id, toast: true, filter: 'all', q: '', items: [item].concat(st.items) }; });
+      self.later(5000, function () { self.setState({ toast: false }); });
+    });
+  }
+  clonePath() {
+    var s = this.state;
+    if (s.store === 'git') return '~/spec-studio/' + (s.repo.split('/')[1] || 'repo');
+    if (s.store === 'drive') return '~/spec-studio/drive-specs';
+    return '~/projects/spec-studio';
+  }
+  renderVals() {
+    var self = this, s = this.state;
+    var open = s.open === null ? !!this.props.openOnStart : s.open;
+    var TYPE = { git: 'Git', drive: 'Drive', local: 'Local' };
+    var ql = s.q.trim().toLowerCase();
+    var shown = s.items.filter(function (w) {
+      return (s.filter === 'all' || w.type === s.filter) && (!ql || (w.name + ' ' + w.path + ' ' + w.label).toLowerCase().indexOf(ql) >= 0);
+    }).map(function (w) {
+      return Object.assign({}, w, {
+        cls: (w.missing ? 'is-missing' : '') + (w.id === s.newId ? ' is-new' : ''),
+        isGit: w.type === 'git', isDrive: w.type === 'drive', isLocal: w.type === 'local',
+        storeType: TYPE[w.type], storeLabel: w.label, storeCls: w.type === 'local' ? '' : 'is-blue',
+        nbl: w.nbl || 'Chưa kết nối', nblCls: w.nbl ? '' : 'is-red',
+        okIcon: w.status === 'synced', dotIcon: w.status === 'unsaved', errIcon: w.status === 'error'
+      });
+    });
+    var filters = [['all', 'Tất cả'], ['local', 'Local'], ['git', 'Git'], ['drive', 'Drive']].map(function (f) {
+      return { label: f[1], sel: s.filter === f[0] ? 'true' : 'false', cls: s.filter === f[0] ? 'is-on' : '', pick: function () { self.setState({ filter: f[0] }); } };
+    });
+    var STEPS = [['Thông tin', 'Tên project'], ['Nơi lưu file', 'Local · Git · Drive'], ['NotebookLM', 'Notebook đích'], ['Xem lại & Tạo', '']];
+    var steps = STEPS.map(function (x, i) {
+      var n = i + 1;
+      return { n: n, t: x[0], d: x[1], done: s.step > n, notDone: s.step <= n, current: s.step === n ? 'step' : 'false', cls: s.step === n ? 'is-on' : s.step > n ? 'is-done' : '' };
+    });
+    var stores = [['local', 'Chỉ Local', 'File nằm trên máy.'], ['git', 'Git repository', 'GitHub, GitLab, Bitbucket…'], ['drive', 'Google Drive', 'Thư mục Drive + bản local.']].map(function (o) {
+      return { t: o[1], d: o[2], on: s.store === o[0] ? 'true' : 'false', cls: s.store === o[0] ? 'is-on' : '', pick: function () { self.setState({ store: o[0] }); } };
+    });
+    var PROV = [['github', 'GitHub'], ['gitlab', 'GitLab'], ['bitbucket', 'Bitbucket'], ['gitea', 'Gitea / Forgejo'], ['generic', 'Git URL']];
+    var providers = PROV.map(function (p) {
+      return { label: p[1], sel: s.provider === p[0] ? 'true' : 'false', cls: s.provider === p[0] ? 'is-on' : '',
+        pick: function () { self.setState({ provider: p[0], conn: p[0] === 'generic' ? 'ssh' : p[0] === 'bitbucket' ? 'mcp' : 'cli', publish: p[0] === 'generic' ? 'push' : s.publish }); } };
+    });
+    var CLI = {
+      github: ['gh 2.62.0', 'Đã đăng nhập · tnthangvn', 'is-ok', true],
+      gitlab: ['glab 1.48 · gitlab.company.vn', 'Chưa đăng nhập', 'is-warn', false],
+      bitbucket: ['—', 'Không có CLI chính thức', 'is-mute', false],
+      gitea: ['tea', 'Không tìm thấy trên máy', 'is-mute', false],
+      generic: ['—', 'Không áp dụng', 'is-mute', false]
+    }[s.provider];
+    var MCP = {
+      github: ['github-mcp · stdio · 26 tool', 'Sẵn sàng', 'is-ok', true],
+      gitlab: ['gitlab-mcp · http', 'Sẵn sàng', 'is-ok', true],
+      bitbucket: ['bitbucket-mcp · stdio', 'Sẵn sàng', 'is-ok', true],
+      gitea: ['+ Thêm MCP server…', 'Chưa cấu hình', 'is-mute', false],
+      generic: ['—', 'Không áp dụng', 'is-mute', false]
+    }[s.provider];
+    var CONN = [
+      ['cli', 'CLI có sẵn', CLI[0], CLI[1], CLI[2], CLI[3]],
+      ['mcp', 'MCP server', MCP[0], MCP[1], MCP[2], MCP[3]],
+      ['token', 'Access Token', 'secrets.json / keychain', s.provider === 'generic' ? 'Không áp dụng' : 'Chưa nhập', 'is-mute', s.provider !== 'generic'],
+      ['ssh', 'SSH key', '~/.ssh/id_ed25519', 'Có sẵn trên máy', 'is-ok', true]
+    ];
+    var connectors = CONN.map(function (c) {
+      var on = s.conn === c[0];
+      return { t: c[1], d: c[2], state: c[3], stateCls: c[4], on: on ? 'true' : 'false', cls: (on ? 'is-on' : '') + (c[5] || c[0] === 'cli' ? '' : ' is-off'), pick: function () { self.setState({ conn: c[0] }); } };
+    });
+    var REPOS = s.provider === 'gitlab'
+      ? [['platform/api-docs', 'private · develop'], ['platform/spec-studio', 'private · main'], ['team/onboarding', 'internal']]
+      : s.provider === 'bitbucket'
+      ? [['tnthang/specs', 'private'], ['tnthang/quick-edit-nbl', 'private']]
+      : [['tnthangvn/quick-edit-nbl', 'public · main · 2 phút trước'], ['tnthangvn/auto-content', 'private · main'], ['tnthangvn/notes', 'private · main'], ['tnthangvn/dotfiles', 'public'], ['tnthangvn/api-docs', 'private · develop']];
+    var rq = s.repoQ.trim().toLowerCase();
+    var repos = REPOS.filter(function (r) { return !rq || r[0].toLowerCase().indexOf(rq) >= 0; }).map(function (r) {
+      var on = s.repo === r[0];
+      return { name: r[0], meta: r[1], sel: on, on: on ? 'true' : 'false', cls: on ? 'is-on' : '', pick: function () { self.setState({ repo: r[0] }); } };
+    });
+    var cliReady = s.conn === 'cli' && CLI[3];
+    var canList = (s.conn === 'cli' && CLI[3]) || (s.conn === 'mcp' && MCP[3]) || s.conn === 'token';
+    var prName = s.provider === 'gitlab' ? 'Merge Request' : 'Pull Request';
+    var prDisabled = s.conn === 'ssh' || s.provider === 'generic';
+    var via = s.conn === 'cli' ? (s.provider === 'gitlab' ? 'glab mr create' : 'gh pr create') : s.conn === 'mcp' ? 'tool create_pull_request (MCP)' : s.conn === 'token' ? 'REST API' : '—';
+    var connName = s.conn === 'cli' ? CLI[0] : s.conn === 'mcp' ? MCP[0] : s.conn === 'token' ? 'Access Token' : 'SSH key';
+    var runs = [
+      [s.store === 'git' ? 'Clone repository' : s.store === 'drive' ? 'Tải thư mục Drive về' : 'Tạo thư mục', s.store === 'git' ? s.repo + '@main' : self.clonePath()],
+      ['Ghi cấu hình', '.spec-studio/config.json'],
+      ['Thêm vào danh sách Projects', '~/.spec-studio/workspaces.json'],
+      [s.skip ? 'Bỏ qua NotebookLM' : 'Kiểm tra NotebookLM', s.skip ? 'kết nối sau' : '4 source khớp tên file']
+    ].map(function (r, i) {
+      return { t: r[0], d: r[1], spin: s.run === i, ok: s.run > i, wait: s.run < i, cls: s.run < i ? 'is-wait' : '' };
+    });
+    var creating = s.step === 4 && s.run >= 0;
+    var nextDisabled = creating || (s.step === 1 && !s.name.trim()) || (s.step === 2 && s.store === 'git' && s.conn === 'cli' && !CLI[3]);
+    return {
+      theme: this.props.theme ?? 'light',
+      countText: s.items.length + ' workspace · registry ~/.spec-studio/workspaces.json',
+      q: s.q, onQ: function (e) { self.setState({ q: e.target.value }); },
+      filters: filters, shown: shown, noResult: shown.length === 0, gridKey: String(s.gridKey),
+      openWizard: function () { self.setState({ open: true, step: 1, run: -1, nb: 'idle' }); },
+      closeWizard: function () { if (!creating) self.setState({ open: false }); },
+      wizardOpen: open,
+      steps: steps, railH: ((s.step - 1) / 3 * 100) + '%',
+      s1: s.step === 1, s2: s.step === 2, s3: s.step === 3, s4: s.step === 4, yes: true,
+      name: s.name, onName: function (e) { self.setState({ name: e.target.value }); },
+      stores: stores, isLocal: s.store === 'local', isGit: s.store === 'git', isDrive: s.store === 'drive',
+      providers: providers, connectors: connectors,
+      showLoginHint: s.conn === 'cli' && s.provider === 'gitlab',
+      loginCmd: 'glab auth login --hostname gitlab.company.vn',
+      canList: !!canList, needUrl: !canList,
+      listSource: s.conn === 'cli' ? (s.provider === 'gitlab' ? 'glab repo list' : 'gh repo list') : s.conn === 'mcp' ? 'MCP tool search_repositories' : 'REST API của provider',
+      repoQ: s.repoQ, onRepoQ: function (e) { self.setState({ repoQ: e.target.value }); },
+      repos: repos, clonePath: this.clonePath(),
+      pushOn: s.publish === 'push' ? 'true' : 'false', prOn: s.publish === 'pr' ? 'true' : 'false',
+      pushCls: s.publish === 'push' || prDisabled ? 'is-on' : '', prCls: prDisabled ? 'is-off' : s.publish === 'pr' ? 'is-on' : '',
+      pickPush: function () { self.setState({ publish: 'push' }); },
+      pickPr: function () { if (!prDisabled) self.setState({ publish: 'pr' }); },
+      prDisabled: prDisabled, prName: prName,
+      prDesc: prDisabled ? 'Cần CLI, MCP hoặc Token để tạo ' + prName + '.' : 'Push branch spec/{date}-{file}, mở ' + prName + ' qua ' + via + '.',
+      checkNb: function () { self.setState({ nb: 'loading' }); self.later(1000, function () { self.setState({ nb: 'ok' }); }); },
+      nbChecking: s.nb === 'loading', nbOk: s.nb === 'ok', nbCls: s.nb === 'loading' ? 'is-loading' : '',
+      nbLabel: s.nb === 'loading' ? 'Đang kiểm tra' : s.nb === 'ok' ? 'Kiểm tra lại' : 'Kiểm tra',
+      driveSyncCls: s.nblStrategy === 'drive' ? 'is-on' : '', rpcCls: s.nblStrategy === 'rpc' ? 'is-on' : '',
+      pickDriveSync: function () { self.setState({ nblStrategy: 'drive' }); }, pickRpc: function () { self.setState({ nblStrategy: 'rpc' }); },
+      driveSyncDesc: s.store === 'drive' ? 'Dùng chung thư mục Drive ở bước 2, không ghi hai lần.' : 'Ghi spec thành Google Doc rồi refresh source.',
+      skip: s.skip, skipState: s.skip ? 'checked' : 'off', toggleSkip: function () { self.setState({ skip: !s.skip }); },
+      sumStore: s.store === 'git' ? PROV.filter(function (p) { return p[0] === s.provider; })[0][1] + ' · ' + (canList ? s.repo : 'git@git.company.vn:team/specs.git') + ' @ main' : s.store === 'drive' ? 'Google Drive · Specs/' + s.name : 'Chỉ Local',
+      sumConn: s.store === 'git' ? connName : s.store === 'drive' ? 'Google OAuth' : '—',
+      sumPublish: s.store === 'git' ? (s.publish === 'pr' && !prDisabled ? 'Commit → tạo ' + prName + ' (' + via + ')' : 'Commit & push thẳng') : s.store === 'drive' ? 'Tải lên Drive' : 'Ghi file local',
+      sumNbl: s.skip ? 'Kết nối sau' : 'Notebook “Spec Studio” · ' + (s.nblStrategy === 'drive' ? 'Drive Sync' : 'Cookie RPC'),
+      creating: creating, notCreating: !creating, runs: runs,
+      canBack: s.step > 1 && !creating,
+      back: function () { self.setState({ step: s.step - 1 }); },
+      next: function () { if (s.step < 4) self.setState({ step: s.step + 1 }); else self.create(); },
+      nextLabel: s.step < 4 ? 'Tiếp tục' : creating ? 'Đang tạo…' : 'Tạo project',
+      nextSpin: creating, nextCls: creating ? 'is-loading' : '', nextDisabled: nextDisabled,
+      showToast: s.toast, createdName: s.name, closeToast: function () { self.setState({ toast: false }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

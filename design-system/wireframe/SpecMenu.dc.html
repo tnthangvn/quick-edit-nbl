@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Spec Studio — Menu spec</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/spec-studio/tokens.css">
+<link rel="stylesheet" href="ds/spec-studio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+@keyframes wf-fade{from{opacity:0}to{opacity:1}}
+@keyframes wf-out{from{opacity:1;max-height:32px}to{opacity:0;max-height:0;transform:translateX(-12px)}}
+@keyframes wf-in{from{opacity:0;max-height:0}to{opacity:1;max-height:32px}}
+@keyframes wf-shake{0%,100%{transform:none}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.wf-reset{border:0;background:transparent;font:inherit;color:inherit;margin:0;text-align:left;cursor:pointer;width:100%}
+.wf-rowbtn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:0;height:100%;border:0;background:transparent;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.wf-rowbtn:focus-visible{outline:2px solid var(--color-ring);outline-offset:2px;border-radius:4px}
+.wf-leaving{animation:wf-out .28s var(--ease-out) both;overflow:hidden}
+.wf-arriving{animation:wf-in .28s var(--ease-out) both;overflow:hidden}
+.wf-rename{flex:1;min-width:0;height:24px;padding:0 6px;border:1.5px solid var(--color-primary);border-radius:4px;background:var(--color-card);color:var(--color-foreground);font-family:var(--font-mono);font-size:12px;outline:none;box-shadow:0 0 0 3px var(--color-primary-soft)}
+.wf-rename.is-bad{border-color:var(--color-destructive);box-shadow:0 0 0 3px var(--color-destructive-soft);animation:wf-shake .24s var(--ease-out)}
+.wf-backdrop{animation:wf-fade .2s var(--ease-out) both}
+.wf-sk{border-radius:4px;background:var(--color-muted)}
+.wf-note{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:20px;color:var(--color-muted-foreground)}
+.wf-note b{color:var(--color-foreground);font-weight:600}
+.wf-num{flex:none;width:20px;height:20px;border-radius:9999px;display:grid;place-items:center;background:var(--color-primary-soft);color:var(--color-primary);font-size:11px;font-weight:600}
+@media (prefers-reduced-motion: reduce){.wf *,.wf *::before,.wf *::after{animation-duration:1ms !important;transition-duration:1ms !important}}
+</style>
+</helmet>
+
+<div class="wf" data-theme="{{theme}}" style="position: relative; height: 100vh; min-height: 820px; display: grid; grid-template-columns: 264px minmax(0, 1fr); grid-template-rows: 48px minmax(0, 1fr); background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); overflow: hidden;">
+  <header class="ss-header" style="grid-column: 1 / -1;">
+    <a href="Main.dc.html" class="ss-iconbtn" aria-label="Về Workbench" title="Về Workbench"><svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg></a>
+    <span class="ss-header__mark" aria-hidden="true">§</span>
+    <span class="ss-header__name">Spec Studio</span>
+    <span class="ss-header__path">~/projects/quick-edit-nbl/specs</span>
+  </header>
+
+  <aside class="ss-sidebar" style="width: auto; overflow: visible;" aria-label="Danh sách spec">
+    <div class="ss-sidebar__head"><span class="ss-overline">Specs</span><span class="ss-sidebar__count">{{countText}}</span></div>
+    <div class="ss-sidebar__list" style="overflow: visible;">
+      <sc-for list="{{specs}}" as="item" hint-placeholder-count="5">
+        <div class="ss-spec {{item.cls}}">
+          <span class="ss-check" data-state="off"><span class="ss-check__box"></span></span>
+          <sc-if value="{{item.notRenaming}}" hint-placeholder-val="{{ true }}">
+            <button type="button" class="wf-rowbtn" onClick="{{item.closeMenu}}">
+              <svg class="ss-icon ss-spec__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg>
+              <span class="ss-spec__name">{{item.name}}</span>
+            </button>
+          </sc-if>
+          <sc-if value="{{item.renaming}}" hint-placeholder-val="{{ false }}">
+            <svg class="ss-icon ss-spec__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
+            <input class="wf-rename {{renameBad}}" value="{{draft}}" onChange="{{onDraft}}" onKeyDown="{{onRenameKey}}" aria-label="Tên mới cho {{item.name}}" autofocus="{{yes}}">
+          </sc-if>
+          <span class="ss-status ss-status--compact ss-status--{{item.status}}" title="{{item.status}}">
+            <sc-if value="{{item.isSynced}}" hint-placeholder-val="{{ true }}"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+            <sc-if value="{{item.isSyncing}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+            <sc-if value="{{item.isError}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg></sc-if>
+          </span>
+          <button type="button" class="ss-iconbtn ss-iconbtn--sm ss-spec__menu {{item.menuBtnCls}}" style="opacity: 1;" aria-label="Thao tác với {{item.name}}" aria-haspopup="menu" aria-expanded="{{item.menuOpen}}" onClick="{{item.toggleMenu}}">
+            <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+          </button>
+        </div>
+      </sc-for>
+    </div>
+  </aside>
+
+  <!-- Context menu -->
+  <sc-if value="{{menuOpen}}" hint-placeholder-val="{{ true }}">
+    <div class="ss-menu" role="menu" aria-label="Thao tác với {{menuFor}}" style="position: absolute; left: 236px; top: {{menuTop}}; z-index: 20;">
+      <button type="button" role="menuitem" class="ss-menu__item" onClick="{{startRename}}">
+        <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
+        <span>Rename</span><span class="ss-menu__kbd">F2</span>
+      </button>
+      <button type="button" role="menuitem" class="ss-menu__item" onClick="{{forceSync}}">
+        <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg>
+        <span>Force Sync lên NotebookLM</span><span class="ss-menu__kbd"></span>
+      </button>
+      <div class="ss-menu__sep" role="separator"></div>
+      <button type="button" role="menuitem" class="ss-menu__item is-destructive" onClick="{{askDelete}}">
+        <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
+        <span>Delete spec</span><span class="ss-menu__kbd">⌫</span>
+      </button>
+    </div>
+  </sc-if>
+
+  <main style="display: flex; gap: 24px; min-width: 0; min-height: 0; padding: 12px 16px 16px;">
+    <div class="ss-editor" style="flex: 1; padding: 24px; gap: 12px;" aria-hidden="true">
+      <div class="wf-sk" style="width: 46%; height: 14px;"></div>
+      <div class="wf-sk" style="width: 78%; height: 10px;"></div>
+      <div class="wf-sk" style="width: 64%; height: 10px;"></div>
+      <div class="wf-sk" style="width: 72%; height: 10px;"></div>
+      <div class="wf-sk" style="width: 38%; height: 10px;"></div>
+    </div>
+    <div style="width: 320px; display: flex; flex-direction: column; gap: 16px; padding-top: 12px;">
+      <span class="ss-overline">Hành vi</span>
+      <div class="wf-note"><span class="wf-num">1</span><span><b>Menu 3 chấm</b> hiện khi rê chuột vào dòng; mở bằng click hoặc F10. Esc / click ra ngoài để đóng.</span></div>
+      <div class="wf-note"><span class="wf-num">2</span><span><b>Rename</b> sửa ngay trên dòng. Enter lưu, Esc huỷ. Tên trùng hoặc thiếu .md thì viền đỏ và rung nhẹ.</span></div>
+      <div class="wf-note"><span class="wf-num">3</span><span><b>Force Sync</b> đổi badge sang Syncing… rồi Synced; lỗi thì Error kèm toast.</span></div>
+      <div class="wf-note"><span class="wf-num">4</span><span><b>Delete</b> luôn hỏi xác nhận; dòng thu lại và có toast “Hoàn tác” trong 6 giây.</span></div>
+    </div>
+  </main>
+
+  <!-- Delete confirm -->
+  <sc-if value="{{confirming}}" hint-placeholder-val="{{ false }}">
+    <div class="wf-backdrop" style="position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; background: rgba(17, 24, 39, 0.45);">
+      <div class="ss-dialog" role="alertdialog" aria-modal="true" aria-labelledby="wf-del-title" aria-describedby="wf-del-desc" style="width: 420px;">
+        <div class="ss-dialog__head" style="padding-bottom: 4px;">
+          <h2 id="wf-del-title" class="ss-dialog__title">Xoá {{menuFor}}?</h2>
+        </div>
+        <p id="wf-del-desc" style="margin: 0; padding: 4px 24px 20px; font-size: 14px; line-height: 20px; color: var(--color-muted-foreground);">File sẽ bị xoá khỏi ./specs trên máy. Source tương ứng trên NotebookLM vẫn giữ cho tới lần sync sau.</p>
+        <div class="ss-dialog__foot">
+          <span style="flex: 1;"></span>
+          <button type="button" class="ss-btn ss-btn--ghost" onClick="{{cancelDelete}}">Cancel</button>
+          <button type="button" class="ss-btn ss-btn--destructive" onClick="{{doDelete}}">
+            <svg class="ss-icon" data-icon="trash-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+            <span>Delete spec</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Toast -->
+  <sc-if value="{{showToast}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; right: 24px; bottom: 24px; z-index: 30;">
+      <div class="ss-toast ss-toast--{{toastVariant}}" role="status">
+        <svg class="ss-icon ss-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+        <div class="ss-toast__text"><p class="ss-toast__title">{{toastTitle}}</p><p class="ss-toast__desc">{{toastDesc}}</p></div>
+        <sc-if value="{{canUndo}}" hint-placeholder-val="{{ false }}"><button type="button" class="ss-btn ss-btn--ghost ss-btn--sm ss-toast__action" onClick="{{undo}}">Hoàn tác</button></sc-if>
+        <button type="button" class="ss-iconbtn ss-iconbtn--sm ss-toast__close" aria-label="Đóng thông báo" onClick="{{closeToast}}"><svg class="ss-icon" data-icon="x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.timers = [];
+    this.state = {
+      menuFor: 'nbl-sync.md', renaming: null, draft: '', bad: false, confirming: false, leaving: null, arriving: null, toast: null, lastDeleted: null,
+      specs: [
+        { name: 'overview.md', status: 'synced' },
+        { name: 'sidebar.md', status: 'synced' },
+        { name: 'settings-dialog.md', status: 'synced' },
+        { name: 'nbl-sync.md', status: 'error' },
+        { name: 'tool-calling.md', status: 'synced' }
+      ]
+    };
+  }
+  componentWillUnmount() { this.timers.forEach(function (t) { clearTimeout(t); }); }
+  later(ms, fn) { this.timers.push(setTimeout(fn, ms)); }
+  setSpec(name, patch) { this.setState(function (s) { return { specs: s.specs.map(function (x) { return x.name === name ? Object.assign({}, x, patch) : x; }) }; }); }
+  commitRename() {
+    var s = this.state, v = s.draft.trim(), old = s.renaming;
+    var clash = s.specs.some(function (x) { return x.name === v && x.name !== old; });
+    if (!/\.md$/.test(v) || v.length < 4 || clash) { this.setState({ bad: false }); var self = this; this.later(10, function () { self.setState({ bad: true }); }); return; }
+    this.setState({ renaming: null, bad: false, specs: s.specs.map(function (x) { return x.name === old ? Object.assign({}, x, { name: v }) : x; }),
+      toast: { variant: 'info', title: 'Đã đổi tên', desc: old + ' → ' + v, undo: false } });
+  }
+  renderVals() {
+    var self = this, s = this.state;
+    var idx = s.specs.findIndex(function (x) { return x.name === s.menuFor; });
+    return {
+      theme: this.props.theme ?? 'light',
+      countText: s.specs.length + ' file',
+      specs: s.specs.map(function (x) {
+        var open = s.menuFor === x.name;
+        return Object.assign({}, x, {
+          cls: (open || s.renaming === x.name ? 'is-selected' : '') + (s.leaving === x.name ? ' wf-leaving' : '') + (s.arriving === x.name ? ' wf-arriving' : ''),
+          menuOpen: open ? 'true' : 'false', menuBtnCls: open ? 'is-active' : '',
+          renaming: s.renaming === x.name, notRenaming: s.renaming !== x.name,
+          isSynced: x.status === 'synced', isSyncing: x.status === 'syncing', isError: x.status === 'error',
+          toggleMenu: function () { self.setState({ menuFor: open ? null : x.name, renaming: null }); },
+          closeMenu: function () { self.setState({ menuFor: null }); }
+        });
+      }),
+      menuOpen: !!s.menuFor && !s.confirming, menuFor: s.menuFor || '',
+      menuTop: (48 + 40 + Math.max(idx, 0) * 33 + 30) + 'px',
+      startRename: function () { self.setState({ renaming: s.menuFor, draft: s.menuFor, menuFor: null, bad: false }); },
+      draft: s.draft, renameBad: s.bad ? 'is-bad' : '', yes: true,
+      onDraft: function (e) { self.setState({ draft: e.target.value, bad: false }); },
+      onRenameKey: function (e) { if (e.key === 'Enter') { e.preventDefault(); self.commitRename(); } if (e.key === 'Escape') { self.setState({ renaming: null }); } },
+      forceSync: function () {
+        var n = s.menuFor; self.setState({ menuFor: null }); self.setSpec(n, { status: 'syncing' });
+        self.later(1600, function () { self.setSpec(n, { status: 'synced' }); self.setState({ toast: { variant: 'info', title: 'Đã đồng bộ ' + n, desc: 'Force Sync · Drive Sync · vừa xong', undo: false } }); });
+      },
+      askDelete: function () { self.setState({ confirming: true }); },
+      confirming: s.confirming,
+      cancelDelete: function () { self.setState({ confirming: false }); },
+      doDelete: function () {
+        var n = s.menuFor, i = idx, item = s.specs[idx];
+        self.setState({ confirming: false, menuFor: null, leaving: n });
+        self.later(280, function () {
+          self.setState(function (st) { return { leaving: null, specs: st.specs.filter(function (x) { return x.name !== n; }), lastDeleted: { item: item, i: i },
+            toast: { variant: 'info', title: 'Đã xoá ' + n, desc: 'File đã chuyển khỏi ./specs.', undo: true } }; });
+        });
+      },
+      undo: function () {
+        var d = s.lastDeleted; if (!d) return;
+        var arr = s.specs.slice(); arr.splice(d.i, 0, d.item);
+        self.setState({ specs: arr, arriving: d.item.name, lastDeleted: null, toast: { variant: 'info', title: 'Đã khôi phục ' + d.item.name, desc: 'Không có gì bị mất.', undo: false } });
+        self.later(320, function () { self.setState({ arriving: null }); });
+      },
+      showToast: !!s.toast,
+      toastVariant: s.toast ? s.toast.variant : 'info', toastTitle: s.toast ? s.toast.title : '', toastDesc: s.toast ? s.toast.desc : '',
+      canUndo: !!(s.toast && s.toast.undo),
+      closeToast: function () { self.setState({ toast: null }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-08T05:08:57Z"
+  },
+  "title": "Spec Studio Wireframe",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "1 · Prototype: sửa spec bằng Agent → Diff → Approve → Sync",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Settings.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "2 · Settings Dialog (3 tab)",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "CliMode.dc.html": {
+      "x": 3040,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "3 · CLI Agent Mode: stream stdout",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "SpecMenu.dc.html": {
+      "x": 0,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "4 · Menu 3 chấm · Rename · Delete",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "SyncStates.dc.html": {
+      "x": 1520,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "5 · Trạng thái sync & Toast",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Empty.dc.html": {
+      "x": 3040,
+      "y": 1020,
+      "w": 1440,
+      "h": 900,
+      "title": "6 · Lần đầu mở app (chưa có spec)",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Projects.dc.html": {
+      "x": 0,
+      "y": 2040,
+      "w": 1440,
+      "h": 900,
+      "title": "7 · Projects (danh sách Workspace) + New Project wizard",
+      "expand": "fill",
+      "is_interactive": true
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Settings.dc.html",
+    "CliMode.dc.html",
+    "SpecMenu.dc.html",
+    "SyncStates.dc.html",
+    "Empty.dc.html",
+    "Projects.dc.html"
+  ],
+  "notes": {
+    "title": {
+      "x": 0,
+      "y": -300,
+      "text": "Spec Studio — Wireframe",
+      "kind": "title1",
+      "maxW": 2800
+    },
+    "howto": {
+      "x": 3040,
+      "y": -330,
+      "text": "Bấm Play trên artboard 1 để chạy luồng chính: tick spec → Send → Agent đọc file và đề xuất → duyệt Diff → Approve & Save → đồng bộ NotebookLM. Tweaks: đổi Light/Dark.",
+      "w": 720,
+      "maxH": 200,
+      "fill": "blue",
+      "size": "m"
+    }
+  },
+  "designSystems": [
+    {
+      "title": "Spec Studio",
+      "namespace": "spec-studio",
+      "artifact": "https://claude.ai/artifact/BopRUTJs8sjABixv5cqpDi",
+      "version": "1791434745-804b",
+      "copiedAt": "2026-10-08T05:08:57Z"
+    }
+  ]
+}

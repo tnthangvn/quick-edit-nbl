@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Spec Studio — Settings</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/spec-studio/tokens.css">
+<link rel="stylesheet" href="ds/spec-studio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+@keyframes wf-fade{from{opacity:0}to{opacity:1}}
+@keyframes wf-up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.wf-backdrop{animation:wf-fade .22s var(--ease-out) both}
+.wf-panel > *{animation:wf-up .28s var(--ease-out) both}
+.wf-panel > *:nth-child(2){animation-delay:30ms}.wf-panel > *:nth-child(3){animation-delay:60ms}.wf-panel > *:nth-child(4){animation-delay:90ms}.wf-panel > *:nth-child(5){animation-delay:120ms}.wf-panel > *:nth-child(6){animation-delay:150ms}
+.wf-sk{border-radius:4px;background:var(--color-muted)}
+.wf-ok{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--color-primary);animation:wf-up .24s var(--ease-out) both}
+.wf-tabline{position:absolute;bottom:-1px;height:2px;background:var(--color-primary);border-radius:2px;transition:left .22s var(--ease-out),width .22s var(--ease-out)}
+.ss-tabs{position:relative}
+.ss-tab.is-on{border-bottom-color:transparent}
+.wf-strategy{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.wf-card{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--color-border);border-radius:8px;background:var(--color-card);font:inherit;color:inherit;text-align:left;cursor:pointer;transition:border-color .15s var(--ease-out),box-shadow .15s var(--ease-out),background-color .15s var(--ease-out)}
+.wf-card:hover{border-color:var(--color-input)}
+.wf-card.is-on{border-color:var(--color-primary);box-shadow:0 0 0 3px var(--color-primary-soft)}
+.wf-card:focus-visible{outline:2px solid var(--color-ring);outline-offset:2px}
+.wf-radio{width:16px;height:16px;flex:none;margin-top:2px;box-sizing:border-box;border:1.5px solid var(--color-input);border-radius:9999px;display:grid;place-items:center;transition:border-color .15s var(--ease-out)}
+.wf-radio::after{content:"";width:8px;height:8px;border-radius:9999px;background:var(--color-primary);transform:scale(0);transition:transform .18s var(--ease-out)}
+.wf-card.is-on .wf-radio{border-color:var(--color-primary)}
+.wf-card.is-on .wf-radio::after{transform:scale(1)}
+@media (prefers-reduced-motion: reduce){.wf *,.wf *::before,.wf *::after{animation-duration:1ms !important;transition-duration:1ms !important}}
+</style>
+</helmet>
+
+<div class="wf" data-theme="{{theme}}" style="position: relative; height: 100vh; min-height: 820px; background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); overflow: hidden;">
+  <!-- Workbench behind (skeleton) -->
+  <div aria-hidden="true" style="position: absolute; inset: 0; display: grid; grid-template-columns: 264px minmax(0, 1fr); grid-template-rows: 48px minmax(0, 1fr);">
+    <div class="ss-header" style="grid-column: 1 / -1;"><span class="ss-header__mark">§</span><span class="ss-header__name">Spec Studio</span><span class="ss-header__path">~/projects/quick-edit-nbl/specs</span></div>
+    <div class="ss-sidebar" style="width: auto; padding: 16px; gap: 14px;">
+      <div class="wf-sk" style="width: 60%; height: 10px;"></div>
+      <div class="wf-sk" style="width: 85%; height: 12px;"></div>
+      <div class="wf-sk" style="width: 70%; height: 12px;"></div>
+      <div class="wf-sk" style="width: 90%; height: 12px;"></div>
+      <div class="wf-sk" style="width: 65%; height: 12px;"></div>
+    </div>
+    <div style="padding: 12px 16px; display: flex; flex-direction: column; gap: 12px;">
+      <div class="ss-editor" style="flex: 1; padding: 24px; gap: 12px;">
+        <div class="wf-sk" style="width: 40%; height: 14px;"></div>
+        <div class="wf-sk" style="width: 75%; height: 10px;"></div>
+        <div class="wf-sk" style="width: 62%; height: 10px;"></div>
+        <div class="wf-sk" style="width: 70%; height: 10px;"></div>
+      </div>
+      <div class="ss-composer" style="height: 88px;"></div>
+    </div>
+  </div>
+
+  <!-- Backdrop + dialog -->
+  <div class="wf-backdrop" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(17, 24, 39, 0.45);">
+    <div class="ss-dialog" role="dialog" aria-modal="true" aria-labelledby="wf-settings-title" style="width: 600px;">
+      <div class="ss-dialog__head">
+        <h2 id="wf-settings-title" class="ss-dialog__title">Settings</h2>
+        <span style="flex: 1;"></span>
+        <a href="Main.dc.html" class="ss-iconbtn" aria-label="Đóng" title="Đóng">
+          <svg class="ss-icon" data-icon="x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </a>
+      </div>
+      <div class="ss-tabs" role="tablist">
+        <button type="button" role="tab" aria-selected="{{tApi.sel}}" class="ss-tab {{tApi.cls}}" onClick="{{tApi.pick}}">
+          <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>
+          Direct API
+        </button>
+        <button type="button" role="tab" aria-selected="{{tCli.sel}}" class="ss-tab {{tCli.cls}}" onClick="{{tCli.pick}}">
+          <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" x2="20" y1="19" y2="19"></line></svg>
+          CLI Agent Runner
+        </button>
+        <button type="button" role="tab" aria-selected="{{tNbl.sel}}" class="ss-tab {{tNbl.cls}}" onClick="{{tNbl.pick}}">
+          <svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg>
+          NotebookLM Sync
+        </button>
+        <span class="wf-tabline" style="left: {{lineLeft}}; width: {{lineWidth}};" aria-hidden="true"></span>
+      </div>
+
+      <!-- Tab: Direct API -->
+      <sc-if value="{{isApi}}" hint-placeholder-val="{{ true }}">
+        <div class="ss-dialog__body wf-panel" role="tabpanel" aria-label="Direct API">
+          <div class="ss-field">
+            <label class="ss-field__label" for="wf-provider">Provider</label>
+            <div class="ss-select" style="width: 100%;">
+              <button id="wf-provider" type="button" class="ss-select__trigger" aria-haspopup="listbox"><span class="ss-select__value">Google Gemini</span><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+            </div>
+          </div>
+          <div class="ss-field">
+            <label class="ss-field__label" for="wf-key">API Key</label>
+            <div style="display: flex; gap: 8px;">
+              <input id="wf-key" class="ss-input is-mono" type="password" value="AIzaSyD-example-key-0000" readonly="{{yes}}" style="flex: 1;">
+              <button type="button" class="ss-btn ss-btn--outline {{testCls}}" onClick="{{test}}" disabled="{{testing}}" style="min-width: 150px;">
+                <sc-if value="{{testIdle}}" hint-placeholder-val="{{ true }}"><svg class="ss-icon" data-icon="refresh-cw" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg></sc-if>
+                <sc-if value="{{testing}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+                <span>{{testLabel}}</span>
+              </button>
+            </div>
+            <sc-if value="{{testOk}}" hint-placeholder-val="{{ false }}">
+              <span class="wf-ok"><svg class="ss-icon ss-pop" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Kết nối thành công · 318 ms · 5 model khả dụng</span>
+            </sc-if>
+            <p class="ss-field__hint">Lưu trong .spec-studio/config.json trên máy, không gửi đi đâu khác.</p>
+          </div>
+          <div class="ss-field">
+            <label class="ss-field__label" for="wf-model">Model ID</label>
+            <div class="ss-select is-mono" style="width: 100%;">
+              <button id="wf-model" type="button" class="ss-select__trigger" aria-haspopup="listbox"><span class="ss-select__value">gemini-1.5-pro</span><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+            </div>
+            <p class="ss-field__hint">Chọn sẵn hoặc gõ tên model tuỳ chỉnh.</p>
+          </div>
+          <div class="ss-field">
+            <label class="ss-field__label" for="wf-prompt-preset">System Prompt Preset</label>
+            <textarea id="wf-prompt-preset" class="ss-input ss-textarea" rows="3" readonly="{{yes}}" value="Bạn là technical writer. Giữ nguyên cấu trúc heading, chỉ sửa phần được yêu cầu, luôn dùng propose_spec_update thay vì ghi đè."></textarea>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Tab: CLI -->
+      <sc-if value="{{isCli}}" hint-placeholder-val="{{ false }}">
+        <div class="ss-dialog__body wf-panel" role="tabpanel" aria-label="CLI Agent Runner">
+          <div class="ss-field">
+            <span class="ss-field__label">Active CLI</span>
+            <div class="wf-strategy" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+              <sc-for list="{{clis}}" as="c" hint-placeholder-count="3">
+                <button type="button" class="wf-card {{c.cls}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">
+                  <span class="wf-radio" aria-hidden="true"></span>
+                  <span style="display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 13px; font-weight: 500;">{{c.label}}</span><span style="font-size: 12px; color: var(--color-muted-foreground);">{{c.hint}}</span></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div class="ss-field">
+            <label class="ss-field__label" for="wf-bin">Binary Path</label>
+            <input id="wf-bin" class="ss-input is-mono" value="{{cliBin}}" readonly="{{yes}}">
+          </div>
+          <div class="ss-field">
+            <label class="ss-field__label" for="wf-args">Default Arguments</label>
+            <input id="wf-args" class="ss-input is-mono" value="{{cliArgs}}" readonly="{{yes}}">
+          </div>
+          <div class="ss-field">
+            <label class="ss-field__label" for="wf-ws">Workspace Path</label>
+            <input id="wf-ws" class="ss-input is-mono" value="./specs" readonly="{{yes}}">
+            <p class="ss-field__hint">Thư mục gốc chứa các file .md.</p>
+          </div>
+          <div class="ss-field ss-field--inline">
+            <div class="ss-field__text"><span class="ss-field__label">Stream Stdout</span><p class="ss-field__hint">Đẩy log tiến trình vào khung chat.</p></div>
+            <button type="button" role="switch" aria-checked="{{streamOn}}" aria-label="Stream Stdout" class="ss-switch {{streamCls}}" onClick="{{toggleStream}}"><span class="ss-switch__thumb"></span></button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Tab: NotebookLM -->
+      <sc-if value="{{isNbl}}" hint-placeholder-val="{{ false }}">
+        <div class="ss-dialog__body wf-panel" role="tabpanel" aria-label="NotebookLM Sync">
+          <div class="ss-field">
+            <label class="ss-field__label" for="wf-nb">Notebook ID</label>
+            <input id="wf-nb" class="ss-input is-mono" value="nbl-7f3a-29c1-b04e" readonly="{{yes}}">
+          </div>
+          <div class="ss-field">
+            <span class="ss-field__label">Sync Strategy</span>
+            <div class="wf-strategy">
+              <button type="button" class="wf-card {{driveCls}}" aria-pressed="{{isDrive}}" onClick="{{pickDrive}}">
+                <span class="wf-radio" aria-hidden="true"></span>
+                <span style="display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 13px; font-weight: 500;">Google Drive Sync</span><span style="font-size: 12px; line-height: 16px; color: var(--color-muted-foreground);">Ghi spec thành Google Doc rồi refresh source. Ổn định, khuyên dùng.</span></span>
+              </button>
+              <button type="button" class="wf-card {{rpcCls}}" aria-pressed="{{isRpc}}" onClick="{{pickRpc}}">
+                <span class="wf-radio" aria-hidden="true"></span>
+                <span style="display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 13px; font-weight: 500;">Direct Cookie RPC</span><span style="font-size: 12px; line-height: 16px; color: var(--color-muted-foreground);">Xoá source cũ rồi nạp lại qua RPC. Nhanh, nhưng cookie hết hạn sẽ lỗi.</span></span>
+              </button>
+            </div>
+          </div>
+          <sc-if value="{{isDriveBool}}" hint-placeholder-val="{{ true }}">
+            <div class="ss-field wf-panel">
+              <label class="ss-field__label" for="wf-folder">Drive Folder ID</label>
+              <input id="wf-folder" class="ss-input is-mono" value="1aBcD-specs-folder-xyz" readonly="{{yes}}">
+              <p class="ss-field__hint">Đăng nhập Google: tnthang… · OAuth đã cấp quyền Drive.</p>
+            </div>
+          </sc-if>
+          <sc-if value="{{isRpcBool}}" hint-placeholder-val="{{ false }}">
+            <div class="ss-field wf-panel">
+              <label class="ss-field__label" for="wf-cookie">Cookie (SID, HSID, SSID) + SNlM0e</label>
+              <input id="wf-cookie" class="ss-input is-mono" type="password" value="SID=…; HSID=…; SSID=…" readonly="{{yes}}">
+              <p class="ss-field__hint">Chỉ lưu local. Cookie thường hết hạn sau vài tuần.</p>
+            </div>
+          </sc-if>
+          <div class="ss-field ss-field--inline">
+            <span class="ss-field__label">Tự động sync lên NBL sau khi Approve Diff</span>
+            <button type="button" role="switch" aria-checked="{{autoOn}}" aria-label="Tự động sync" class="ss-switch {{autoCls}}" onClick="{{toggleAuto}}"><span class="ss-switch__thumb"></span></button>
+          </div>
+          <div class="ss-field ss-field--inline">
+            <span class="ss-field__label">Hiện hộp thoại xác nhận trước khi sync</span>
+            <button type="button" role="switch" aria-checked="{{confirmOn}}" aria-label="Xác nhận trước khi sync" class="ss-switch {{confirmCls}}" onClick="{{toggleConfirm}}"><span class="ss-switch__thumb"></span></button>
+          </div>
+        </div>
+      </sc-if>
+
+      <div class="ss-dialog__foot">
+        <span class="ss-dialog__path">.spec-studio/config.json</span>
+        <span style="flex: 1;"></span>
+        <a href="Main.dc.html" class="ss-btn ss-btn--ghost" style="text-decoration: none;">Cancel</a>
+        <a href="Main.dc.html" class="ss-btn ss-btn--primary" style="text-decoration: none;">Save</a>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Giao diện"},"tab":{"editor":"enum","options":["api","cli","nbl"],"default":"api","section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.timers = [];
+    this.state = { tab: null, test: 'idle', cli: 'claude-code', stream: true, strategy: 'drive', auto: true, confirm: false };
+  }
+  componentWillUnmount() { this.timers.forEach(function (t) { clearTimeout(t); }); }
+  renderVals() {
+    var self = this, s = this.state;
+    var tab = s.tab || this.props.tab || 'api';
+    var TABS = { api: ['24px', '104px'], cli: ['148px', '150px'], nbl: ['318px', '146px'] };
+    function t(id) { return { sel: tab === id ? 'true' : 'false', cls: tab === id ? 'is-on' : '', pick: function () { self.setState({ tab: id }); } }; }
+    var CLI = { 'claude-code': ['Claude Code', '/usr/local/bin/claude', '--dangerously-skip-permissions'], aider: ['Aider', '/usr/local/bin/aider', '--yes --no-auto-commits'], custom: ['Custom Script', './scripts/edit-spec.sh', '--file {spec}'] };
+    var HINT = { 'claude-code': 'Anthropic', aider: 'Git-aware', custom: 'Shell' };
+    return {
+      theme: this.props.theme ?? 'light',
+      tApi: t('api'), tCli: t('cli'), tNbl: t('nbl'),
+      lineLeft: TABS[tab][0], lineWidth: TABS[tab][1],
+      isApi: tab === 'api', isCli: tab === 'cli', isNbl: tab === 'nbl', yes: true,
+      test: function () {
+        if (s.test === 'loading') return;
+        self.setState({ test: 'loading' });
+        self.timers.push(setTimeout(function () { self.setState({ test: 'ok' }); }, 1100));
+      },
+      testing: s.test === 'loading', testIdle: s.test !== 'loading', testOk: s.test === 'ok',
+      testLabel: s.test === 'loading' ? 'Đang kiểm tra…' : 'Test Connection',
+      testCls: s.test === 'loading' ? 'is-loading' : '',
+      clis: Object.keys(CLI).map(function (k) { return { label: CLI[k][0], hint: HINT[k], on: s.cli === k ? 'true' : 'false', cls: s.cli === k ? 'is-on' : '', pick: function () { self.setState({ cli: k }); } }; }),
+      cliBin: CLI[s.cli][1], cliArgs: CLI[s.cli][2],
+      streamOn: s.stream ? 'true' : 'false', streamCls: s.stream ? 'is-on' : '', toggleStream: function () { self.setState({ stream: !s.stream }); },
+      isDrive: s.strategy === 'drive' ? 'true' : 'false', isRpc: s.strategy === 'rpc' ? 'true' : 'false',
+      isDriveBool: s.strategy === 'drive', isRpcBool: s.strategy === 'rpc',
+      driveCls: s.strategy === 'drive' ? 'is-on' : '', rpcCls: s.strategy === 'rpc' ? 'is-on' : '',
+      pickDrive: function () { self.setState({ strategy: 'drive' }); }, pickRpc: function () { self.setState({ strategy: 'rpc' }); },
+      autoOn: s.auto ? 'true' : 'false', autoCls: s.auto ? 'is-on' : '', toggleAuto: function () { self.setState({ auto: !s.auto }); },
+      confirmOn: s.confirm ? 'true' : 'false', confirmCls: s.confirm ? 'is-on' : '', toggleConfirm: function () { self.setState({ confirm: !s.confirm }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

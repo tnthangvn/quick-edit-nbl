@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Spec Studio — Bắt đầu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/spec-studio/tokens.css">
+<link rel="stylesheet" href="ds/spec-studio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{color:inherit}
+@keyframes wf-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes wf-in{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+@keyframes wf-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.wf-hero > *{animation:wf-up .42s var(--ease-out) both}
+.wf-hero > *:nth-child(2){animation-delay:60ms}.wf-hero > *:nth-child(3){animation-delay:120ms}.wf-hero > *:nth-child(4){animation-delay:180ms}.wf-hero > *:nth-child(5){animation-delay:240ms}
+.wf-steps{display:flex;flex-direction:column;gap:12px}
+.wf-stepcard{display:flex;gap:16px;align-items:flex-start;padding:16px 20px;border:1px solid var(--color-border);border-radius:8px;background:var(--color-card);transition:border-color .2s var(--ease-out),box-shadow .2s var(--ease-out)}
+.wf-stepcard.is-current{border-color:var(--color-primary);box-shadow:0 0 0 3px var(--color-primary-soft)}
+.wf-num{flex:none;width:28px;height:28px;border-radius:9999px;display:grid;place-items:center;border:1.5px solid var(--color-input);font-size:12px;font-weight:600;color:var(--color-muted-foreground);transition:all .2s var(--ease-out)}
+.wf-stepcard.is-current .wf-num{border-color:var(--color-primary);color:var(--color-primary)}
+.wf-stepcard.is-done .wf-num{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-primary-foreground)}
+.wf-found{animation:wf-in .3s var(--ease-out) both}
+.wf-ghost{display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 16px;text-align:center;color:var(--color-muted-foreground);font-size:12px;line-height:16px}
+.wf-ghost .ss-icon{animation:wf-float 3s var(--ease-in-out) infinite}
+.wf-detect{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--color-primary);animation:wf-up .3s var(--ease-out) both}
+@media (prefers-reduced-motion: reduce){.wf *,.wf *::before,.wf *::after{animation-duration:1ms !important;animation-iteration-count:1 !important;transition-duration:1ms !important}}
+</style>
+</helmet>
+
+<div class="wf" data-theme="{{theme}}" style="height: 100vh; min-height: 820px; display: grid; grid-template-columns: 264px minmax(0, 1fr); grid-template-rows: 48px minmax(0, 1fr); background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); overflow: hidden;">
+  <header class="ss-header" style="grid-column: 1 / -1;">
+    <span class="ss-header__mark" aria-hidden="true">§</span>
+    <span class="ss-header__name">Spec Studio</span>
+    <span style="flex: 1;"></span>
+    <a href="Settings.dc.html" class="ss-iconbtn" aria-label="Settings" title="Settings">
+      <svg class="ss-icon" data-icon="settings" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+    </a>
+  </header>
+
+  <aside class="ss-sidebar" style="width: auto;" aria-label="Danh sách spec">
+    <div class="ss-sidebar__head"><span class="ss-overline">Specs</span><span class="ss-sidebar__count">{{countText}}</span></div>
+    <sc-if value="{{noFiles}}" hint-placeholder-val="{{ true }}">
+      <div class="wf-ghost">
+        <svg class="ss-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+        <span>Chưa có spec nào.<br>Chọn thư mục ở bước 1.</span>
+      </div>
+    </sc-if>
+    <div class="ss-sidebar__list">
+      <sc-for list="{{files}}" as="f" hint-placeholder-count="0">
+        <div class="ss-spec wf-found" style="animation-delay: {{f.delay}};">
+          <span class="ss-check" data-state="off"><span class="ss-check__box"></span></span>
+          <svg class="ss-icon ss-spec__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg>
+          <span class="ss-spec__name">{{f.name}}</span>
+          <span class="ss-status ss-status--unsaved ss-status--compact" role="img" aria-label="Chưa sync"><span class="ss-dot"></span></span>
+        </div>
+      </sc-for>
+    </div>
+  </aside>
+
+  <main style="display: flex; justify-content: center; overflow: auto; padding: 48px 24px;">
+    <div class="wf-hero" style="width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 20px;">
+      <span class="ss-overline" style="color: var(--color-primary);">Bắt đầu</span>
+      <h1 style="margin: 0; font-size: 40px; line-height: 44px; font-weight: 600; letter-spacing: -0.02em;">Sửa spec cùng Agent, rồi đẩy thẳng lên NotebookLM.</h1>
+      <p style="margin: 0; font-size: 14px; line-height: 20px; color: var(--color-muted-foreground);">Ba bước để có workbench đầu tiên. Mọi cấu hình nằm trong .spec-studio/config.json trên máy bạn.</p>
+
+      <div class="wf-steps">
+        <!-- Step 1 -->
+        <div class="wf-stepcard {{s1}}">
+          <span class="wf-num">
+            <sc-if value="{{d1}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+            <sc-if value="{{n1}}" hint-placeholder-val="{{ true }}">1</sc-if>
+          </span>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+            <div><div style="font-size: 14px; line-height: 20px; font-weight: 600;">Chọn thư mục chứa spec</div><div style="font-size: 12px; line-height: 16px; color: var(--color-muted-foreground);">Spec Studio đọc mọi file .md trong thư mục này.</div></div>
+            <div style="display: flex; gap: 8px;">
+              <label for="wf-dir" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Đường dẫn thư mục</label>
+              <input id="wf-dir" class="ss-input is-mono" value="{{dir}}" onChange="{{onDir}}" style="flex: 1;">
+              <button type="button" class="ss-btn ss-btn--primary {{scanCls}}" onClick="{{scan}}" disabled="{{scanning}}" style="min-width: 128px;">
+                <sc-if value="{{scanning}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+                <sc-if value="{{notScanning}}" hint-placeholder-val="{{ true }}"><svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></sc-if>
+                <span>{{scanLabel}}</span>
+              </button>
+            </div>
+            <sc-if value="{{d1}}" hint-placeholder-val="{{ false }}"><span class="wf-detect"><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Tìm thấy {{fileCount}} file .md</span></sc-if>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="wf-stepcard {{s2}}">
+          <span class="wf-num">
+            <sc-if value="{{d2}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+            <sc-if value="{{n2}}" hint-placeholder-val="{{ true }}">2</sc-if>
+          </span>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+            <div><div style="font-size: 14px; line-height: 20px; font-weight: 600;">Kết nối Agent</div><div style="font-size: 12px; line-height: 16px; color: var(--color-muted-foreground);">Dùng API key, hoặc CLI có sẵn trên máy.</div></div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" class="ss-btn ss-btn--outline ss-btn--sm" onClick="{{pickApi}}" disabled="{{lock2}}">
+                <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>
+                <span>Nhập API key</span>
+              </button>
+              <button type="button" class="ss-btn ss-btn--tonal ss-btn--sm {{detectCls}}" onClick="{{detect}}" disabled="{{lock2}}">
+                <sc-if value="{{detecting}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+                <sc-if value="{{notDetecting}}" hint-placeholder-val="{{ true }}"><svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" x2="20" y1="19" y2="19"></line></svg></sc-if>
+                <span>{{detectLabel}}</span>
+              </button>
+            </div>
+            <sc-if value="{{d2}}" hint-placeholder-val="{{ false }}"><span class="wf-detect"><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>{{agentText}}</span></sc-if>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="wf-stepcard {{s3}}">
+          <span class="wf-num">3</span>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+            <div><div style="font-size: 14px; line-height: 20px; font-weight: 600;">Kết nối NotebookLM <span style="font-weight: 400; color: var(--color-muted-foreground);">(có thể làm sau)</span></div><div style="font-size: 12px; line-height: 16px; color: var(--color-muted-foreground);">Notebook ID và cách đồng bộ: Google Drive hoặc Cookie RPC.</div></div>
+            <div><a href="Settings.dc.html" class="ss-btn ss-btn--outline ss-btn--sm" style="text-decoration: none;">Mở cấu hình NotebookLM</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <sc-if value="{{ready}}" hint-placeholder-val="{{ false }}">
+          <a href="Main.dc.html" class="ss-btn ss-btn--primary" style="text-decoration: none;">
+            <span>Mở Workbench</span>
+            <svg class="ss-icon" data-icon="send-horizontal" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.714 3.048a.498.498 0 0 0-.683.627l2.843 7.627a2 2 0 0 1 0 1.396l-2.842 7.627a.498.498 0 0 0 .682.627l18-8.5a.5.5 0 0 0 0-.904z"></path><path d="M6 12h16"></path></svg>
+          </a>
+        </sc-if>
+        <sc-if value="{{notReady}}" hint-placeholder-val="{{ true }}">
+          <span class="ss-btn ss-btn--primary" aria-disabled="true" style="opacity: .45; cursor: not-allowed;">Mở Workbench</span>
+        </sc-if>
+        <span style="font-size: 12px; color: var(--color-muted-foreground);">{{readyText}}</span>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.timers = [];
+    this.state = { dir: '~/projects/quick-edit-nbl/specs', scan: 'idle', agent: 'idle', agentText: '' };
+  }
+  componentWillUnmount() { this.timers.forEach(function (t) { clearTimeout(t); }); }
+  renderVals() {
+    var self = this, s = this.state;
+    var FILES = ['overview.md', 'sidebar.md', 'settings-dialog.md', 'nbl-sync.md', 'tool-calling.md'];
+    var d1 = s.scan === 'done', d2 = s.agent === 'done';
+    return {
+      theme: this.props.theme ?? 'light',
+      dir: s.dir, onDir: function (e) { self.setState({ dir: e.target.value }); },
+      scan: function () {
+        if (s.scan === 'loading') return;
+        self.setState({ scan: 'loading' });
+        self.timers.push(setTimeout(function () { self.setState({ scan: 'done' }); }, 1100));
+      },
+      scanning: s.scan === 'loading', notScanning: s.scan !== 'loading',
+      scanLabel: s.scan === 'loading' ? 'Đang quét…' : d1 ? 'Quét lại' : 'Quét thư mục',
+      scanCls: s.scan === 'loading' ? 'is-loading' : '',
+      files: d1 ? FILES.map(function (n, i) { return { name: n, delay: (i * 70) + 'ms' }; }) : [],
+      noFiles: !d1, fileCount: String(FILES.length), countText: d1 ? FILES.length + ' file' : '0 file',
+      d1: d1, n1: !d1, d2: d2, n2: !d2,
+      s1: d1 ? 'is-done' : 'is-current',
+      s2: d2 ? 'is-done' : d1 ? 'is-current' : '',
+      s3: d1 && d2 ? 'is-current' : '',
+      lock2: s.agent === 'loading',
+      pickApi: function () { self.setState({ agent: 'done', agentText: 'Direct API · Google Gemini · gemini-1.5-pro' }); },
+      detect: function () {
+        self.setState({ agent: 'loading' });
+        self.timers.push(setTimeout(function () { self.setState({ agent: 'done', agentText: 'Tìm thấy Claude Code tại /usr/local/bin/claude' }); }, 1200));
+      },
+      detecting: s.agent === 'loading', notDetecting: s.agent !== 'loading',
+      detectLabel: s.agent === 'loading' ? 'Đang dò CLI…' : 'Tự dò CLI trên máy',
+      detectCls: s.agent === 'loading' ? 'is-loading' : '',
+      agentText: s.agentText,
+      ready: d1 && d2, notReady: !(d1 && d2),
+      readyText: d1 && d2 ? 'Sẵn sàng. NotebookLM có thể kết nối sau.' : 'Hoàn tất bước 1 và 2 để tiếp tục.'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -3,6 +3,7 @@
 ## 1. Tổng quan & Mục tiêu (Overview & Objectives)
 * **Tên dự án:** Spec Studio (Local Workbench)
 * **Mục tiêu:** Ứng dụng local chạy trên Next.js quản lý và chỉnh sửa tập trung các file đặc tả kỹ thuật (`.md`). Tích hợp AI Agent (Direct API hoặc Local CLI) tự động cập nhật spec và xử lý bài toán đồng bộ hóa (replace/update) lên Google NotebookLM (NBL).
+* **Đơn vị làm việc:** mỗi bộ spec thuộc một **Workspace (Project)**. Một Workspace gồm: thư mục làm việc ở local, nơi lưu trữ gốc của file `.md` (chỉ local, Git repo hoặc Google Drive) và đích đồng bộ trên NotebookLM (Notebook ID). Người dùng có thể tạo nhiều Workspace và chuyển qua lại.
 * **Vấn đề giải quyết:** NotebookLM xem source là immutable snapshot, không hỗ trợ sửa trực tiếp content của source ID có sẵn qua API công khai. Hệ thống này giải quyết vòng lặp: quản lý spec local $\to$ AI đề xuất/sửa spec $\to$ tự động trigger pipeline đồng bộ (Drive Sync hoặc RPC Xóa/Nạp lại).
 
 ---
@@ -24,7 +25,61 @@
 
 Thiết kế giao diện bám sát wireframe:
 
+### 3.0. Màn hình Projects (Workspace Manager)
+
+Màn hình đầu tiên khi mở app (route `/`); mở lại bất cứ lúc nào từ Workspace Switcher trên Header.
+
+* **Danh sách Workspace đã tạo** (đọc từ registry `~/.spec-studio/workspaces.json`, mục 5.3), mỗi Workspace một thẻ/dòng:
+  * Tên project, đường dẫn thư mục làm việc local.
+  * Badge nơi lưu trữ: `Local`, `Git` (kèm `repo@branch`) hoặc `Drive` (kèm tên thư mục Drive).
+  * Đích NotebookLM: tên/ID notebook rút gọn, hoặc `Chưa kết nối`.
+  * Số file spec, thời điểm mở gần nhất, trạng thái tổng (`Synced` / `Có thay đổi chưa push` / `Lỗi`).
+  * Click → mở Workspace (route `/w/[id]`). Menu 3 chấm: Mở thư mục, Đổi tên, Sửa cấu hình, Gỡ khỏi danh sách (không xoá file).
+* **Thanh công cụ:** ô tìm kiếm theo tên/đường dẫn, lọc theo loại lưu trữ, sắp xếp (Mở gần nhất / Tên), nút **+ New Project**, nút **Mở thư mục có sẵn** (thêm thư mục đã có `.spec-studio/config.json`).
+* **Trạng thái trống:** chưa có Workspace nào → hiển thị lời mời tạo project đầu tiên.
+* **Workspace mất kết nối:** thư mục local không còn tồn tại → thẻ mờ, badge `Không tìm thấy thư mục`, hành động `Tìm lại` / `Gỡ khỏi danh sách`.
+
+#### 3.0.1. Wizard **+ New Project** (Dialog nhiều bước)
+
+1. **Thông tin:** Tên project (bắt buộc, duy nhất), mô tả ngắn (tuỳ chọn).
+2. **Nơi lưu file `.md`** (chọn 1 trong 3):
+   * **Chỉ Local:** chọn thư mục làm việc (`workspacePath`) và thư mục con chứa spec (`specsDir`, mặc định `./specs`). File chỉ nằm trên máy.
+   * **Git repository:**
+     * **Provider:** `GitHub` · `GitLab` · `Bitbucket` · `Gitea / Forgejo` · `Git thường (self-hosted, chỉ URL)`; GitHub/GitLab hỗ trợ cả bản self-hosted (nhập Host).
+     * **Kết nối qua** (chọn 1, xem mục 3.0.2): `CLI có sẵn trên máy` (`gh`, `glab`, `tea`…), `MCP server`, `Personal Access Token`, hoặc `SSH key`.
+     * Khi đã kết nối qua CLI/MCP/Token: **chọn repo từ danh sách** (có tìm kiếm, gõ `owner/repo`) thay vì dán URL; chọn Branch từ danh sách nhánh. Với `SSH key` / `Git thường`: dán Repo URL.
+     * Thư mục con trong repo chứa spec, thư mục clone ở local (`workspacePath`).
+     * **Cách đẩy thay đổi:** `Push thẳng lên branch` hoặc `Tạo branch + Pull/Merge Request` (tên branch theo mẫu `spec/{date}-{filename}`, PR/MR tạo qua CLI/MCP/API của provider; gộp nhiều lần Approve trong một phiên vào cùng một PR nếu PR còn mở).
+     * Tuỳ chọn: `Tự commit sau khi Approve`, `Tự push / tạo PR sau khi commit`, mẫu commit message (vd `docs(spec): {action} {filename}`), `Pull khi mở Workspace`.
+     * Nút **Kiểm tra**: xác thực provider, quyền đọc/ghi repo, `git ls-remote`.
+   * **Google Drive:** Drive Folder ID/URL chứa file `.md`, thư mục làm việc local (bản sao để Agent đọc/ghi), chiều đồng bộ: `Tải về khi mở` + `Tải lên sau khi Approve`. Xác thực Google OAuth (dùng chung với NotebookLM Drive Sync nếu cùng tài khoản). Nút **Kiểm tra quyền** (đọc/ghi thư mục).
+3. **Đích NotebookLM:** Notebook ID hoặc dán URL notebook (tự tách ID), Sync Strategy (`drive_sync` / `rpc`), quy tắc ánh xạ: mỗi file spec ↔ một source cùng tên (mặc định). Tuỳ chọn **Bỏ qua, kết nối sau**. Nút **Kiểm tra** (đọc danh sách source của notebook).
+4. **Xem lại & Tạo:** tóm tắt cấu hình. Khi bấm **Tạo project**:
+   * Tạo thư mục (Local) / clone repo (Git) / tải thư mục Drive về (Drive).
+   * Ghi `.spec-studio/config.json` vào `workspacePath` (mục 5.1).
+   * Thêm bản ghi vào registry `~/.spec-studio/workspaces.json`.
+   * Mở Workspace vừa tạo; tiến trình từng bước hiển thị trong Dialog, lỗi ở bước nào thì dừng ở bước đó kèm nút Thử lại.
+
+#### 3.0.2. Kết nối Git provider (Connectors)
+
+Quản lý tập trung trong Settings › Tab 5 `Integrations`, dùng lại cho mọi Workspace; Wizard chỉ chọn connector đã có hoặc tạo nhanh connector mới.
+
+| Loại connector | Cách hoạt động | Provider gợi ý |
+| --- | --- | --- |
+| **CLI có sẵn** | Dò binary trên máy (`which gh`, `which glab`…), đọc trạng thái đăng nhập (`gh auth status`, `glab auth status`), lấy token tạm (`gh auth token`) cho git qua HTTPS; liệt kê repo/branch, tạo PR/MR bằng chính CLI (`gh pr create`, `glab mr create`). Không lưu token vào app. | GitHub → `gh`, GitLab → `glab`, Gitea → `tea`; Bitbucket: CLI tuỳ chỉnh |
+| **MCP server** | Khai báo MCP server (stdio: `command` + `args` + `env`; hoặc HTTP/SSE: `url` + header). App gọi các tool của server (liệt kê repo, branch, tạo PR/MR, đọc trạng thái CI). Tool MCP có thể được bật thêm cho AI Agent (mục 5.2). | GitHub MCP, GitLab MCP, Bitbucket MCP hoặc server tự viết |
+| **Personal Access Token** | Lưu token trong `secrets.json` / keychain; gọi REST API của provider. Hiện phạm vi (scope) tối thiểu cần cấp. | Mọi provider |
+| **SSH key** | Dùng ssh-agent / key có sẵn của máy; chỉ clone/pull/push, không liệt kê repo và không tạo PR. | Mọi Git remote |
+
+* Mỗi connector có nút **Kiểm tra** (hiện tài khoản đang đăng nhập, host, phạm vi quyền) và trạng thái `Đã kết nối` / `Cần đăng nhập lại` / `Không tìm thấy CLI`.
+* Nếu CLI có trên máy nhưng chưa đăng nhập: hiện lệnh gợi ý (`gh auth login`, `glab auth login`) và nút chạy lệnh trong terminal của CLI Runner.
+* Thứ tự ưu tiên khi một Workspace có nhiều cách xác thực: CLI → MCP → Token → SSH.
+
+Validation: thư mục local phải ghi được; `workspacePath` không trùng Workspace khác; Git/Drive phải qua bước Kiểm tra trước khi Tạo (hoặc người dùng xác nhận bỏ qua).
+
 ### 3.1. Header & Navigation
+* **Workspace Switcher:** cạnh tên app, hiển thị tên Workspace hiện tại + badge nơi lưu trữ; mở dropdown danh sách Workspace gần đây, `+ New Project` và `Tất cả projects…` (về màn hình 3.0).
+* **Storage Status:** với Workspace Git/Drive, hiển thị số thay đổi chưa push/upload và nút `Push` / `Pull` nhanh.
 * **Logo / App Name:** Đặt tại góc trên bên trái[cite: 1].
 * **Settings Action:** Icon bánh răng tại góc trên bên phải[cite: 1] để kích hoạt Settings Dialog toàn hệ thống.
 
@@ -47,6 +102,19 @@ Thiết kế giao diện bám sát wireframe:
   * Sử dụng Monaco `<DiffEditor />` chia 2 cột (Original vs Proposed) highlight xanh/đỏ.
   * Nút hành động nổi trên thanh bar: `Approve & Save` (ghi đè file) và `Reject`.
 
+### 3.3.1. Bảng tiến trình đồng bộ (Sync Activity)
+
+Hiện ở góc dưới phải ngay sau khi Approve & Save (thay cho toast đơn), theo dõi luồng 6.4 cho file vừa lưu:
+
+* **Đầu bảng:** `Đang đồng bộ <file>` + `n/N nơi`, thanh tiến độ, nút Thu gọn / Đóng (Đóng bị khoá khi đang chạy).
+* **Mỗi đích một dòng** (chỉ các đích Workspace đã cấu hình): icon, tên, chi tiết bước hiện tại (font mono), trạng thái `Chờ` / `Đang chạy` / `Xong` / `Lỗi`:
+  * `Ghi file local` → `specs/<file> · <size>`.
+  * `Git · Push` → `commit “docs(spec): …”` → `git push origin <branch>…` → `<branch> · <sha>`; hoặc `Git · Pull Request` → `push spec/<date>-<file>…` → `gh pr create…` → link `PR #12` (mở trình duyệt).
+  * `Google Drive` → `Specs/<folder>/<file> · đã ghi đè`.
+  * `NotebookLM` → `refresh source “<file>”` → `<notebook> · source <file>`.
+* **Kết thúc:** tất cả xong → `Đã đồng bộ <file>` và tự thu gọn sau 5 giây; có lỗi → `Đồng bộ n/N nơi · 1 lỗi`, dòng lỗi nền đỏ nhạt kèm lý do (vd `push bị từ chối (403)`) và nút **Thử lại**; bảng không tự ẩn.
+* **Header:** chip trạng thái cho từng đích đã cấu hình (`Git` · `Drive` · `NBL`) đổi màu theo tiến trình, kể cả khi bảng đã thu gọn.
+
 ### 3.4. Footer Toolbar & Chatbox
 * **Quick Setting Toolbar (Nằm ngay trên Chatbox)[cite: 1]:**
   * Switcher chế độ: `[ API Key Mode ]` $\leftrightarrow$ `[ CLI Agent Mode ]`[cite: 1].
@@ -61,7 +129,7 @@ Thiết kế giao diện bám sát wireframe:
 
 ## 4. Đặc tả Cấu hình (Settings Dialog)
 
-Modal cấu hình gồm 3 tab độc lập:
+Modal cấu hình gồm 5 tab độc lập (tab 1, 2, 5 là cấu hình chung của app; tab 3–4 thuộc Workspace đang mở):
 
 ### Tab 1: Direct API (LLM Integration)
 * **Provider:** Select (`Google Gemini`, `Anthropic`, `OpenAI`, `DeepSeek`, `Ollama / Local BaseURL`).
@@ -84,6 +152,18 @@ Modal cấu hình gồm 3 tab độc lập:
 * **Automation:**
   * Toggle: `Tự động sync lên NBL sau khi Approve Diff`.
   * Toggle: `Hiện hộp thoại xác nhận trước khi sync`.
+
+### Tab 4: Workspace & Storage
+* **Tên Workspace**, **Thư mục làm việc local** (chỉ đọc, nút `Mở thư mục`), **Specs Dir**.
+* **Loại lưu trữ:** `Local` / `Git` / `Drive` (đổi loại sẽ chạy lại bước kiểm tra như Wizard 3.0.1).
+* **Git:** Provider, connector đang dùng (đổi được), Repo, Branch, thư mục con, cách đẩy (`Push thẳng` / `Pull/Merge Request`), `Tự commit`, `Tự push / tạo PR`, mẫu commit message, `Pull khi mở`.
+* **Drive:** Drive Folder ID, `Tải về khi mở`, `Tải lên sau khi Approve`.
+* **Vùng nguy hiểm:** `Gỡ Workspace khỏi danh sách` (không xoá file).
+
+### Tab 5: Integrations (Git providers & MCP)
+* Danh sách connector (mục 3.0.2): tên, loại (`CLI` / `MCP` / `Token` / `SSH`), provider, tài khoản, trạng thái; nút `+ Thêm connector`, `Kiểm tra`, `Sửa`, `Xoá`.
+* **Tự dò CLI:** quét `gh`, `glab`, `tea` và các CLI người dùng khai báo; hiện phiên bản và tài khoản đăng nhập.
+* **MCP servers:** thêm server stdio (command, args, env) hoặc HTTP (url, headers); xem danh sách tool server cung cấp; bật/tắt từng tool cho AI Agent.
 
 ---
 
@@ -118,6 +198,67 @@ Modal cấu hình gồm 3 tab độc lập:
     "autoSyncOnApprove": false
   }
 }
+```
+
+Từ khi có Workspace, `config.json` nằm trong `workspacePath/.spec-studio/` của từng Workspace và có thêm khối `workspace` + `storage`. Cấu hình `api` và `cli` dùng chung cho mọi Workspace, lưu ở `~/.spec-studio/settings.json` (Workspace có thể ghi đè).
+
+```json
+{
+  "workspace": {
+    "id": "ws_7f3a29c1",
+    "name": "Quick Edit NBL",
+    "specsDir": "./specs"
+  },
+  "storage": {
+    "type": "git",
+    "git": {
+      "provider": "github",
+      "host": "github.com",
+      "connectorId": "conn_gh_cli",
+      "repo": "tnthangvn/quick-edit-nbl",
+      "remote": "git@github.com:tnthangvn/quick-edit-nbl.git",
+      "branch": "main",
+      "publishMode": "pull_request",
+      "prBranchTemplate": "spec/{date}-{filename}",
+      "subdir": "docs",
+      "auth": "ssh",
+      "autoCommit": true,
+      "autoPush": false,
+      "commitMessage": "docs(spec): {action} {filename}",
+      "pullOnOpen": true
+    },
+    "drive": null
+  },
+  "nbl": {
+    "notebookId": "xxxx-xxxx-xxxx",
+    "syncStrategy": "drive_sync",
+    "driveFolderId": "yyyy-yyyy-yyyy",
+    "autoSyncOnApprove": true,
+    "confirmBeforeSync": false
+  }
+}
+```
+
+* `storage.type`: `"local" | "git" | "drive"`.
+* `storage.git.provider`: `"github" | "gitlab" | "bitbucket" | "gitea" | "generic"`; `publishMode`: `"push" | "pull_request"`.
+* Connector khai báo trong `~/.spec-studio/settings.json` (dùng chung), Workspace chỉ tham chiếu `connectorId`:
+
+```json
+{
+  "connectors": [
+    { "id": "conn_gh_cli", "type": "cli", "provider": "github", "host": "github.com", "command": "gh" },
+    { "id": "conn_gl_cli", "type": "cli", "provider": "gitlab", "host": "gitlab.company.vn", "command": "glab" },
+    { "id": "conn_gh_mcp", "type": "mcp", "provider": "github", "transport": "stdio",
+      "command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"], "envFromSecrets": ["GITHUB_PERSONAL_ACCESS_TOKEN"],
+      "agentTools": ["create_pull_request", "list_branches"] },
+    { "id": "conn_bb_token", "type": "token", "provider": "bitbucket", "host": "bitbucket.org", "secretRef": "bb_app_password" },
+    { "id": "conn_ssh", "type": "ssh", "provider": "generic" }
+  ]
+}
+```
+* Với `"drive"`: `"drive": { "folderId": "…", "pullOnOpen": true, "pushOnApprove": true }`, `git` = `null`.
+* Token/secret (PAT, OAuth refresh token, cookie NotebookLM) **không** ghi vào `config.json` của Workspace (vì file có thể bị commit lên Git) mà lưu ở `~/.spec-studio/secrets.json` (hoặc keychain hệ điều hành), tham chiếu theo `workspace.id`. Thêm `.spec-studio/` vào `.gitignore` mẫu khi tạo Workspace Git, trừ khi người dùng chọn chia sẻ cấu hình.
+
 ### 5.2. Tools cấp cho AI Agent (Vercel AI SDK Tools)
 
 -   `list_specs()`: Trả về danh sách file `.md` trong thư mục `specsDir`.
@@ -126,6 +267,39 @@ Modal cấu hình gồm 3 tab độc lập:
 -   `apply_spec_update({ filename, content })`: Ghi đè trực tiếp xuống disk khi người dùng bấm Approve.
 -   `delete_spec({ filename })`: Xóa file spec khỏi thư mục local.
 -   `trigger_nbl_sync({ filename })`: Gọi module đồng bộ file tương ứng lên NotebookLM.
+-   `publish_specs({ files?, message? })`: Commit + push hoặc tạo/cập nhật PR/MR theo `storage.git.publishMode` của Workspace (chỉ khi storage là Git; luôn hỏi xác nhận người dùng).
+-   Tool từ MCP server của connector (vd `create_pull_request`, `list_branches`) chỉ được cấp cho Agent khi người dùng bật trong Tab 5; mặc định tắt.
+
+### 5.3. Registry các Workspace (`~/.spec-studio/workspaces.json`)
+
+```json
+{
+  "version": 1,
+  "lastOpenedId": "ws_7f3a29c1",
+  "workspaces": [
+    {
+      "id": "ws_7f3a29c1",
+      "name": "Quick Edit NBL",
+      "path": "/var/www/free-time/quick-edit-nbl",
+      "storageType": "git",
+      "storageLabel": "tnthangvn/quick-edit-nbl@main",
+      "notebookId": "xxxx-xxxx-xxxx",
+      "createdAt": "2026-10-08T06:40:00Z",
+      "lastOpenedAt": "2026-10-08T06:52:00Z"
+    }
+  ]
+}
+```
+
+Registry chỉ là danh bạ để hiển thị màn hình Projects; nguồn sự thật của từng Workspace là `config.json` trong thư mục của nó.
+
+### 5.4. API Route Handlers cho Workspace
+
+* `GET /api/workspaces` · `POST /api/workspaces` (tạo theo Wizard) · `PATCH /api/workspaces/[id]` · `DELETE /api/workspaces/[id]` (chỉ gỡ khỏi registry).
+* `GET /api/connectors` · `POST /api/connectors` · `POST /api/connectors/[id]/check` · `GET /api/connectors/detect` (dò CLI trên máy) · `GET /api/connectors/[id]/repos?q=` · `GET /api/connectors/[id]/branches?repo=`.
+* `POST /api/workspaces/[id]/check` — kiểm tra thư mục, Git remote, quyền Drive, Notebook ID; trả kết quả từng mục.
+* `POST /api/workspaces/[id]/pull` · `POST /api/workspaces/[id]/push` — đồng bộ với nơi lưu trữ (Git: `pull --ff-only` / `add` + `commit` + `push`; Drive: tải về / tải lên).
+* Mọi route file I/O hiện có (`/api/specs/*`) nhận thêm `workspaceId` và chỉ được đọc/ghi bên trong `workspacePath` của Workspace đó (chặn path traversal).
 
 ## 6\. Luồng Xử lý Dữ liệu Chính (Workflows)
 
@@ -161,7 +335,54 @@ Plaintext
                 └── Gọi RPC AddSource(notebook_id, new_content).
 ```
 
+### 6.3. Luồng Tạo & Mở Workspace
+
+```
+[Projects] → + New Project → Wizard (Thông tin → Nơi lưu → NotebookLM → Xem lại)
+          │
+          ├── Local : tạo workspacePath/specsDir (nếu chưa có)
+          ├── Git   : git clone --branch <branch> <remote> <workspacePath>
+          └── Drive : tải các file .md trong folderId về workspacePath/specsDir
+          │
+          ├── Ghi workspacePath/.spec-studio/config.json
+          ├── Thêm bản ghi vào ~/.spec-studio/workspaces.json
+          └── Mở /w/[id]
+                ├── pullOnOpen? → Git pull / Drive download (xung đột → hỏi người dùng)
+                └── Load danh sách spec vào Sidebar
+```
+
+### 6.4. Luồng Lưu trữ sau khi Approve
+
+```
+[Approve & Save] → ghi file .md vào workspacePath (luôn luôn)
+          │
+          ├── storage = local : xong
+          ├── storage = git   : autoCommit? → git commit (message theo mẫu)
+          │                     publishMode = push         → git push (lỗi → badge "Chưa push" + toast)
+          │                     publishMode = pull_request → push branch spec/… → tạo/cập nhật PR/MR
+          │                                                   qua connector (gh / glab / MCP / API) → toast kèm link PR
+          └── storage = drive : pushOnApprove? → upload/ghi đè file trên Drive
+          │
+          └── nbl.autoSyncOnApprove? → Luồng 6.2 đồng bộ lên NotebookLM
+```
+
+**Nguyên tắc chạy pipeline:**
+* Chỉ chạy các đích Workspace đã cấu hình (Git / Drive / NotebookLM); bước ghi file local luôn chạy trước và là điều kiện cho các bước sau.
+* Các đích remote chạy lần lượt theo thứ tự Git → Drive → NotebookLM, **độc lập với nhau**: một đích lỗi không chặn đích khác. Spec chỉ chuyển `Synced` khi mọi đích thành công; có đích lỗi → `Error`, các đích còn lại vẫn giữ kết quả.
+* Mỗi đích có nút **Thử lại** riêng; thử lại chỉ chạy đích đó.
+* Không cho chạy hai pipeline cùng lúc cho một file; Approve tiếp theo trên cùng file được xếp hàng.
+
+Nếu storage và NotebookLM Drive Sync cùng dùng một thư mục Drive, bước upload ở 6.4 và bước ghi Google Doc ở 6.2 được gộp làm một để tránh ghi hai lần.
+
 ## 7. Kế hoạch Triển khai (Checklist)
+
+-   [ ] **Phase 0: Workspace Manager**
+    
+    -   Registry `~/.spec-studio/workspaces.json`, `settings.json`, `secrets.json`.
+    -   Màn hình Projects (3.0) + Wizard New Project (3.0.1) + Workspace Switcher trên Header.
+    -   API `/api/workspaces/*` (CRUD, check, pull, push); storage adapter `local` / `git` (`simple-git`) / `drive` (Drive API v3).
+    -   Connectors: dò & dùng CLI (`gh`, `glab`, `tea`), MCP client (`@modelcontextprotocol/sdk`, stdio + HTTP), Token, SSH; Tab 5 Integrations; publish dạng PR/MR.
+
 
 -   [ ] **Phase 1: Next.js Foundation & File I/O**
     
@@ -171,7 +392,7 @@ Plaintext
     -   Tích hợp `@monaco-editor/react` (cả Editor và DiffEditor).
 -   [ ] **Phase 2: Settings Engine**
     
-    -   Dựng UI Settings Dialog (Radix Dialog / shadcn) với 3 tab: API, CLI, NBL.
+    -   Dựng UI Settings Dialog (Radix Dialog / shadcn) với 5 tab: API, CLI, NBL, Workspace & Storage, Integrations.
     -   Xây dựng API route đọc/ghi cấu hình vào file local `.spec-studio/config.json`.
 -   [ ] **Phase 3: Agent Integration (API & CLI)**
     
