@@ -19,9 +19,11 @@ export const PullWorkspaceParams = zod.object({
 })
 
 export const PullWorkspaceResponse = zod.object({
+  "items": zod.array(zod.object({
   "storageType": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
   "files": zod.array(zod.string()),
   "headSha": zod.string().nullable()
+}))
 })
 
 /**
@@ -34,21 +36,23 @@ export const PushWorkspaceParams = zod.object({
   "workspaceId": zod.string().min(1)
 })
 
-export const pushWorkspaceResponsePullRequestOneNumberMin = -9007199254740991;
-export const pushWorkspaceResponsePullRequestOneNumberMax = 9007199254740991;
+export const pushWorkspaceResponseItemsItemPullRequestOneNumberMin = -9007199254740991;
+export const pushWorkspaceResponseItemsItemPullRequestOneNumberMax = 9007199254740991;
 
 
 
 export const PushWorkspaceResponse = zod.object({
+  "items": zod.array(zod.object({
   "storageType": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
   "files": zod.array(zod.string()),
   "branch": zod.string().nullable(),
   "commitSha": zod.string().nullable(),
   "pushed": zod.boolean(),
   "pullRequest": zod.union([zod.object({
-  "number": zod.int().min(pushWorkspaceResponsePullRequestOneNumberMin).max(pushWorkspaceResponsePullRequestOneNumberMax),
+  "number": zod.int().min(pushWorkspaceResponseItemsItemPullRequestOneNumberMin).max(pushWorkspaceResponseItemsItemPullRequestOneNumberMax),
   "url": zod.string()
 }),zod.null()])
+}))
 })
 
 /**
@@ -61,28 +65,30 @@ export const GetStorageStatusParams = zod.object({
   "workspaceId": zod.string().min(1)
 })
 
-export const getStorageStatusResponseUncommittedMin = 0;
-export const getStorageStatusResponseUncommittedMax = 9007199254740991;
+export const getStorageStatusResponseItemsItemUncommittedMin = 0;
+export const getStorageStatusResponseItemsItemUncommittedMax = 9007199254740991;
 
-export const getStorageStatusResponseAheadOneMin = 0;
-export const getStorageStatusResponseAheadOneMax = 9007199254740991;
+export const getStorageStatusResponseItemsItemAheadOneMin = 0;
+export const getStorageStatusResponseItemsItemAheadOneMax = 9007199254740991;
 
-export const getStorageStatusResponseBehindOneMin = 0;
-export const getStorageStatusResponseBehindOneMax = 9007199254740991;
+export const getStorageStatusResponseItemsItemBehindOneMin = 0;
+export const getStorageStatusResponseItemsItemBehindOneMax = 9007199254740991;
 
-export const getStorageStatusResponsePendingFilesMin = 0;
-export const getStorageStatusResponsePendingFilesMax = 9007199254740991;
+export const getStorageStatusResponseItemsItemPendingFilesMin = 0;
+export const getStorageStatusResponseItemsItemPendingFilesMax = 9007199254740991;
 
 
 
 export const GetStorageStatusResponse = zod.object({
+  "items": zod.array(zod.object({
   "storageType": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
   "branch": zod.string().nullable(),
   "currentBranch": zod.string().nullable(),
-  "uncommitted": zod.int().min(getStorageStatusResponseUncommittedMin).max(getStorageStatusResponseUncommittedMax),
-  "ahead": zod.union([zod.int().min(getStorageStatusResponseAheadOneMin).max(getStorageStatusResponseAheadOneMax),zod.null()]),
-  "behind": zod.union([zod.int().min(getStorageStatusResponseBehindOneMin).max(getStorageStatusResponseBehindOneMax),zod.null()]),
-  "pendingFiles": zod.int().min(getStorageStatusResponsePendingFilesMin).max(getStorageStatusResponsePendingFilesMax)
+  "uncommitted": zod.int().min(getStorageStatusResponseItemsItemUncommittedMin).max(getStorageStatusResponseItemsItemUncommittedMax),
+  "ahead": zod.union([zod.int().min(getStorageStatusResponseItemsItemAheadOneMin).max(getStorageStatusResponseItemsItemAheadOneMax),zod.null()]),
+  "behind": zod.union([zod.int().min(getStorageStatusResponseItemsItemBehindOneMin).max(getStorageStatusResponseItemsItemBehindOneMax),zod.null()]),
+  "pendingFiles": zod.int().min(getStorageStatusResponseItemsItemPendingFilesMin).max(getStorageStatusResponseItemsItemPendingFilesMax)
+}))
 })
 
 /**

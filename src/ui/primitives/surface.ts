@@ -16,7 +16,7 @@ export const surfaceVariants = cva(
 
 /** Một dòng trong menu / danh sách chọn: cao `size-row`, hover/được trỏ = `color-accent`. */
 export const menuItemVariants = cva(
-  "relative flex min-h-(--size-row) cursor-pointer items-center gap-2 rounded-md px-2 text-[13px] leading-[18px] outline-none select-none transition-colors duration-(--duration-fast) ease-out data-highlighted:bg-accent data-[selected=true]:bg-accent data-disabled:pointer-events-none data-disabled:opacity-45 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "relative flex min-h-(--size-row) cursor-pointer items-center gap-2 rounded-md px-2 text-[13px] leading-[18px] outline-none select-none transition-colors duration-(--duration-fast) ease-out data-highlighted:bg-accent data-[selected=true]:bg-accent data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       tone: {

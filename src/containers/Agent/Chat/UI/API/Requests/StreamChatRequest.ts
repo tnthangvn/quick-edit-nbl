@@ -15,6 +15,8 @@ export const ChatUiMessage = z
 export const StreamChatBody = z
   .object({
     workspaceId: z.string().min(1),
+    /** Phiên chat Agent chứa lượt này (lưu lịch sử). */
+    sessionId: z.string().min(1).max(64),
     messages: z.array(ChatUiMessage).min(1).max(500),
     /** Spec được tick trên Sidebar, đường dẫn tương đối trong specsDir. */
     contextFiles: z.array(z.string().min(1).max(500)).max(50).default([]),

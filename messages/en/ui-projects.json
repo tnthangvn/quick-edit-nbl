@@ -55,15 +55,6 @@
       "confirm": "Remove",
       "removed": "Removed {name} from the list"
     },
-    "folder": {
-      "title": "Folder of {name}",
-      "description": "Copy the path to open it in your file manager or terminal.",
-      "path": "Working folder",
-      "specsDir": "Specs Dir",
-      "copy": "Copy Path",
-      "copied": "Copied",
-      "copyFailed": "The browser blocked copying"
-    },
     "import": {
       "title": "Open existing folder",
       "description": "Add a folder that already has .spec-studio/config.json to the Projects list.",

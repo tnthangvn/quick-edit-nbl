@@ -20,6 +20,9 @@ export SPEC_STUDIO_HOME
 # DATA_DRIVER (JSON | POSTGRES) đọc từ .env.local; script db:* tự xử lý theo driver.
 COMPOSE := docker compose
 
+# PORT/PORT_START đọc từ .env.local (ưu tiên) hoặc .env, để next dev/start nhận đúng port.
+LOAD_ENV := set -a; for f in .env .env.local; do [ -f "$$f" ] && . "./$$f"; done; set +a;
+
 ##@ Cài đặt
 
 .PHONY: setup
@@ -43,7 +46,7 @@ doctor: ## Kiểm tra phiên bản Node/pnpm và các CLI tuỳ chọn
 
 .PHONY: dev
 dev: ## Chạy dev server (tự sinh lại API trước khi chạy)
-	@$(PNPM) dev
+	@$(LOAD_ENV) $(PNPM) dev
 
 .PHONY: build
 build: ## Build production
@@ -51,7 +54,7 @@ build: ## Build production
 
 .PHONY: start
 start: ## Chạy bản build production
-	@$(PNPM) start
+	@$(LOAD_ENV) PORT="$${PORT_START:-$$PORT}" $(PNPM) start
 
 ##@ API (OpenAPI)
 

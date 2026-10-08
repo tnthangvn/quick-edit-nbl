@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { AgentMode, LlmProvider } from "@/ship/contracts/enums/agent";
-import { StorageType } from "@/ship/contracts/enums/StorageType";
 import { GitProvider, PublishMode, SyncStrategy } from "@/ship/contracts/enums/sync";
 import { GitBranchName, GitHost, GitRemoteUrl, RepoFullName, RepoSubdir, SpecsDir } from "./ConfigFields";
 
@@ -64,8 +63,8 @@ export const WorkspaceConfig = z
   .object({
     version: z.literal(1),
     workspace: z.object({ id: z.string(), name: z.string().trim().min(1).max(100), specsDir: SpecsDir }),
+    /** Local luôn ngầm định có; Git/Drive bật thêm độc lập, không loại trừ nhau. */
     storage: z.object({
-      type: StorageType,
       git: GitStorageConfig.nullable(),
       drive: DriveStorageConfig.nullable(),
     }),
@@ -90,10 +89,19 @@ export const DEFAULT_NOTEBOOK_CONFIG: NotebookConfig = {
   confirmBeforeSync: true,
 };
 
-/** Nhãn hiển thị ở registry: "owner/repo@branch" (Git), folderId (Drive), null (Local). */
+/** Nhãn hiển thị ở registry: ghép nhãn từng storage đang bật ("owner/repo@branch", folderId); null nếu chỉ Local. */
 export function storageLabelOf(config: WorkspaceConfig): string | null {
   const { git, drive } = config.storage;
-  if (config.storage.type === "GIT" && git) return `${git.repo ?? git.remote.replace(/\.git$/, "").split(/[/:]/).slice(-2).join("/")}@${git.branch}`;
-  if (config.storage.type === "DRIVE" && drive) return drive.folderId;
-  return null;
+  const labels: string[] = [];
+  if (git) labels.push(`${git.repo ?? git.remote.replace(/\.git$/, "").split(/[/:]/).slice(-2).join("/")}@${git.branch}`);
+  if (drive) labels.push(drive.folderId);
+  return labels.length ? labels.join(" + ") : null;
+}
+
+/** CSV cột `storage_type` của registry (luôn bắt đầu "LOCAL"), dùng để lọc/hiển thị theo loại storage đang bật. */
+export function storageTypesOf(storage: WorkspaceConfig["storage"]): string {
+  const types = ["LOCAL"];
+  if (storage.git) types.push("GIT");
+  if (storage.drive) types.push("DRIVE");
+  return types.join(",");
 }

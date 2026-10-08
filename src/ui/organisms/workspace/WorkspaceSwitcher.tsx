@@ -32,6 +32,11 @@ export type WorkspaceSwitcherProps = {
 const STORAGE_ICON: Record<StorageType, LucideIcon> = { LOCAL: FileText, GIT: GitBranch, DRIVE: Cloud };
 const RECENT_LIMIT = 6;
 
+/** Local luôn ngầm định có; dùng loại đầu tiên khác Local làm đại diện (icon đơn), LOCAL nếu không có gì khác. */
+const primaryStorageType = (types: readonly StorageType[]): StorageType => types.find((t) => t !== "LOCAL") ?? "LOCAL";
+/** Ẩn "Local" khỏi badge liệt kê khi có thêm Git/Drive. */
+const nonLocalStorageTypes = (types: readonly StorageType[]): StorageType[] => (types.length > 1 ? types.filter((t) => t !== "LOCAL") : [...types]);
+
 /**
  * Workspace Switcher trên Header (spec 3.1): tên Workspace hiện tại + badge nơi lưu; dropdown Workspace gần đây,
  * `+ New Project` và `Tất cả projects…` (về màn Projects).
@@ -67,12 +72,19 @@ export function WorkspaceSwitcher({ currentWorkspaceId, onNewProject }: Workspac
           ) : (
             <span className="min-w-0 truncate">{ws?.name ?? t("projects")}</span>
           )}
-          {ws ? (
-            <Badge size="xs" variant={ws.storageType === "LOCAL" ? "neutral" : "primary"}>
-              <Icon icon={STORAGE_ICON[ws.storageType]} size="xs" />
-              {tc(`storage.${ws.storageType}`)}
-            </Badge>
-          ) : null}
+          {ws
+            ? (() => {
+                const types = nonLocalStorageTypes(ws.storageTypes);
+                return (
+                  <Badge size="xs" variant={types.length === 1 && types[0] === "LOCAL" ? "neutral" : "primary"}>
+                    {types.map((t) => (
+                      <Icon key={t} icon={STORAGE_ICON[t]} size="xs" />
+                    ))}
+                    {types.map((t) => tc(`storage.${t}`)).join(" + ")}
+                  </Badge>
+                );
+              })()
+            : null}
           <Icon icon={ChevronsUpDown} size="sm" tone="muted" />
         </Button>
       </DropdownMenuTrigger>
@@ -103,7 +115,7 @@ export function WorkspaceSwitcher({ currentWorkspaceId, onNewProject }: Workspac
                   if (!isCurrent) open.mutate({ workspaceId: item.id });
                 }}
               >
-                <Icon icon={isCurrent ? Check : STORAGE_ICON[item.storageType]} tone={isCurrent ? "primary" : "muted"} />
+                <Icon icon={isCurrent ? Check : STORAGE_ICON[primaryStorageType(item.storageTypes)]} tone={isCurrent ? "primary" : "muted"} />
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate">{item.name}</span>
                   <span className="truncate font-mono text-[11px] leading-4 text-muted-foreground">{item.storageLabel ?? item.path}</span>

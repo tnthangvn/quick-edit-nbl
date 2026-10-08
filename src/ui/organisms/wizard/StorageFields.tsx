@@ -259,7 +259,7 @@ export function GitStorageFields() {
           )}
         </Field>
         <Field label={t("subdir")} hint={t("subdirHint")} error={err("subdir")}>
-          <Input mono placeholder="." {...register("storage.git.subdir")} />
+          <Input mono placeholder={t("subdirPlaceholder")} {...register("storage.git.subdir")} />
         </Field>
       </div>
 

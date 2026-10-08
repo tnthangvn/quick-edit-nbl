@@ -3,7 +3,7 @@
 import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Copy, FolderOpen } from "lucide-react";
+import { FolderOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import {
@@ -16,7 +16,6 @@ import {
 import type { Workspace } from "@/client/api/generated/model";
 import { ImportWorkspaceBody, UpdateWorkspaceBody } from "@/client/api/generated/zod/workspace/workspace.zod";
 import { extractApiError, useErrorMessage } from "@/client/api/useErrorMessage";
-import { useFlash } from "@/client/hooks/use-flash";
 import { Field } from "@/ui/molecules/field";
 import { Button } from "@/ui/primitives/button";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/ui/primitives/dialog";
@@ -154,52 +153,6 @@ export function RemoveWorkspaceDialog({ open, onOpenChange, workspace, onRemoved
           </Button>
           <Button variant="destructive" loading={remove.isPending} onClick={() => workspace && remove.mutate({ workspaceId: workspace.id })}>
             {t("confirm")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-/* ---------------------------------------------------------------- Mở thư mục (hiện đường dẫn) */
-
-type FolderPathDialogProps = BaseProps & { workspace: Pick<Workspace, "name" | "path" | "specsDir"> | null };
-
-/** "Mở thư mục": app chạy trong trình duyệt nên hiện đường dẫn để sao chép (API chưa có lệnh mở trình quản lý file). */
-export function FolderPathDialog({ open, onOpenChange, workspace }: FolderPathDialogProps) {
-  const t = useTranslations("projects.folder");
-  const tc = useTranslations("common.actions");
-  const [copied, flashCopied] = useFlash();
-  const copy = async () => {
-    if (!workspace) return;
-    try {
-      await navigator.clipboard.writeText(workspace.path);
-      flashCopied();
-    } catch {
-      notify.error(t("copyFailed"));
-    }
-  };
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent size="md">
-        <DialogHeader>
-          <DialogTitle>{t("title", { name: workspace?.name ?? "" })}</DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
-        </DialogHeader>
-        <DialogBody>
-          <Field label={t("path")}>
-            <Input mono readOnly value={workspace?.path ?? ""} onFocus={(e) => e.currentTarget.select()} />
-          </Field>
-          <Field label={t("specsDir")}>
-            <Input mono readOnly value={workspace?.specsDir ?? ""} />
-          </Field>
-        </DialogBody>
-        <DialogFooter className="justify-end">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            {tc("close")}
-          </Button>
-          <Button variant="primary" icon={Copy} success={copied} successText={t("copied")} onClick={copy}>
-            {t("copy")}
           </Button>
         </DialogFooter>
       </DialogContent>

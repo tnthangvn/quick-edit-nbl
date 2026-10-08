@@ -13,6 +13,8 @@ export const SpecRelativePath = z
 export const StartCliRunBody = z
   .object({
     workspaceId: z.string().min(1),
+    /** Phiên chat Agent chứa lượt này (giữ transcript, nối tiếp hội thoại CLI). */
+    sessionId: z.string().min(1).max(64),
     profileId: z.string().min(1),
     prompt: z.string().trim().min(1).max(20_000),
     contextFiles: z.array(SpecRelativePath).max(50).default([]),

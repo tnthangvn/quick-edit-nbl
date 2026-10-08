@@ -2,6 +2,7 @@
   "common": {
     "appName": "Spec Studio",
     "actions": {
+      "backToProjects": "Back to Projects",
       "close": "Close",
       "cancel": "Cancel",
       "save": "Save",
@@ -13,7 +14,6 @@
       "forceSync": "Force Sync",
       "deleteSpec": "Delete spec",
       "more": "More actions",
-      "openFolder": "Open Folder",
       "editConfig": "Edit Config",
       "removeFromList": "Remove From List",
       "locate": "Locate",

@@ -1,25 +1,25 @@
 "use client";
 
 import * as React from "react";
-import { Cloud, FileText, GitBranch } from "lucide-react";
+import { FolderOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import type * as z from "zod";
-import { StorageType, SyncStrategy } from "@/client/api/generated/model";
+import { SyncStrategy } from "@/client/api/generated/model";
 import type { CreateWorkspaceBody } from "@/client/api/generated/zod/workspace/workspace.zod";
 import { Field } from "@/ui/molecules/field";
 import { Badge } from "@/ui/primitives/badge";
+import { IconButton } from "@/ui/primitives/button";
 import { Checkbox } from "@/ui/primitives/checkbox";
 import { ChoiceCard, ChoiceCardGroup } from "@/ui/primitives/choice-card";
-import { Icon } from "@/ui/primitives/icon";
 import { Input } from "@/ui/primitives/input";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/ui/primitives/input-group";
 import { Switch } from "@/ui/primitives/switch";
+import { FolderBrowserDialog } from "@/ui/organisms/filesystem/FolderBrowserDialog";
 import { fieldError } from "@/ui/organisms/settings/form-errors";
 import { DriveStorageFields, GitStorageFields, GoogleSignIn } from "@/ui/organisms/wizard/StorageFields";
 
 export type WizardForm = z.input<typeof CreateWorkspaceBody>;
-
-const STORAGE_ICON = { LOCAL: FileText, GIT: GitBranch, DRIVE: Cloud } as const;
 
 /* ---------------------------------------------------------------- 1. Thông tin */
 
@@ -40,39 +40,45 @@ export function InfoStep() {
 
 /* ---------------------------------------------------------------- 2. Nơi lưu */
 
-export function StorageStep({ onTypeChange }: { onTypeChange: (type: StorageType) => void }) {
+/** Local luôn ngầm định có (path + specsDir dưới); Git/Drive bật thêm độc lập qua 2 switch, không loại trừ nhau. */
+export function StorageStep({ onGitToggle, onDriveToggle }: { onGitToggle: (enabled: boolean) => void; onDriveToggle: (enabled: boolean) => void }) {
   const t = useTranslations("wizard.storage");
-  const { register, control, formState } = useFormContext<WizardForm>();
-  const type = useWatch({ control, name: "storage.type" });
+  const tf = useTranslations("filesystem.browser");
+  const { register, control, setValue, getValues, formState } = useFormContext<WizardForm>();
+  const git = useWatch({ control, name: "storage.git" });
+  const drive = useWatch({ control, name: "storage.drive" });
+  const [browserOpen, setBrowserOpen] = React.useState(false);
   return (
     <>
-      <Field label={t("where")}>
-        <ChoiceCardGroup value={type} onValueChange={(v) => onTypeChange(v as StorageType)} aria-label={t("where")}>
-          {Object.values(StorageType).map((st) => (
-            <ChoiceCard
-              key={st}
-              value={st}
-              title={t(`types.${st}.title`)}
-              description={t(`types.${st}.description`)}
-              trailing={<Icon icon={STORAGE_ICON[st]} tone="muted" />}
-            />
-          ))}
-        </ChoiceCardGroup>
-      </Field>
-
-      <div data-cols={type === "GIT" ? 1 : 2} className="grid grid-cols-1 gap-4 data-[cols=2]:sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <Field label={t(`path.${type}`)} hint={t("pathHint")} error={fieldError(formState.errors, "path")}>
-          <Input mono placeholder={type === "GIT" ? "/home/you/spec-studio/specs" : "/home/you/projects/specs"} {...register("path")} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <Field label={t("path")} hint={t("pathHint")} error={fieldError(formState.errors, "path")}>
+          <InputGroup>
+            <InputGroupInput mono placeholder="/home/you/projects/specs" {...register("path")} />
+            <InputGroupAddon align="inline-end">
+              <IconButton icon={FolderOpen} size="icon-sm" label={tf("title")} onClick={() => setBrowserOpen(true)} />
+            </InputGroupAddon>
+          </InputGroup>
         </Field>
-        {type !== "GIT" ? (
-          <Field label={t("specsDir")} error={fieldError(formState.errors, "specsDir")}>
-            <Input mono placeholder="./specs" {...register("specsDir")} />
-          </Field>
-        ) : null}
+        <Field label={t("specsDir")} hint={t("specsDirHint")} error={fieldError(formState.errors, "specsDir")}>
+          <Input mono placeholder={t("specsDirPlaceholder")} {...register("specsDir")} />
+        </Field>
       </div>
+      <FolderBrowserDialog
+        open={browserOpen}
+        onOpenChange={setBrowserOpen}
+        initialPath={getValues("path") || undefined}
+        onSelect={(path) => setValue("path", path, { shouldDirty: true, shouldValidate: true })}
+      />
 
-      {type === "GIT" ? <GitStorageFields /> : null}
-      {type === "DRIVE" ? <DriveStorageFields /> : null}
+      <Field layout="inline" label={t("gitToggle.label")} hint={t("gitToggle.hint")}>
+        <Switch checked={Boolean(git)} onCheckedChange={onGitToggle} />
+      </Field>
+      {git ? <GitStorageFields /> : null}
+
+      <Field layout="inline" label={t("driveToggle.label")} hint={t("driveToggle.hint")}>
+        <Switch checked={Boolean(drive)} onCheckedChange={onDriveToggle} />
+      </Field>
+      {drive ? <DriveStorageFields /> : null}
     </>
   );
 }
@@ -153,9 +159,9 @@ export function ReviewSummary({ skipNotebook }: { skipNotebook: boolean }) {
   const tn = useTranslations("wizard.notebook");
   const { control } = useFormContext<WizardForm>();
   const v = useWatch({ control }) as WizardForm;
-  const storage = v.storage;
-  const git = storage?.type === "GIT" ? storage.git : null;
-  const drive = storage?.type === "DRIVE" ? storage.drive : null;
+  const git = v.storage?.git ?? null;
+  const drive = v.storage?.drive ?? null;
+  const activeTypes = ["LOCAL", ...(git ? (["GIT"] as const) : []), ...(drive ? (["DRIVE"] as const) : [])];
   return (
     <dl className="m-0 divide-y divide-border rounded-lg border border-border bg-card px-4">
       <Row label={t("name")}>{v.name}</Row>
@@ -163,13 +169,12 @@ export function ReviewSummary({ skipNotebook }: { skipNotebook: boolean }) {
       <Row label={t("path")}>{mono(v.path)}</Row>
       <Row label={t("storage")}>
         <span className="flex flex-wrap items-center gap-1.5">
-          {storage ? (
-            <Badge size="md" variant={storage.type === "LOCAL" ? "neutral" : "primary"}>
-              <Icon icon={STORAGE_ICON[storage.type]} size="xs" />
-              {tc(`storage.${storage.type}`)}
+          {activeTypes.map((type) => (
+            <Badge key={type} size="md" variant={type === "LOCAL" ? "neutral" : "primary"}>
+              {tc(`storage.${type}`)}
             </Badge>
-          ) : null}
-          {storage?.type !== "GIT" ? mono(v.specsDir ?? "./specs") : null}
+          ))}
+          {mono(v.specsDir?.trim() ? v.specsDir : t("specsDirRoot"))}
         </span>
       </Row>
       {git ? (
@@ -177,7 +182,7 @@ export function ReviewSummary({ skipNotebook }: { skipNotebook: boolean }) {
           <Row label={t("repo")}>
             {mono(`${git.repo ?? git.remote ?? ""}@${git.branch ?? "main"}`)} · {tc(`connector.provider.${git.provider}`)}
           </Row>
-          <Row label={t("subdir")}>{mono(git.subdir || ".")}</Row>
+          <Row label={t("subdir")}>{mono(git.subdir?.trim() ? git.subdir : t("subdirRoot"))}</Row>
           <Row label={t("publish")}>{git.publishMode === "PULL_REQUEST" ? t("publishPr") : t("publishPush")}</Row>
         </>
       ) : null}

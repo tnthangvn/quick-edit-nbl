@@ -13,6 +13,10 @@
   ],
   "tags": [
     {
+      "name": "AgentSession",
+      "description": "Phiên chat với Agent: lịch sử, nối tiếp ngữ cảnh (API và CLI)"
+    },
+    {
       "name": "Chat",
       "description": "AI Agent qua Direct API"
     },
@@ -23,6 +27,10 @@
     {
       "name": "Connector",
       "description": "Kết nối Git provider: CLI, MCP, Token, SSH (spec 3.0.2)"
+    },
+    {
+      "name": "FileSystem",
+      "description": "Duyệt thư mục trên máy cho dialog chọn thư mục"
     },
     {
       "name": "Notebook",
@@ -1736,6 +1744,98 @@
         }
       }
     },
+    "/api/settings/export": {
+      "get": {
+        "operationId": "exportSettings",
+        "tags": [
+          "Setting"
+        ],
+        "summary": "Xuất cấu hình cơ bản (Direct API, CLI Agent Runner, Connectors) — không kèm secret",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportedSettingsOutput"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/import": {
+      "post": {
+        "operationId": "importSettings",
+        "tags": [
+          "Setting"
+        ],
+        "summary": "Nhập cấu hình cơ bản: ghi đè Direct API/CLI Runner, thêm connector mới (bỏ qua trùng tên)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportedSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportSettingsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/connectors": {
       "get": {
         "operationId": "listConnectors",
@@ -2346,6 +2446,70 @@
         }
       }
     },
+    "/api/filesystem/browse": {
+      "get": {
+        "operationId": "browseDirectory",
+        "tags": [
+          "FileSystem"
+        ],
+        "summary": "Duyệt thư mục trên máy cho dialog chọn thư mục",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Bỏ trống = thư mục home",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            "description": "Bỏ trống = thư mục home"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowseDirectoryResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/workspaces/{workspaceId}/pull": {
       "post": {
         "operationId": "pullWorkspace",
@@ -2370,7 +2534,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PullResult"
+                  "$ref": "#/components/schemas/PullResultList"
                 }
               }
             }
@@ -2472,7 +2636,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PushResult"
+                  "$ref": "#/components/schemas/PushResultList"
                 }
               }
             }
@@ -2574,7 +2738,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StorageStatus"
+                  "$ref": "#/components/schemas/StorageStatusList"
                 }
               }
             }
@@ -3553,6 +3717,245 @@
           }
         }
       }
+    },
+    "/api/agent/sessions": {
+      "get": {
+        "operationId": "listAgentSessions",
+        "tags": [
+          "AgentSession"
+        ],
+        "summary": "Danh sách phiên chat Agent của Workspace (History)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSessionList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAgentSession",
+        "tags": [
+          "AgentSession"
+        ],
+        "summary": "Mở phiên chat Agent mới",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentSessionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSession"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/sessions/{sessionId}": {
+      "get": {
+        "operationId": "getAgentSession",
+        "tags": [
+          "AgentSession"
+        ],
+        "summary": "Một phiên chat Agent: tin nhắn API + các lượt CLI",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sessionId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAgentSession",
+        "tags": [
+          "AgentSession"
+        ],
+        "summary": "Xoá phiên chat Agent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sessionId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3591,82 +3994,13 @@
             "maxLength": 1024
           },
           "specsDir": {
-            "default": "./specs",
+            "default": "",
+            "description": "Thư mục con chứa spec; để trống = gốc workspace",
             "type": "string",
-            "minLength": 1,
             "maxLength": 255
           },
           "storage": {
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "const": "LOCAL"
-                  }
-                },
-                "required": [
-                  "type"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "const": "GIT"
-                  },
-                  "git": {
-                    "$ref": "#/components/schemas/GitStorageInput"
-                  },
-                  "shareConfig": {
-                    "default": false,
-                    "description": "true = không thêm .spec-studio/ vào .gitignore",
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "type",
-                  "git"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "const": "DRIVE"
-                  },
-                  "drive": {
-                    "type": "object",
-                    "properties": {
-                      "folderId": {
-                        "type": "string",
-                        "maxLength": 500,
-                        "description": "Drive Folder ID hoặc URL thư mục"
-                      },
-                      "pullOnOpen": {
-                        "default": true,
-                        "type": "boolean"
-                      },
-                      "pushOnApprove": {
-                        "default": true,
-                        "type": "boolean"
-                      }
-                    },
-                    "required": [
-                      "folderId"
-                    ]
-                  }
-                },
-                "required": [
-                  "type",
-                  "drive"
-                ]
-              }
-            ],
-            "type": "object"
+            "$ref": "#/components/schemas/CreateWorkspaceStorageInput"
           },
           "notebook": {
             "default": null,
@@ -3686,6 +4020,56 @@
           "path",
           "storage"
         ]
+      },
+      "CreateWorkspaceStorageInput": {
+        "type": "object",
+        "properties": {
+          "git": {
+            "default": null,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GitStorageInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "drive": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "folderId": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "Drive Folder ID hoặc URL thư mục"
+                  },
+                  "pullOnOpen": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "pushOnApprove": {
+                    "default": true,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "folderId"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "shareConfig": {
+            "default": false,
+            "description": "true = không thêm .spec-studio/ vào .gitignore (chỉ áp dụng khi bật Git)",
+            "type": "boolean"
+          }
+        }
       },
       "GitStorageInput": {
         "type": "object",
@@ -3739,7 +4123,8 @@
             "maxLength": 255
           },
           "subdir": {
-            "default": ".",
+            "default": "",
+            "description": "Thư mục con trong repo chứa spec; để trống = gốc repo",
             "type": "string",
             "maxLength": 255
           },
@@ -3975,6 +4360,10 @@
               "streamStdout": {
                 "type": "boolean"
               },
+              "permissionMode": {
+                "default": "BYPASS",
+                "$ref": "#/components/schemas/CliPermissionMode"
+              },
               "profiles": {
                 "minItems": 1,
                 "maxItems": 50,
@@ -3997,6 +4386,15 @@
           "cli"
         ]
       },
+      "CliPermissionMode": {
+        "type": "string",
+        "enum": [
+          "DEFAULT",
+          "PLAN",
+          "ACCEPT_EDITS",
+          "BYPASS"
+        ]
+      },
       "WorkspaceConfig": {
         "type": "object",
         "properties": {
@@ -4017,7 +4415,6 @@
               },
               "specsDir": {
                 "type": "string",
-                "minLength": 1,
                 "maxLength": 255
               }
             },
@@ -4030,9 +4427,6 @@
           "storage": {
             "type": "object",
             "properties": {
-              "type": {
-                "$ref": "#/components/schemas/StorageType"
-              },
               "git": {
                 "anyOf": [
                   {
@@ -4055,7 +4449,6 @@
               }
             },
             "required": [
-              "type",
               "git",
               "drive"
             ]
@@ -4270,6 +4663,204 @@
           "value"
         ]
       },
+      "ExportedSettings": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number",
+            "const": 1
+          },
+          "exportedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "agent": {
+            "type": "object",
+            "properties": {
+              "activeMode": {
+                "$ref": "#/components/schemas/AgentMode"
+              },
+              "api": {
+                "type": "object",
+                "properties": {
+                  "provider": {
+                    "$ref": "#/components/schemas/LlmProvider"
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "baseUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "temperature": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 2
+                  },
+                  "systemPrompt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "provider",
+                  "model",
+                  "baseUrl",
+                  "temperature",
+                  "systemPrompt"
+                ]
+              },
+              "cli": {
+                "type": "object",
+                "properties": {
+                  "activeProfileId": {
+                    "type": "string"
+                  },
+                  "streamStdout": {
+                    "type": "boolean"
+                  },
+                  "permissionMode": {
+                    "default": "BYPASS",
+                    "$ref": "#/components/schemas/CliPermissionMode"
+                  },
+                  "profiles": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CliProfile"
+                    }
+                  }
+                },
+                "required": [
+                  "activeProfileId",
+                  "streamStdout",
+                  "profiles"
+                ]
+              }
+            },
+            "required": [
+              "activeMode",
+              "api",
+              "cli"
+            ]
+          },
+          "connectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportedConnector"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "exportedAt",
+          "agent",
+          "connectors"
+        ]
+      },
+      "ExportedConnector": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "$ref": "#/components/schemas/ConnectorType"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/GitProvider"
+          },
+          "host": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "command": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "env": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "transport": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/McpTransport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "headers": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "secret_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "agent_tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "provider",
+          "host",
+          "command",
+          "args",
+          "env",
+          "transport",
+          "url",
+          "headers",
+          "secret_keys",
+          "agent_tools"
+        ]
+      },
+      "McpTransport": {
+        "type": "string",
+        "enum": [
+          "STDIO",
+          "HTTP"
+        ]
+      },
       "CreateConnectorInput": {
         "type": "object",
         "properties": {
@@ -4403,13 +4994,6 @@
           "name",
           "type",
           "provider"
-        ]
-      },
-      "McpTransport": {
-        "type": "string",
-        "enum": [
-          "STDIO",
-          "HTTP"
         ]
       },
       "UpdateConnectorInput": {
@@ -4552,6 +5136,11 @@
             "type": "string",
             "minLength": 1
           },
+          "sessionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
           "messages": {
             "minItems": 1,
             "maxItems": 500,
@@ -4573,6 +5162,7 @@
         },
         "required": [
           "workspaceId",
+          "sessionId",
           "messages"
         ]
       },
@@ -4641,6 +5231,11 @@
             "type": "string",
             "minLength": 1
           },
+          "sessionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
           "profileId": {
             "type": "string",
             "minLength": 1
@@ -4663,8 +5258,22 @@
         },
         "required": [
           "workspaceId",
+          "sessionId",
           "profileId",
           "prompt"
+        ]
+      },
+      "CreateAgentSessionBody": {
+        "type": "object",
+        "properties": {
+          "workspaceId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "workspaceId"
         ]
       },
       "SpecProposedEvent": {
@@ -4892,6 +5501,7 @@
           "CONNECTOR.INVALID_COMMAND",
           "CONNECTOR.INVALID_URL",
           "CONNECTOR.INVALID_SECRET_KEY",
+          "FILESYSTEM.DIRECTORY_NOT_FOUND",
           "STORAGE.NOT_SUPPORTED",
           "STORAGE.CONFIG_MISSING",
           "STORAGE.PULL_CONFLICT",
@@ -4927,7 +5537,10 @@
           "AGENT.CLI_TIMEOUT",
           "AGENT.SANDBOX_FAILED",
           "AGENT.RUN_NOT_FOUND",
-          "AGENT.RUN_ALREADY_ACTIVE"
+          "AGENT.RUN_ALREADY_ACTIVE",
+          "AGENT.CLI_PERMISSION_UNSUPPORTED",
+          "AGENT.CLI_PERMISSION_DENIED",
+          "AGENT.SESSION_NOT_FOUND"
         ],
         "description": "Mã lỗi dạng DOMAIN.REASON"
       },
@@ -5119,8 +5732,11 @@
           "specsDir": {
             "type": "string"
           },
-          "storageType": {
-            "$ref": "#/components/schemas/StorageType"
+          "storageTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StorageType"
+            }
           },
           "storageLabel": {
             "type": [
@@ -5161,7 +5777,7 @@
           "description",
           "path",
           "specsDir",
-          "storageType",
+          "storageTypes",
           "storageLabel",
           "notebookId",
           "status",
@@ -5514,6 +6130,10 @@
               "streamStdout": {
                 "type": "boolean"
               },
+              "permissionMode": {
+                "default": "BYPASS",
+                "$ref": "#/components/schemas/CliPermissionMode"
+              },
               "profiles": {
                 "type": "array",
                 "items": {
@@ -5524,6 +6144,7 @@
             "required": [
               "activeProfileId",
               "streamStdout",
+              "permissionMode",
               "profiles"
             ],
             "additionalProperties": false
@@ -5564,6 +6185,27 @@
         "required": [
           "kind",
           "isSet"
+        ],
+        "additionalProperties": false
+      },
+      "ImportSettingsResult": {
+        "type": "object",
+        "properties": {
+          "importedConnectors": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "skippedConnectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "importedConnectors",
+          "skippedConnectors"
         ],
         "additionalProperties": false
       },
@@ -5973,6 +6615,63 @@
         ],
         "additionalProperties": false
       },
+      "BrowseDirectoryResult": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "parent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "writable": {
+            "type": "boolean"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DirectoryEntry"
+            }
+          }
+        },
+        "required": [
+          "path",
+          "parent",
+          "writable",
+          "entries"
+        ],
+        "additionalProperties": false
+      },
+      "DirectoryEntry": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "PullResultList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PullResult"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
       "PullResult": {
         "type": "object",
         "properties": {
@@ -5996,6 +6695,21 @@
           "storageType",
           "files",
           "headSha"
+        ],
+        "additionalProperties": false
+      },
+      "PushResultList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PushResult"
+            }
+          }
+        },
+        "required": [
+          "items"
         ],
         "additionalProperties": false
       },
@@ -6059,6 +6773,21 @@
           "commitSha",
           "pushed",
           "pullRequest"
+        ],
+        "additionalProperties": false
+      },
+      "StorageStatusList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StorageStatus"
+            }
+          }
+        },
+        "required": [
+          "items"
         ],
         "additionalProperties": false
       },
@@ -6376,6 +7105,9 @@
           },
           {
             "$ref": "#/components/schemas/CliRunProposalEvent"
+          },
+          {
+            "$ref": "#/components/schemas/CliRunSessionEvent"
           }
         ],
         "type": "object",
@@ -6386,7 +7118,8 @@
             "LOG": "#/components/schemas/CliRunLogEvent",
             "TOOL_CALL": "#/components/schemas/CliRunToolCallEvent",
             "MESSAGE": "#/components/schemas/CliRunMessageEvent",
-            "PROPOSAL": "#/components/schemas/CliRunProposalEvent"
+            "PROPOSAL": "#/components/schemas/CliRunProposalEvent",
+            "SESSION": "#/components/schemas/CliRunSessionEvent"
           }
         }
       },
@@ -6624,6 +7357,208 @@
         ],
         "additionalProperties": false
       },
+      "CliRunSessionEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "SESSION"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "cliSessionId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "runId",
+          "seq",
+          "at",
+          "cliSessionId"
+        ],
+        "additionalProperties": false
+      },
+      "AgentSessionList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentSessionSummary"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "AgentSessionSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "AgentSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "workspaceId": {
+            "type": "string"
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cliProfileId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatUiMessage"
+            }
+          },
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentSessionRun"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "workspaceId",
+          "title",
+          "cliProfileId",
+          "messages",
+          "runs",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "AgentSessionRun": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "profileId": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CliRunStatus"
+          },
+          "exitCode": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "$ref": "#/components/schemas/ErrorCode"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/ErrorParams"
+                  }
+                },
+                "required": [
+                  "code"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CliRunEvent"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "runId",
+          "prompt",
+          "profileId",
+          "status",
+          "exitCode",
+          "error",
+          "events",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
       "WorkspaceEvent": {
         "oneOf": [
           {
@@ -6666,7 +7601,6 @@
               },
               "specsDir": {
                 "type": "string",
-                "minLength": 1,
                 "maxLength": 255
               }
             },
@@ -6680,9 +7614,6 @@
           "storage": {
             "type": "object",
             "properties": {
-              "type": {
-                "$ref": "#/components/schemas/StorageType"
-              },
               "git": {
                 "anyOf": [
                   {
@@ -6705,7 +7636,6 @@
               }
             },
             "required": [
-              "type",
               "git",
               "drive"
             ],
@@ -7056,6 +7986,203 @@
         ],
         "additionalProperties": false
       },
+      "ExportedSettingsOutput": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number",
+            "const": 1
+          },
+          "exportedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "agent": {
+            "type": "object",
+            "properties": {
+              "activeMode": {
+                "$ref": "#/components/schemas/AgentMode"
+              },
+              "api": {
+                "type": "object",
+                "properties": {
+                  "provider": {
+                    "$ref": "#/components/schemas/LlmProvider"
+                  },
+                  "model": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "baseUrl": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "temperature": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 2
+                  },
+                  "systemPrompt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "provider",
+                  "model",
+                  "baseUrl",
+                  "temperature",
+                  "systemPrompt"
+                ],
+                "additionalProperties": false
+              },
+              "cli": {
+                "type": "object",
+                "properties": {
+                  "activeProfileId": {
+                    "type": "string"
+                  },
+                  "streamStdout": {
+                    "type": "boolean"
+                  },
+                  "permissionMode": {
+                    "default": "BYPASS",
+                    "$ref": "#/components/schemas/CliPermissionMode"
+                  },
+                  "profiles": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/CliProfileOutput"
+                    }
+                  }
+                },
+                "required": [
+                  "activeProfileId",
+                  "streamStdout",
+                  "permissionMode",
+                  "profiles"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "activeMode",
+              "api",
+              "cli"
+            ],
+            "additionalProperties": false
+          },
+          "connectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportedConnectorOutput"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "exportedAt",
+          "agent",
+          "connectors"
+        ],
+        "additionalProperties": false
+      },
+      "ExportedConnectorOutput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "$ref": "#/components/schemas/ConnectorType"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/GitProvider"
+          },
+          "host": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "command": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "env": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "transport": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/McpTransport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "headers": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "secret_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "agent_tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "provider",
+          "host",
+          "command",
+          "args",
+          "env",
+          "transport",
+          "url",
+          "headers",
+          "secret_keys",
+          "agent_tools"
+        ],
+        "additionalProperties": false
+      },
       "CliProfileOutput": {
         "type": "object",
         "properties": {
@@ -7161,6 +8288,10 @@
               "streamStdout": {
                 "type": "boolean"
               },
+              "permissionMode": {
+                "default": "BYPASS",
+                "$ref": "#/components/schemas/CliPermissionMode"
+              },
               "profiles": {
                 "type": "array",
                 "items": {
@@ -7171,6 +8302,7 @@
             "required": [
               "activeProfileId",
               "streamStdout",
+              "permissionMode",
               "profiles"
             ],
             "additionalProperties": false

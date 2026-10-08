@@ -3,6 +3,7 @@ import path from "node:path";
 import { studio } from "@/containers/providers";
 import type { AgentSettingsAccess, SpecAccess } from "@/ship/contracts/studioAccess";
 import { Action } from "@/ship/parents/Action";
+import { GetAgentSessionTask } from "../../Session/Tasks/GetAgentSessionTask";
 import { CliProfileNotFoundException } from "../Exceptions/CliRunnerExceptions";
 import { ExecuteCliRunSubAction } from "../SubActions/ExecuteCliRunSubAction";
 import { BuildCliInvocationTask } from "../Tasks/BuildCliInvocationTask";
@@ -12,6 +13,7 @@ import { PrepareSandboxTask } from "../Tasks/PrepareSandboxTask";
 
 export type StartCliRunInput = {
   workspaceId: string;
+  sessionId: string;
   profileId: string;
   prompt: string;
   contextFiles: string[];
@@ -28,6 +30,7 @@ export class StartCliRunAction extends Action<StartCliRunInput, { runId: string 
   constructor(
     private readonly specs: SpecAccess = studio.specs(),
     private readonly settings: AgentSettingsAccess = studio.agentSettings(),
+    private readonly getSession = new GetAgentSessionTask(),
     private readonly createRun = new CreateCliRunTask(),
     private readonly discardRun = new DiscardCliRunTask(),
     private readonly buildInvocation = new BuildCliInvocationTask(),
@@ -38,21 +41,25 @@ export class StartCliRunAction extends Action<StartCliRunInput, { runId: string 
     super();
   }
 
-  async run({ workspaceId, profileId, prompt, contextFiles }: StartCliRunInput): Promise<{ runId: string }> {
+  async run({ workspaceId, sessionId, profileId, prompt, contextFiles }: StartCliRunInput): Promise<{ runId: string }> {
     const workspace = await this.specs.getWorkspace(workspaceId);
+    const session = await this.getSession.run({ sessionId, workspaceId });
     const { cli } = await this.settings.get(workspaceId);
     const profile = cli.profiles.find((p) => p.id === profileId);
     if (!profile) throw new CliProfileNotFoundException({ profileId });
+    // Cùng profile với lượt trước → nối tiếp hội thoại của CLI; đổi profile thì bắt đầu phiên CLI mới.
+    const resumeId = session.cli_profile_id === profileId ? session.cli_session_id : null;
 
     const run = await this.createRun.run({ workspaceId });
     try {
-      const invocation = await this.buildInvocation.run({ profile, prompt, contextFiles });
+      const invocation = await this.buildInvocation.run({ profile, prompt, contextFiles, resumeId, permissionMode: cli.permissionMode });
       const specsDir = path.resolve(workspace.path, workspace.specsDir);
-      const sandbox = await this.prepareSandbox.run({ specsDir });
+      const sandbox = await this.prepareSandbox.run({ specsDir, sessionId });
       run.push({ type: "STATUS", status: "RUNNING", exitCode: null, error: null });
       // Chạy nền: SubAction tự đẩy STATUS kết thúc và không ném lỗi.
       void this.execute.run({
         run,
+        session: { sessionId, profileId, prompt, resumed: Boolean(resumeId) },
         invocation,
         sandbox,
         specsDir,

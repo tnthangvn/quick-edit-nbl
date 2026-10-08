@@ -32,8 +32,18 @@ export class CliRun {
   }
 
   push(draft: CliRunEventDraft): void {
+    this.emit(this.prepare(draft));
+  }
+
+  /** Gắn runId / seq / at cho event mà chưa phát (để lưu trước rồi mới phát, vd STATUS kết thúc). */
+  prepare(draft: CliRunEventDraft): CliRunEvent {
     const event = { ...draft, runId: this.id, seq: this.seq++, at: new Date().toISOString() } as CliRunEvent;
     if (event.type === "LOG" || event.type === "MESSAGE") event.text = clip(event.text);
+    return event;
+  }
+
+  /** Phát event đã `prepare`. */
+  emit(event: CliRunEvent): void {
     if (event.type === "STATUS") this.status = event.status;
 
     const buffer = event.type !== "LOG" || this.bufferedLogs++ < MAX_BUFFERED_LOGS;
@@ -85,6 +95,8 @@ export class CliRunStore {
   }
 }
 
-// Giữ registry qua hot reload của Next dev.
+// Giữ registry qua hot reload của Next dev. Chính file này được nạp lại thì class đổi: bỏ registry cũ, vì run tạo từ
+// class cũ thiếu method mới (vd `prepare`) và sẽ hỏng giữa chừng.
 const globalForRuns = globalThis as unknown as { __specStudioCliRuns?: CliRunStore };
-export const cliRunStore = (globalForRuns.__specStudioCliRuns ??= new CliRunStore());
+if (!(globalForRuns.__specStudioCliRuns instanceof CliRunStore)) globalForRuns.__specStudioCliRuns = new CliRunStore();
+export const cliRunStore = globalForRuns.__specStudioCliRuns;

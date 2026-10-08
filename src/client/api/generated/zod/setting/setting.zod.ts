@@ -15,7 +15,7 @@ import * as zod from 'zod';
 export const getSettingsResponseApiTemperatureMin = 0;
 export const getSettingsResponseApiTemperatureMax = 2;
 
-
+export const getSettingsResponseCliPermissionModeDefault = `BYPASS`;
 
 
 export const getSettingsResponseCliProfilesItemEnvDefault = {};
@@ -33,6 +33,7 @@ export const GetSettingsResponse = zod.object({
   "cli": zod.object({
   "activeProfileId": zod.string(),
   "streamStdout": zod.boolean(),
+  "permissionMode": zod.enum(['DEFAULT', 'PLAN', 'ACCEPT_EDITS', 'BYPASS']).default(getSettingsResponseCliPermissionModeDefault),
   "profiles": zod.array(zod.object({
   "id": zod.string().min(1),
   "name": zod.string().min(1),
@@ -54,7 +55,7 @@ export const updateSettingsBodyApiTemperatureMax = 2;
 
 export const updateSettingsBodyApiApiKeyOneMax = 4096;
 
-
+export const updateSettingsBodyCliPermissionModeDefault = `BYPASS`;
 
 
 export const updateSettingsBodyCliProfilesItemEnvDefault = {};
@@ -75,6 +76,7 @@ export const UpdateSettingsBody = zod.object({
   "cli": zod.object({
   "activeProfileId": zod.string(),
   "streamStdout": zod.boolean(),
+  "permissionMode": zod.enum(['DEFAULT', 'PLAN', 'ACCEPT_EDITS', 'BYPASS']).default(updateSettingsBodyCliPermissionModeDefault),
   "profiles": zod.array(zod.object({
   "id": zod.string().min(1),
   "name": zod.string().min(1),
@@ -91,7 +93,7 @@ export const UpdateSettingsBody = zod.object({
 export const updateSettingsResponseApiTemperatureMin = 0;
 export const updateSettingsResponseApiTemperatureMax = 2;
 
-
+export const updateSettingsResponseCliPermissionModeDefault = `BYPASS`;
 
 
 export const updateSettingsResponseCliProfilesItemEnvDefault = {};
@@ -109,6 +111,7 @@ export const UpdateSettingsResponse = zod.object({
   "cli": zod.object({
   "activeProfileId": zod.string(),
   "streamStdout": zod.boolean(),
+  "permissionMode": zod.enum(['DEFAULT', 'PLAN', 'ACCEPT_EDITS', 'BYPASS']).default(updateSettingsResponseCliPermissionModeDefault),
   "profiles": zod.array(zod.object({
   "id": zod.string().min(1),
   "name": zod.string().min(1),
@@ -166,10 +169,9 @@ export const GetWorkspaceConfigResponse = zod.object({
   "workspace": zod.object({
   "id": zod.string(),
   "name": zod.string().min(1).max(getWorkspaceConfigResponseWorkspaceNameMax),
-  "specsDir": zod.string().min(1).max(getWorkspaceConfigResponseWorkspaceSpecsDirMax)
+  "specsDir": zod.string().max(getWorkspaceConfigResponseWorkspaceSpecsDirMax)
 }),
   "storage": zod.object({
-  "type": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
   "git": zod.union([zod.object({
   "provider": zod.enum(['GITHUB', 'GITLAB', 'BITBUCKET', 'GITEA', 'GENERIC']),
   "host": zod.string().min(1).max(getWorkspaceConfigResponseStorageGitOneHostMax).regex(getWorkspaceConfigResponseStorageGitOneHostRegExp),
@@ -257,10 +259,9 @@ export const UpdateWorkspaceConfigBody = zod.object({
   "workspace": zod.object({
   "id": zod.string(),
   "name": zod.string().min(1).max(updateWorkspaceConfigBodyWorkspaceNameMax),
-  "specsDir": zod.string().min(1).max(updateWorkspaceConfigBodyWorkspaceSpecsDirMax)
+  "specsDir": zod.string().max(updateWorkspaceConfigBodyWorkspaceSpecsDirMax)
 }),
   "storage": zod.object({
-  "type": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
   "git": zod.union([zod.object({
   "provider": zod.enum(['GITHUB', 'GITLAB', 'BITBUCKET', 'GITEA', 'GENERIC']),
   "host": zod.string().min(1).max(updateWorkspaceConfigBodyStorageGitOneHostMax).regex(updateWorkspaceConfigBodyStorageGitOneHostRegExp),
@@ -337,10 +338,9 @@ export const UpdateWorkspaceConfigResponse = zod.object({
   "workspace": zod.object({
   "id": zod.string(),
   "name": zod.string().min(1).max(updateWorkspaceConfigResponseWorkspaceNameMax),
-  "specsDir": zod.string().min(1).max(updateWorkspaceConfigResponseWorkspaceSpecsDirMax)
+  "specsDir": zod.string().max(updateWorkspaceConfigResponseWorkspaceSpecsDirMax)
 }),
   "storage": zod.object({
-  "type": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
   "git": zod.union([zod.object({
   "provider": zod.enum(['GITHUB', 'GITLAB', 'BITBUCKET', 'GITEA', 'GENERIC']),
   "host": zod.string().min(1).max(updateWorkspaceConfigResponseStorageGitOneHostMax).regex(updateWorkspaceConfigResponseStorageGitOneHostRegExp),
@@ -436,4 +436,128 @@ export const DeleteWorkspaceSecretParams = zod.object({
 })
 
 export const DeleteWorkspaceSecretResponse = zod.void()
+
+/**
+ * @summary Xuất cấu hình cơ bản (Direct API, CLI Agent Runner, Connectors) — không kèm secret
+ */
+export const exportSettingsResponseExportedAtRegExp = new RegExp('^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$');
+
+export const exportSettingsResponseAgentApiTemperatureMin = 0;
+export const exportSettingsResponseAgentApiTemperatureMax = 2;
+
+export const exportSettingsResponseAgentCliPermissionModeDefault = `BYPASS`;
+
+
+export const exportSettingsResponseAgentCliProfilesItemEnvDefault = {};
+
+
+export const ExportSettingsResponse = zod.object({
+  "version": zod.literal(1),
+  "exportedAt": zod.iso.datetime({"offset":true}).regex(exportSettingsResponseExportedAtRegExp),
+  "agent": zod.object({
+  "activeMode": zod.enum(['API', 'CLI']),
+  "api": zod.object({
+  "provider": zod.enum(['GOOGLE', 'ANTHROPIC', 'OPENAI', 'DEEPSEEK', 'OLLAMA']),
+  "model": zod.string().min(1),
+  "baseUrl": zod.string().nullable(),
+  "temperature": zod.number().min(exportSettingsResponseAgentApiTemperatureMin).max(exportSettingsResponseAgentApiTemperatureMax),
+  "systemPrompt": zod.string()
+}),
+  "cli": zod.object({
+  "activeProfileId": zod.string(),
+  "streamStdout": zod.boolean(),
+  "permissionMode": zod.enum(['DEFAULT', 'PLAN', 'ACCEPT_EDITS', 'BYPASS']).default(exportSettingsResponseAgentCliPermissionModeDefault),
+  "profiles": zod.array(zod.object({
+  "id": zod.string().min(1),
+  "name": zod.string().min(1),
+  "kind": zod.enum(['CLAUDE_CODE', 'CODEX', 'ANTIGRAVITY', 'AIDER', 'CUSTOM']),
+  "command": zod.string().min(1),
+  "args": zod.array(zod.string()),
+  "outputFormat": zod.enum(['STREAM_JSON', 'JSONL', 'TEXT']),
+  "env": zod.record(zod.string(), zod.string()).default(exportSettingsResponseAgentCliProfilesItemEnvDefault)
+}))
+})
+}),
+  "connectors": zod.array(zod.object({
+  "name": zod.string().min(1),
+  "type": zod.enum(['CLI', 'MCP', 'TOKEN', 'SSH']),
+  "provider": zod.enum(['GITHUB', 'GITLAB', 'BITBUCKET', 'GITEA', 'GENERIC']),
+  "host": zod.string().nullable(),
+  "command": zod.string().nullable(),
+  "args": zod.array(zod.string()),
+  "env": zod.record(zod.string(), zod.string()),
+  "transport": zod.union([zod.enum(['STDIO', 'HTTP']),zod.null()]),
+  "url": zod.string().nullable(),
+  "headers": zod.record(zod.string(), zod.string()),
+  "secret_keys": zod.array(zod.string()),
+  "agent_tools": zod.array(zod.string())
+}))
+})
+
+/**
+ * @summary Nhập cấu hình cơ bản: ghi đè Direct API/CLI Runner, thêm connector mới (bỏ qua trùng tên)
+ */
+export const importSettingsBodyExportedAtRegExp = new RegExp('^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$');
+
+export const importSettingsBodyAgentApiTemperatureMin = 0;
+export const importSettingsBodyAgentApiTemperatureMax = 2;
+
+export const importSettingsBodyAgentCliPermissionModeDefault = `BYPASS`;
+
+
+export const importSettingsBodyAgentCliProfilesItemEnvDefault = {};
+
+
+export const ImportSettingsBody = zod.object({
+  "version": zod.literal(1),
+  "exportedAt": zod.iso.datetime({"offset":true}).regex(importSettingsBodyExportedAtRegExp),
+  "agent": zod.object({
+  "activeMode": zod.enum(['API', 'CLI']),
+  "api": zod.object({
+  "provider": zod.enum(['GOOGLE', 'ANTHROPIC', 'OPENAI', 'DEEPSEEK', 'OLLAMA']),
+  "model": zod.string().min(1),
+  "baseUrl": zod.string().nullable(),
+  "temperature": zod.number().min(importSettingsBodyAgentApiTemperatureMin).max(importSettingsBodyAgentApiTemperatureMax),
+  "systemPrompt": zod.string()
+}),
+  "cli": zod.object({
+  "activeProfileId": zod.string(),
+  "streamStdout": zod.boolean(),
+  "permissionMode": zod.enum(['DEFAULT', 'PLAN', 'ACCEPT_EDITS', 'BYPASS']).default(importSettingsBodyAgentCliPermissionModeDefault),
+  "profiles": zod.array(zod.object({
+  "id": zod.string().min(1),
+  "name": zod.string().min(1),
+  "kind": zod.enum(['CLAUDE_CODE', 'CODEX', 'ANTIGRAVITY', 'AIDER', 'CUSTOM']),
+  "command": zod.string().min(1),
+  "args": zod.array(zod.string()),
+  "outputFormat": zod.enum(['STREAM_JSON', 'JSONL', 'TEXT']),
+  "env": zod.record(zod.string(), zod.string()).default(importSettingsBodyAgentCliProfilesItemEnvDefault)
+}))
+})
+}),
+  "connectors": zod.array(zod.object({
+  "name": zod.string().min(1),
+  "type": zod.enum(['CLI', 'MCP', 'TOKEN', 'SSH']),
+  "provider": zod.enum(['GITHUB', 'GITLAB', 'BITBUCKET', 'GITEA', 'GENERIC']),
+  "host": zod.string().nullable(),
+  "command": zod.string().nullable(),
+  "args": zod.array(zod.string()),
+  "env": zod.record(zod.string(), zod.string()),
+  "transport": zod.union([zod.enum(['STDIO', 'HTTP']),zod.null()]),
+  "url": zod.string().nullable(),
+  "headers": zod.record(zod.string(), zod.string()),
+  "secret_keys": zod.array(zod.string()),
+  "agent_tools": zod.array(zod.string())
+}))
+})
+
+export const importSettingsResponseImportedConnectorsMin = 0;
+export const importSettingsResponseImportedConnectorsMax = 9007199254740991;
+
+
+
+export const ImportSettingsResponse = zod.object({
+  "importedConnectors": zod.int().min(importSettingsResponseImportedConnectorsMin).max(importSettingsResponseImportedConnectorsMax),
+  "skippedConnectors": zod.array(zod.string())
+})
 

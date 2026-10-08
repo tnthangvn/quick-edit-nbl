@@ -9,6 +9,7 @@ import { useCliRunStream } from "@/client/hooks/use-cli-run";
 import { useWorkspaceEvents } from "@/client/hooks/use-workspace-events";
 import { useHydrateCliRunStore } from "@/client/stores/workbench-cli-store";
 import { useHydrateWorkbenchEditorStore, useWorkbenchEditorStore } from "@/client/stores/workbench-editor-store";
+import { useHydrateAgentSessionStore } from "@/client/stores/workbench-session-store";
 import { useActiveProposal } from "@/client/stores/workbench-proposal-store";
 import { usePublishStore } from "@/client/stores/workbench-publish-store";
 import { notify } from "@/ui/primitives/sonner";
@@ -25,6 +26,7 @@ export function WorkbenchSession({ workspaceId }: { workspaceId: string }) {
 
   useHydrateWorkbenchEditorStore();
   useHydrateCliRunStore();
+  useHydrateAgentSessionStore();
 
   useEffect(() => {
     usePublishStore.getState().reset(workspaceId);

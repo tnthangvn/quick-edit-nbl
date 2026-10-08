@@ -5,18 +5,8 @@
  * API local của Spec Studio. Lỗi chỉ trả mã (ErrorCode); FE tự dịch.
  * OpenAPI spec version: 1.0.0
  */
-import type { GitStorageInput } from './gitStorageInput';
 
-export type CreateWorkspaceInputStorage = {
-  type: 'LOCAL';
-} | {
-  type: 'GIT';
-  git: GitStorageInput;
-  /** true = không thêm .spec-studio/ vào .gitignore */
-  shareConfig?: boolean;
-} | {
-  type: 'DRIVE';
-  drive: {
+export type CreateWorkspaceStorageInputDrive = {
   /**
      * Drive Folder ID hoặc URL thư mục
      * @maxLength 500
@@ -24,5 +14,4 @@ export type CreateWorkspaceInputStorage = {
   folderId: string;
   pullOnOpen?: boolean;
   pushOnApprove?: boolean;
-};
-};
+} | null;

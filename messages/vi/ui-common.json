@@ -2,6 +2,7 @@
   "common": {
     "appName": "Spec Studio",
     "actions": {
+      "backToProjects": "Về màn hình Projects",
       "close": "Đóng",
       "cancel": "Cancel",
       "save": "Save",
@@ -13,7 +14,6 @@
       "forceSync": "Force Sync",
       "deleteSpec": "Delete spec",
       "more": "Thao tác khác",
-      "openFolder": "Mở thư mục",
       "editConfig": "Sửa cấu hình",
       "removeFromList": "Gỡ khỏi danh sách",
       "locate": "Tìm lại",

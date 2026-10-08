@@ -58,8 +58,17 @@ export const CliRunProposalEvent = z
   })
   .meta({ id: "CliRunProposalEvent" });
 
+export const CliRunSessionEvent = z
+  .object({
+    type: z.literal("SESSION"),
+    ...base,
+    /** Id phiên của chính CLI (claude session_id, agy conversation_id, codex thread_id) để lượt sau resume. */
+    cliSessionId: z.string(),
+  })
+  .meta({ id: "CliRunSessionEvent" });
+
 export const CliRunEvent = z
-  .discriminatedUnion("type", [CliRunStatusEvent, CliRunLogEvent, CliRunToolCallEvent, CliRunMessageEvent, CliRunProposalEvent])
+  .discriminatedUnion("type", [CliRunStatusEvent, CliRunLogEvent, CliRunToolCallEvent, CliRunMessageEvent, CliRunProposalEvent, CliRunSessionEvent])
   .meta({ id: "CliRunEvent" });
 export type CliRunEvent = z.infer<typeof CliRunEvent>;
 

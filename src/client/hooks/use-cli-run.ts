@@ -36,12 +36,12 @@ export function useCliRunActions(workspaceId: string) {
   const starting = useRef(false);
 
   const start = useCallback(
-    async (input: { profileId: string; prompt: string; contextFiles: string[] }) => {
+    async (input: { sessionId: string; profileId: string; prompt: string; contextFiles: string[] }) => {
       if (starting.current) return;
       starting.current = true;
       try {
         const { runId } = await startCliRun({ workspaceId, ...input });
-        useCliRunStore.getState().start({ runId, workspaceId, prompt: input.prompt, profileId: input.profileId });
+        useCliRunStore.getState().start({ runId, workspaceId, sessionId: input.sessionId, prompt: input.prompt, profileId: input.profileId });
       } finally {
         starting.current = false;
       }

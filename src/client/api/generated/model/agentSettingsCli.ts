@@ -5,10 +5,12 @@
  * API local của Spec Studio. Lỗi chỉ trả mã (ErrorCode); FE tự dịch.
  * OpenAPI spec version: 1.0.0
  */
+import type { CliPermissionMode } from './cliPermissionMode';
 import type { CliProfileOutput } from './cliProfileOutput';
 
 export type AgentSettingsCli = {
   activeProfileId: string;
   streamStdout: boolean;
+  permissionMode: CliPermissionMode;
   profiles: CliProfileOutput[];
 };

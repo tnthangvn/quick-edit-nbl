@@ -4,7 +4,7 @@ import { AssertWorkspaceUniqueTask } from "../../Workspace/Tasks/AssertWorkspace
 import { GetWorkspaceTask } from "../../Workspace/Tasks/GetWorkspaceTask";
 import { UpdateWorkspaceRecordTask } from "../../Workspace/Tasks/UpdateWorkspaceRecordTask";
 import { WorkspaceIdMismatchException } from "../Exceptions/WorkspaceIdMismatchException";
-import { storageLabelOf, type WorkspaceConfig } from "../Models/WorkspaceConfig";
+import { storageLabelOf, storageTypesOf, type WorkspaceConfig } from "../Models/WorkspaceConfig";
 import { WriteWorkspaceConfigTask } from "../Tasks/WriteWorkspaceConfigTask";
 
 /** Lưu Tab 3, 4: ghi config.json rồi đồng bộ các cột hiển thị trong registry (tên, specsDir, loại lưu trữ, notebook). */
@@ -28,7 +28,7 @@ export class UpdateWorkspaceConfigAction extends Action<{ workspaceId: string; c
       patch: {
         name: saved.workspace.name,
         specs_dir: saved.workspace.specsDir,
-        storage_type: saved.storage.type,
+        storage_type: storageTypesOf(saved.storage),
         storage_label: storageLabelOf(saved),
         notebook_id: saved.nbl.notebookId,
       },

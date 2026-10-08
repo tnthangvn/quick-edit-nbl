@@ -14,7 +14,7 @@ import { Button } from "@/ui/primitives/button";
 import { notify } from "@/ui/primitives/sonner";
 import { Spinner } from "@/ui/primitives/spinner";
 import type { StorageFilter } from "@/ui/organisms/projects/ProjectToolbar";
-import { EditWorkspaceDialog, FolderPathDialog, RemoveWorkspaceDialog } from "@/ui/organisms/projects/WorkspaceDialogs";
+import { EditWorkspaceDialog, RemoveWorkspaceDialog } from "@/ui/organisms/projects/WorkspaceDialogs";
 
 export type ProjectListProps = {
   q: string;
@@ -29,7 +29,7 @@ export type ProjectListProps = {
 };
 
 type DialogState =
-  | { kind: "rename" | "locate" | "folder" | "remove"; workspace: Workspace }
+  | { kind: "rename" | "locate" | "remove"; workspace: Workspace }
   | null;
 
 /**
@@ -54,6 +54,9 @@ export function ProjectList({ q, storage, sort, onNewProject, onImport, onEditCo
   const open = useOpenWorkspace({
     mutation: {
       onSuccess: ({ workspace }) => {
+        // Next Router Cache có thể giữ nguyên component này khi quay lại "/" (không remount) — phải tự reset,
+        // không thì `opening` còn giữ id cũ, lần mở kế tiếp bị chặn im lặng ở `if (opening) return`.
+        setOpening(null);
         void queryClient.invalidateQueries({ queryKey: getListWorkspacesQueryKey() });
         router.push(`/w/${workspace.id}`);
       },
@@ -128,7 +131,6 @@ export function ProjectList({ q, storage, sort, onNewProject, onImport, onEditCo
                   key={ws.id}
                   workspace={ws}
                   onOpen={() => openWorkspace(ws)}
-                  onOpenFolder={() => setDialog({ kind: "folder", workspace: ws })}
                   onRename={() => setDialog({ kind: "rename", workspace: ws })}
                   onEditConfig={ws.status === "ACTIVE" ? () => onEditConfig(ws.id) : undefined}
                   onRemove={() => setDialog({ kind: "remove", workspace: ws })}
@@ -155,7 +157,6 @@ export function ProjectList({ q, storage, sort, onNewProject, onImport, onEditCo
         workspace={ws}
         onOpenChange={closeDialog}
       />
-      <FolderPathDialog open={dialog?.kind === "folder"} workspace={ws} onOpenChange={closeDialog} />
       <RemoveWorkspaceDialog open={dialog?.kind === "remove"} workspace={ws} onOpenChange={closeDialog} />
     </>
   );

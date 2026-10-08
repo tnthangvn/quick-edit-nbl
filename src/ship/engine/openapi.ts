@@ -34,11 +34,13 @@ const TAG_DESCRIPTIONS: Record<string, string> = {
   Spec: "Đọc / ghi / đổi tên / xoá file spec .md",
   Setting: "Cấu hình app và Workspace, secret",
   Connector: "Kết nối Git provider: CLI, MCP, Token, SSH (spec 3.0.2)",
+  FileSystem: "Duyệt thư mục trên máy cho dialog chọn thư mục",
   Storage: "Pull / publish cho Local, Git, Drive",
   Notebook: "Đồng bộ NotebookLM",
   Publish: "Pipeline sau Approve (spec 6.4)",
   Chat: "AI Agent qua Direct API",
   CliRunner: "AI Agent qua CLI (Claude Code, Codex, Antigravity, Aider)",
+  AgentSession: "Phiên chat với Agent: lịch sử, nối tiếp ngữ cảnh (API và CLI)",
 };
 
 const isEventStream = (d: SuccessResponseDef): d is EventStreamResponse => !!d && typeof d === "object" && "eventStream" in d;

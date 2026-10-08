@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AgentMode, CliAgentKind, CliOutputFormat, LlmProvider } from "./enums/agent";
+import { AgentMode, CliAgentKind, CliOutputFormat, CliPermissionMode, LlmProvider } from "./enums/agent";
 
 /**
  * Cấu hình Agent dùng chung giữa Section Studio (container Setting lưu) và Section Agent (Chat, CliRunner đọc).
@@ -35,6 +35,8 @@ export const AgentSettings = z
     cli: z.object({
       activeProfileId: z.string(),
       streamStdout: z.boolean(),
+      /** Mặc định Bypass: CLI chạy headless không hỏi được quyền (chạy trong sandbox là bản sao specsDir). Settings cũ chưa có trường này cũng nhận Bypass. */
+      permissionMode: CliPermissionMode.default("BYPASS"),
       profiles: z.array(CliProfile),
     }),
   })

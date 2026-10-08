@@ -15,7 +15,6 @@ const config = (over: { storage?: Partial<WorkspaceConfig["storage"]>; nbl?: Par
   version: 1,
   workspace: { id: "w", name: "W", specsDir: "./specs" },
   storage: {
-    type: "DRIVE",
     git: null,
     drive: { folderId: "folder1", pullOnOpen: false, pushOnApprove: true },
     ...over.storage,

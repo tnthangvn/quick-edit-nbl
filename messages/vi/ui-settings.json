@@ -8,7 +8,8 @@
       "CLI": "CLI Agent Runner",
       "NOTEBOOK": "NotebookLM Sync",
       "WORKSPACE": "Workspace & Storage",
-      "INTEGRATIONS": "Integrations"
+      "INTEGRATIONS": "Integrations",
+      "EXPORT_IMPORT": "Export/Import"
     },
     "loading": "Đang tải cấu hình…",
     "loadFailed": "Không tải được cấu hình",
@@ -218,6 +219,19 @@
       "create": "Add Connector",
       "created": "Đã thêm connector {name}",
       "updated": "Đã lưu connector {name}"
+    },
+    "exportImport": {
+      "title": "Export / Import cấu hình",
+      "description": "Xuất cấu hình cơ bản (Direct API, CLI Agent Runner, Connectors) để mang qua máy khác. Không kèm API key, token hay tài khoản — sang máy mới cần đăng nhập/nhập lại.",
+      "exportButton": "Export config",
+      "exportedFileName": "spec-studio-settings.json",
+      "importButton": "Import config",
+      "invalidFile": "File không đúng định dạng cấu hình Spec Studio.",
+      "importConfirmTitle": "Import cấu hình?",
+      "importConfirmDescription": "Direct API và CLI Agent Runner sẽ bị ghi đè hoàn toàn. Connector trùng tên sẽ được bỏ qua, connector cũ không bị xoá.",
+      "importSuccess": "Đã import cấu hình. Thêm {imported} connector mới.",
+      "importSkipped": "Bỏ qua {count} connector trùng tên: {names}.",
+      "importFailed": "Import thất bại"
     }
   }
 }

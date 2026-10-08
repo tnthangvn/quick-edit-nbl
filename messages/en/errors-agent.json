@@ -16,7 +16,10 @@
       "CLI_TIMEOUT": "The CLI agent ran past the time limit and was stopped.",
       "SANDBOX_FAILED": "Could not create the temporary copy to run the CLI agent.",
       "RUN_NOT_FOUND": "CLI agent run not found.",
-      "RUN_ALREADY_ACTIVE": "This workspace already has a CLI agent run in progress."
+      "RUN_ALREADY_ACTIVE": "This workspace already has a CLI agent run in progress.",
+      "SESSION_NOT_FOUND": "Chat session not found (it may have been deleted).",
+      "CLI_PERMISSION_UNSUPPORTED": "Profile {profileId} cannot run with the {mode} permission mode headlessly. Choose Bypass or Profile default.",
+      "CLI_PERMISSION_DENIED": "The CLI did nothing because its tools were denied in headless mode. Choose the Bypass permission mode and send again."
     }
   }
 }

@@ -8,7 +8,8 @@
       "CLI": "CLI Agent Runner",
       "NOTEBOOK": "NotebookLM Sync",
       "WORKSPACE": "Workspace & Storage",
-      "INTEGRATIONS": "Integrations"
+      "INTEGRATIONS": "Integrations",
+      "EXPORT_IMPORT": "Export/Import"
     },
     "loading": "Loading settings…",
     "loadFailed": "Couldn't load settings",
@@ -218,6 +219,19 @@
       "create": "Add Connector",
       "created": "Added connector {name}",
       "updated": "Saved connector {name}"
+    },
+    "exportImport": {
+      "title": "Export / Import configuration",
+      "description": "Export basic configuration (Direct API, CLI Agent Runner, Connectors) to carry over to another machine. No API keys, tokens or accounts included — sign in again on the new machine.",
+      "exportButton": "Export config",
+      "exportedFileName": "spec-studio-settings.json",
+      "importButton": "Import config",
+      "invalidFile": "This file isn't a valid Spec Studio settings export.",
+      "importConfirmTitle": "Import configuration?",
+      "importConfirmDescription": "Direct API and CLI Agent Runner will be fully overwritten. Connectors with a matching name are skipped; existing connectors are never removed.",
+      "importSuccess": "Imported. Added {imported} new connector(s).",
+      "importSkipped": "Skipped {count} connector(s) with a matching name: {names}.",
+      "importFailed": "Import failed"
     }
   }
 }

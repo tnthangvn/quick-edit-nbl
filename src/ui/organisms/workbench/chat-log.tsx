@@ -6,13 +6,19 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getToolName, isTextUIPart, isToolUIPart, type UIMessage } from "ai";
 import { Bot, CircleAlert, GitCompareArrows } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { getGetSpecQueryOptions } from "@/client/api/generated";
-import type { SpecSyncStatus } from "@/client/api/generated/model";
+import {
+  getGetAgentSessionQueryKey,
+  getGetSpecQueryOptions,
+  getListAgentSessionsQueryKey,
+  useGetAgentSession,
+} from "@/client/api/generated";
+import type { CliRunEvent, CliRunStatus, CliRunStatusEventError, SpecSyncStatus } from "@/client/api/generated/model";
 import { useErrorMessage } from "@/client/api/useErrorMessage";
 import { specFileParam } from "@/client/hooks/use-workspace-events";
-import { chatErrorPayload, getWorkspaceChat } from "@/client/stores/workbench-chat";
+import { chatErrorPayload, getSessionChat, isRestoredMessage, seedSessionChat } from "@/client/stores/workbench-chat";
 import { buildCliTimeline, useCliRunStore } from "@/client/stores/workbench-cli-store";
 import { useWorkbenchEditorStore } from "@/client/stores/workbench-editor-store";
+import { useActiveSessionId, useAgentSessionStore } from "@/client/stores/workbench-session-store";
 import { proposalKey, useProposalStore } from "@/client/stores/workbench-proposal-store";
 import { ChatMessage } from "@/ui/molecules/chat-message";
 import { Button } from "@/ui/primitives/button";
@@ -28,27 +34,85 @@ type ProposeOutput = { proposed?: boolean; reason?: string; error?: string };
 const FALLBACK_DELAY_MS = 1500;
 
 /**
- * Log chat (spec 3.4, ChatMessage.md). API: tin nhắn của `useChat` (user / assistant / tool). CLI: dòng thời gian của run
- * (khối stdout, tool call, câu trả lời). Cuộn xuống cuối khi có nội dung mới.
+ * Log chat của phiên Agent đang mở (spec 3.4, ChatMessage.md). API: tin nhắn của `useChat` (user / assistant / tool),
+ * nạp lại từ server khi mở lại phiên. CLI: các run đã lưu của phiên + run đang chạy (stdout, tool call, câu trả lời).
+ * Cuộn xuống cuối khi có nội dung mới.
  */
 export function ChatLog({ workspaceId }: { workspaceId: string }) {
   const { mode } = useAgentSettings();
   const end = React.useRef<HTMLDivElement>(null);
-  const chat = useChat({ chat: getWorkspaceChat(workspaceId) });
-  const cliRun = useCliRunStore((s) => (s.run?.workspaceId === workspaceId ? s.run : null));
+  const sessionId = useActiveSessionId(workspaceId);
+  const session = useSessionData(workspaceId, sessionId);
+  const chat = useChat({ chat: getSessionChat(workspaceId, sessionId) });
+  const liveRun = useCliRunStore((s) => (sessionId && s.run?.workspaceId === workspaceId && s.run.sessionId === sessionId ? s.run : null));
   useProposalFallback(workspaceId, chat.messages);
+  useRefreshOnFinish(workspaceId, sessionId, chat.status, liveRun?.status);
 
-  const tick = mode === "API" ? `${chat.messages.length}:${JSON.stringify(chat.messages.at(-1)?.parts.length)}:${chat.status}` : `${cliRun?.lastSeq}`;
+  const savedRuns = session?.runs ?? [];
+  const showLive = liveRun !== null && !savedRuns.some((r) => r.runId === liveRun.runId);
+
+  const tick =
+    mode === "API"
+      ? `${chat.messages.length}:${JSON.stringify(chat.messages.at(-1)?.parts.length)}:${chat.status}`
+      : `${savedRuns.length}:${liveRun?.lastSeq}`;
   React.useEffect(() => {
     end.current?.scrollIntoView({ block: "nearest" });
   }, [tick]);
 
+  let body: React.ReactNode;
+  if (mode === "API") body = <ApiLog messages={chat.messages} status={chat.status} error={chat.error} />;
+  else if (savedRuns.length === 0 && !showLive) body = <Hint />;
+  else {
+    body = (
+      <>
+        {savedRuns.map((r) => (
+          <CliRunBlock key={r.runId} {...r} running={false} />
+        ))}
+        {showLive ? <CliRunBlock {...liveRun} running={liveRun.status === "RUNNING"} /> : null}
+      </>
+    );
+  }
+
   return (
     <div aria-live="polite" className="flex flex-col gap-2">
-      {mode === "API" ? <ApiLog messages={chat.messages} status={chat.status} error={chat.error} /> : <CliLog run={cliRun} />}
+      {body}
       <div ref={end} />
     </div>
   );
+}
+
+/** Đọc phiên đang mở; nạp hội thoại API vào Chat; phiên không còn (404) thì bỏ chọn. */
+function useSessionData(workspaceId: string, sessionId: string | null) {
+  const query = useGetAgentSession(sessionId ?? "", { query: { enabled: sessionId !== null } });
+  const data = sessionId && query.data?.id === sessionId ? query.data : undefined;
+  const missing = (query.error as { status?: number } | null)?.status === 404;
+
+  React.useEffect(() => {
+    if (data) seedSessionChat(getSessionChat(workspaceId, data.id), data.messages);
+  }, [data, workspaceId]);
+
+  React.useEffect(() => {
+    if (missing) useAgentSessionStore.getState().clearActive(workspaceId);
+  }, [missing, workspaceId]);
+
+  return data;
+}
+
+/** Lượt chat / run vừa xong → server đã lưu: tải lại phiên (run đã lưu thay run live) và danh sách (tiêu đề, thời gian). */
+function useRefreshOnFinish(workspaceId: string, sessionId: string | null, chatStatus: string, runStatus: CliRunStatus | undefined) {
+  const queryClient = useQueryClient();
+  const prev = React.useRef({ chatStatus, runStatus });
+
+  React.useEffect(() => {
+    const before = prev.current;
+    prev.current = { chatStatus, runStatus };
+    if (!sessionId) return;
+    const chatDone = before.chatStatus !== "ready" && chatStatus === "ready";
+    const runDone = before.runStatus === "RUNNING" && runStatus !== undefined && runStatus !== "RUNNING";
+    if (!chatDone && !runDone) return;
+    void queryClient.invalidateQueries({ queryKey: getListAgentSessionsQueryKey({ workspaceId }) });
+    if (runDone) void queryClient.invalidateQueries({ queryKey: getGetAgentSessionQueryKey(sessionId) });
+  }, [chatStatus, runStatus, sessionId, workspaceId, queryClient]);
 }
 
 function Hint() {
@@ -93,7 +157,7 @@ function ApiLog({ messages, status, error }: { messages: UIMessage[]; status: st
                   </ChatMessage>
                 ) : null;
               }
-              if (isToolUIPart(part)) return <ToolRow key={part.toolCallId} part={part} />;
+              if (isToolUIPart(part)) return <ToolRow key={part.toolCallId} part={part} restored={isRestoredMessage(m.id)} />;
               return null;
             })}
           </React.Fragment>
@@ -110,7 +174,7 @@ function ApiLog({ messages, status, error }: { messages: UIMessage[]; status: st
 }
 
 /** Một tool call: tên mono + tệp liên quan + trạng thái (propose_spec_update → "Chờ duyệt"). */
-function ToolRow({ part }: { part: ToolPart }) {
+function ToolRow({ part, restored }: { part: ToolPart; restored: boolean }) {
   const t = useTranslations("workbench.chat.tool");
   const name = getToolName(part as Parameters<typeof getToolName>[0]);
   const input = (part.input ?? {}) as ProposeInput;
@@ -130,7 +194,7 @@ function ToolRow({ part }: { part: ToolPart }) {
     label = t("done");
     if (name === "propose_spec_update") {
       if (output?.proposed === false) label = t("noChanges");
-      else if (handled) label = t("reviewed");
+      else if (handled || restored) label = t("reviewed");
       else {
         status = "UNSAVED";
         label = t("pendingReview");
@@ -166,6 +230,7 @@ function ToolRow({ part }: { part: ToolPart }) {
 /**
  * Dự phòng khi lỡ SSE `SPEC_PROPOSED`: tool part `propose_spec_update` đã xong (`proposed: true`) mà sau 1.5s chưa có
  * đề xuất cùng `toolCallId` trong hàng đợi → đưa vào bằng `input.newContent`, bản gốc đọc lại qua `getSpec`.
+ * Bỏ qua tin nhắn nạp lại từ phiên cũ (đề xuất đã xử lý ở lần trước).
  */
 function useProposalFallback(workspaceId: string, messages: UIMessage[]) {
   const queryClient = useQueryClient();
@@ -174,7 +239,7 @@ function useProposalFallback(workspaceId: string, messages: UIMessage[]) {
   React.useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
     for (const m of messages) {
-      if (m.role !== "assistant") continue;
+      if (m.role !== "assistant" || isRestoredMessage(m.id)) continue;
       for (const part of m.parts) {
         if (!isToolUIPart(part) || part.state !== "output-available") continue;
         if (getToolName(part as Parameters<typeof getToolName>[0]) !== "propose_spec_update") continue;
@@ -202,16 +267,26 @@ function useProposalFallback(workspaceId: string, messages: UIMessage[]) {
   }, [messages, queryClient, workspaceId]);
 }
 
-function CliLog({ run }: { run: ReturnType<typeof useCliRunStore.getState>["run"] }) {
+type CliRunBlockProps = {
+  runId: string;
+  prompt: string;
+  profileId: string;
+  events: CliRunEvent[];
+  status: CliRunStatus;
+  exitCode: number | null;
+  error: CliRunStatusEventError;
+  running: boolean;
+};
+
+/** Một lượt CLI: prompt + dòng thời gian (stdout, tool call, câu trả lời, đề xuất) + trạng thái kết thúc. */
+function CliRunBlock({ runId, prompt, profileId, events, status, exitCode, error, running }: CliRunBlockProps) {
   const t = useTranslations("workbench.chat");
-  const items = React.useMemo(() => buildCliTimeline(run?.events ?? []), [run?.events]);
-  if (!run) return <Hint />;
-  const running = run.status === "RUNNING";
+  const items = React.useMemo(() => buildCliTimeline(events), [events]);
   return (
     <>
-      <ChatMessage variant="user">{run.prompt}</ChatMessage>
+      <ChatMessage variant="user">{prompt}</ChatMessage>
       {items.length === 0 && running ? (
-        <ChatMessage variant="log" logTitle={t("cliTitle", { profile: run.profileId })} streaming>
+        <ChatMessage variant="log" logTitle={t("cliTitle", { profile: profileId })} streaming>
           {t("cliStarting")}
         </ChatMessage>
       ) : null}
@@ -219,7 +294,7 @@ function CliLog({ run }: { run: ReturnType<typeof useCliRunStore.getState>["run"
         switch (item.kind) {
           case "log":
             return (
-              <ChatMessage key={item.key} variant="log" logTitle={t("cliTitle", { profile: run.profileId })} streaming={running && item === items.at(-1)}>
+              <ChatMessage key={item.key} variant="log" logTitle={t("cliTitle", { profile: profileId })} streaming={running && item === items.at(-1)}>
                 {item.text}
               </ChatMessage>
             );
@@ -236,15 +311,13 @@ function CliLog({ run }: { run: ReturnType<typeof useCliRunStore.getState>["run"
               </ChatMessage>
             );
           case "proposal":
-            return <CliProposalRow key={item.key} runId={run.runId} file={item.file} />;
+            return <CliProposalRow key={item.key} runId={runId} file={item.file} />;
         }
       })}
       {!running ? (
-        <p className="m-0 text-xs leading-4 text-muted-foreground">
-          {t(`cliStatus.${run.status}`, { code: run.exitCode ?? "—" })}
-        </p>
+        <p className="m-0 text-xs leading-4 text-muted-foreground">{t(`cliStatus.${status}`, { code: exitCode ?? "—" })}</p>
       ) : null}
-      {run.error ? <ErrorLine error={run.error} /> : null}
+      {error ? <ErrorLine error={error} /> : null}
     </>
   );
 }

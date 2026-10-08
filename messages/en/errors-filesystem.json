@@ -1,0 +1,7 @@
+{
+  "errors": {
+    "FILESYSTEM": {
+      "DIRECTORY_NOT_FOUND": "Directory {path} not found."
+    }
+  }
+}

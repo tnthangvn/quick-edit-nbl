@@ -107,7 +107,34 @@
       "profile": "CLI profile",
       "profilePlaceholder": "Pick a CLI profile",
       "context": "{count, plural, one {# spec in context} other {# specs in context}}",
-      "settings": "Agent settings"
+      "settings": "Agent settings",
+      "newSession": "New session",
+      "history": "History",
+      "historyLoading": "Loading…",
+      "historyEmpty": "No sessions yet",
+      "deleteSession": "Delete current session",
+      "deleteSessionFailed": "Could not delete chat session",
+      "permissionLabel": "CLI permission mode",
+      "permission": {
+        "DEFAULT": "Profile default",
+        "PLAN": "Plan",
+        "ACCEPT_EDITS": "Accept edits",
+        "BYPASS": "Bypass"
+      },
+      "permissionHint": {
+        "DEFAULT": "Use the flags in the profile args",
+        "PLAN": "Read-only, plan only",
+        "ACCEPT_EDITS": "Edit files, ask before commands",
+        "BYPASS": "Skip all confirmations"
+      },
+      "dock": "Chat position",
+      "dockOption": {
+        "BOTTOM": "Below editor",
+        "LEFT": "Left",
+        "RIGHT": "Right"
+      },
+      "resizeChat": "Drag to resize the chat panel",
+      "permissionUnsupported": "Not supported by this CLI when headless"
     },
     "chat": {
       "hint": "Tick the related specs on the left, then describe the change you want.",
@@ -129,7 +156,8 @@
         "pendingReview": "Awaiting review",
         "reviewed": "Handled",
         "openDiff": "Open Diff"
-      }
+      },
+      "untitled": "Untitled session"
     },
     "composer": {
       "placeholderApi": "Ask the Agent to edit specs…",
@@ -137,7 +165,8 @@
       "noContext": "No spec selected as context",
       "contextLabel": "{count, plural, one {# spec in context} other {# specs in context}}",
       "cliStartFailed": "Could not start the CLI Agent",
-      "cliStopFailed": "Could not stop the CLI Agent"
+      "cliStopFailed": "Could not stop the CLI Agent",
+      "sessionFailed": "Could not create chat session"
     }
   }
 }

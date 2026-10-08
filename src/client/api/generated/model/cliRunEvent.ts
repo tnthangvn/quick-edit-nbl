@@ -8,7 +8,8 @@
 import type { CliRunLogEvent } from './cliRunLogEvent';
 import type { CliRunMessageEvent } from './cliRunMessageEvent';
 import type { CliRunProposalEvent } from './cliRunProposalEvent';
+import type { CliRunSessionEvent } from './cliRunSessionEvent';
 import type { CliRunStatusEvent } from './cliRunStatusEvent';
 import type { CliRunToolCallEvent } from './cliRunToolCallEvent';
 
-export type CliRunEvent = CliRunStatusEvent | CliRunLogEvent | CliRunToolCallEvent | CliRunMessageEvent | CliRunProposalEvent;
+export type CliRunEvent = CliRunStatusEvent | CliRunLogEvent | CliRunToolCallEvent | CliRunMessageEvent | CliRunProposalEvent | CliRunSessionEvent;

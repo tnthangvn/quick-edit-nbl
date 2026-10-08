@@ -25,7 +25,7 @@ import { MemorySecrets } from "./memorySecrets";
 const settingsInput = (over: Partial<UpdateSettingsInput["api"]> = {}): UpdateSettingsInput => ({
   activeMode: "API",
   api: { provider: "GOOGLE", model: "gemini-pro-latest", baseUrl: null, temperature: 0.2, systemPrompt: "x", ...over },
-  cli: { activeProfileId: "codex", streamStdout: true, profiles: DEFAULT_CLI_PROFILES },
+  cli: { activeProfileId: "codex", streamStdout: true, permissionMode: "DEFAULT", profiles: DEFAULT_CLI_PROFILES },
 });
 
 describe("Setting", () => {
@@ -84,7 +84,7 @@ describe("Setting", () => {
     const config: WorkspaceConfig = {
       version: 1,
       workspace: { id: "ws1", name: "W", specsDir: "./specs" },
-      storage: { type: "LOCAL", git: null, drive: null },
+      storage: { git: null, drive: null },
       nbl: DEFAULT_NOTEBOOK_CONFIG,
       agent: { activeMode: "CLI", cli: { activeProfileId: "aider" } },
     };
@@ -116,7 +116,7 @@ describe("Setting", () => {
       config: {
         version: 1,
         workspace: { id: ws.id, name: "W2", specsDir: "./specs" },
-        storage: { type: "LOCAL", git: null, drive: null },
+        storage: { git: null, drive: null },
         nbl: DEFAULT_NOTEBOOK_CONFIG,
         agent: { activeMode: "CLI", cli: { activeProfileId: "aider" }, api: { provider: "ANTHROPIC" } },
       },

@@ -13,9 +13,6 @@ export type WorkspaceConfigOutputWorkspace = {
      * @maxLength 100
      */
   name: string;
-  /**
-     * @minLength 1
-     * @maxLength 255
-     */
+  /** @maxLength 255 */
   specsDir: string;
 };

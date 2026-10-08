@@ -36,10 +36,11 @@ import { RemoveWorkspaceDialog } from "@/ui/organisms/projects/WorkspaceDialogs"
 import { apiErrorMap, applyServerFieldErrors } from "@/ui/organisms/settings/form-errors";
 import { ApiTab, type SettingsForm } from "@/ui/organisms/settings/tabs/ApiTab";
 import { CliTab } from "@/ui/organisms/settings/tabs/CliTab";
+import { ExportImportTab } from "@/ui/organisms/settings/tabs/ExportImportTab";
 import { NotebookTab, type ConfigForm, type NotebookSecrets } from "@/ui/organisms/settings/tabs/NotebookTab";
 import { WorkspaceTab } from "@/ui/organisms/settings/tabs/WorkspaceTab";
 
-export type SettingsTab = "API" | "CLI" | "NOTEBOOK" | "WORKSPACE" | "INTEGRATIONS";
+export type SettingsTab = "API" | "CLI" | "NOTEBOOK" | "WORKSPACE" | "INTEGRATIONS" | "EXPORT_IMPORT";
 
 export type SettingsDialogProps = {
   open: boolean;
@@ -49,14 +50,19 @@ export type SettingsDialogProps = {
   initialTab?: SettingsTab;
 };
 
-const GLOBAL_TABS: SettingsTab[] = ["API", "CLI", "INTEGRATIONS"];
-const ALL_TABS: SettingsTab[] = ["API", "CLI", "NOTEBOOK", "WORKSPACE", "INTEGRATIONS"];
+const GLOBAL_TABS: SettingsTab[] = ["API", "CLI", "INTEGRATIONS", "EXPORT_IMPORT"];
+const ALL_TABS: SettingsTab[] = ["API", "CLI", "NOTEBOOK", "WORKSPACE", "INTEGRATIONS", "EXPORT_IMPORT"];
 
 function toSettingsForm(view: AgentSettingsView): SettingsForm {
   return {
     activeMode: view.activeMode,
     api: { provider: view.api.provider, model: view.api.model, baseUrl: view.api.baseUrl, temperature: view.api.temperature, systemPrompt: view.api.systemPrompt },
-    cli: { activeProfileId: view.cli.activeProfileId, streamStdout: view.cli.streamStdout, profiles: view.cli.profiles },
+    cli: {
+      activeProfileId: view.cli.activeProfileId,
+      streamStdout: view.cli.streamStdout,
+      permissionMode: view.cli.permissionMode,
+      profiles: view.cli.profiles,
+    },
   };
 }
 
@@ -281,6 +287,9 @@ function SettingsPanel({ onOpenChange, workspaceId, initialTab, saving, setSavin
               ) : null}
               <TabsContent value="INTEGRATIONS" className="flex flex-col gap-5">
                 <ConnectorManager />
+              </TabsContent>
+              <TabsContent value="EXPORT_IMPORT" className="flex flex-col gap-5">
+                <ExportImportTab />
               </TabsContent>
             </DialogBody>
           </Tabs>

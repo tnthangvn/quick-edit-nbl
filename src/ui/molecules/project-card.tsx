@@ -28,7 +28,6 @@ type ProjectCardProps = {
   notebookLabel?: string;
   href?: string;
   onOpen?: () => void;
-  onOpenFolder?: () => void;
   onRename?: () => void;
   onEditConfig?: () => void;
   onRemove?: () => void;
@@ -43,7 +42,6 @@ function ProjectCard({
   notebookLabel,
   href,
   onOpen,
-  onOpenFolder,
   onRename,
   onEditConfig,
   onRemove,
@@ -58,6 +56,8 @@ function ProjectCard({
   const notebook = workspace.notebookId ? t("workspace.notebook", { name: notebookLabel ?? workspace.notebookId }) : t("workspace.notebookNone");
   const openLabel = t("workspace.open", { name: workspace.name });
   const stretched = "outline-none after:absolute after:inset-0 after:rounded-lg after:content-['']";
+  /** Local luôn ngầm định có; ẩn badge "Local" khi có thêm Git/Drive. */
+  const storageTypes = workspace.storageTypes.length > 1 ? workspace.storageTypes.filter((st) => st !== "LOCAL") : workspace.storageTypes;
 
   return (
     <Card data-slot="project-card" interactive dimmed={missing} className={cn("min-h-44", className)}>
@@ -83,12 +83,6 @@ function ProjectCard({
             <IconButton icon={Ellipsis} size="icon-sm" label={t("workspace.menu", { name: workspace.name })} tooltip={false} className="relative z-10" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {onOpenFolder ? (
-              <DropdownMenuItem onSelect={onOpenFolder}>
-                <FolderOpen />
-                {t("actions.openFolder")}
-              </DropdownMenuItem>
-            ) : null}
             {onRename ? (
               <DropdownMenuItem onSelect={onRename}>
                 <Pencil />
@@ -116,8 +110,10 @@ function ProjectCard({
 
       <div className="flex flex-wrap gap-1.5">
         <Badge size="md">
-          <Icon icon={STORAGE_ICON[workspace.storageType]} size="xs" />
-          <span>{t(`storage.${workspace.storageType}`)}</span>
+          {storageTypes.map((st) => (
+            <Icon key={st} icon={STORAGE_ICON[st]} size="xs" />
+          ))}
+          <span>{storageTypes.map((st) => t(`storage.${st}`)).join(" + ")}</span>
           {workspace.storageLabel ? <code className="truncate">{workspace.storageLabel}</code> : null}
         </Badge>
         <Badge size="md" variant={workspace.notebookId ? "primary" : "neutral"}>

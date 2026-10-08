@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { useHydrateUiStore, useUiStore } from "@/client/stores/ui-store";
+import { useTranslations } from "next-intl";
+import { CHAT_PANEL_WIDTH, useHydrateUiStore, useUiStore } from "@/client/stores/ui-store";
 import { SettingsDialog, type SettingsTab } from "@/ui/organisms/settings/SettingsDialog";
 import {
   ChatComposer,
@@ -17,14 +18,18 @@ import {
 import { WorkbenchTemplate } from "@/ui/templates/workbench-template";
 
 /**
- * Màn Workbench: ghép WorkbenchTemplate với các organism. Chỉ giữ state giao diện của màn (sidebar thu gọn, Settings
- * Dialog đang mở); dữ liệu do từng organism tự lấy.
+ * Màn Workbench: ghép WorkbenchTemplate với các organism. Chỉ giữ state giao diện của màn (sidebar thu gọn, vị trí khung
+ * chat, Settings Dialog đang mở); dữ liệu do từng organism tự lấy.
  */
 export function WorkbenchScreen({ workspaceId }: { workspaceId: string }) {
   const router = useRouter();
   useHydrateUiStore();
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
+  const chatDock = useUiStore((s) => s.chatDock);
+  const chatPanelWidth = useUiStore((s) => s.chatPanelWidth);
+  const setChatPanelWidth = useUiStore((s) => s.setChatPanelWidth);
+  const t = useTranslations("workbench.toolbar");
   const [settings, setSettings] = React.useState<{ open: boolean; tab?: SettingsTab }>({ open: false });
   const [newSpecOpen, setNewSpecOpen] = React.useState(false);
 
@@ -35,6 +40,9 @@ export function WorkbenchScreen({ workspaceId }: { workspaceId: string }) {
       <WorkbenchSession workspaceId={workspaceId} />
       <WorkbenchTemplate
         collapsed={collapsed}
+        chatDock={chatDock}
+        chatWidth={{ value: chatPanelWidth, min: CHAT_PANEL_WIDTH.min, max: CHAT_PANEL_WIDTH.max, label: t("resizeChat") }}
+        onChatWidthChange={setChatPanelWidth}
         header={
           <WorkbenchHeader
             workspaceId={workspaceId}

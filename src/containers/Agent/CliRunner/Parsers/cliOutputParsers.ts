@@ -22,14 +22,49 @@ export function summarizeInput(input: unknown): string {
 const log = (text: string, stream: "STDOUT" | "STDERR" = "STDOUT"): CliRunEventDraft => ({ type: "LOG", stream, text });
 const message = (text: string, delta = false): CliRunEventDraft => ({ type: "MESSAGE", text, delta });
 const toolCall = (name: string, input: unknown): CliRunEventDraft => ({ type: "TOOL_CALL", name, input: summarizeInput(input) });
+const session = (id: unknown): CliRunEventDraft[] => (str(id) ? [{ type: "SESSION", cliSessionId: id as string }] : []);
+
+/**
+ * Antigravity (`agy -p --output-format stream-json`): {event:"init", conversation_id},
+ * {event:"step_update", step_update:{step_type:"agent_response", text_delta} | {step_type:"tool", state, tool_info:{name, parameters}}},
+ * {event:"result", result:{status, response}}.
+ */
+function parseAntigravity(obj: Json): CliRunEventDraft[] {
+  switch (obj.event) {
+    case "init":
+      return session(obj.conversation_id);
+    case "step_update": {
+      const step = isObject(obj.step_update) ? obj.step_update : {};
+      if (step.step_type === "agent_response" && str(step.text_delta)) return [message(step.text_delta as string, true)];
+      if (step.step_type === "tool" && step.state === "ACTIVE") {
+        const info = isObject(step.tool_info) ? step.tool_info : {};
+        return [toolCall(str(info.name) ?? str(step.tool_name) ?? "tool", info.parameters)];
+      }
+      return [];
+    }
+    case "result": {
+      const result = isObject(obj.result) ? obj.result : {};
+      return result.status === "SUCCESS" ? [] : [log(str(result.response) || str(result.status) || "error", "STDERR")];
+    }
+    case "error":
+      return [log(str(obj.message) ?? summarizeInput(obj.error ?? obj), "STDERR")];
+    default:
+      return [];
+  }
+}
 
 /**
  * `--output-format stream-json`:
- * - Claude Code: {type:"assistant", message:{content:[{type:"text"}|{type:"tool_use"}]}}, {type:"result", is_error}...
- * - Antigravity / Gemini CLI: {type:"message", role:"assistant", content, delta}, {type:"tool_use", tool_name, parameters}, {type:"error"}...
+ * - Claude Code: {type:"system", subtype:"init", session_id}, {type:"assistant", message:{content:[{type:"text"}|{type:"tool_use"}]}},
+ *   {type:"result", is_error}...
+ * - Gemini CLI: {type:"message", role:"assistant", content, delta}, {type:"tool_use", tool_name, parameters}, {type:"error"}...
+ * - Antigravity: khoá `event` thay cho `type` (xem parseAntigravity).
  */
 function parseStreamJson(obj: Json): CliRunEventDraft[] {
+  if (obj.type === undefined && typeof obj.event === "string") return parseAntigravity(obj);
   switch (obj.type) {
+    case "system":
+      return obj.subtype === "init" ? session(obj.session_id) : [];
     case "assistant": {
       const content = isObject(obj.message) && Array.isArray(obj.message.content) ? obj.message.content : [];
       return content.flatMap((block): CliRunEventDraft[] => {
@@ -55,8 +90,12 @@ function parseStreamJson(obj: Json): CliRunEventDraft[] {
   }
 }
 
-/** `codex exec --json`: {type:"item.started"|"item.completed", item:{type:"agent_message"|"command_execution"|...}}, turn.failed, error. */
+/**
+ * `codex exec --json`: {type:"thread.started", thread_id}, {type:"item.started"|"item.completed", item:{type:"agent_message"|...}},
+ * turn.failed, error.
+ */
 function parseJsonl(obj: Json): CliRunEventDraft[] {
+  if (obj.type === "thread.started") return session(obj.thread_id);
   const item = isObject(obj.item) ? obj.item : undefined;
   if (item && (obj.type === "item.started" || obj.type === "item.completed")) {
     const started = obj.type === "item.started";
@@ -98,3 +137,9 @@ export function parseCliLine(format: CliOutputFormat, line: string): CliRunEvent
   if (!isObject(obj)) return [log(line)];
   return format === "STREAM_JSON" ? parseStreamJson(obj) : parseJsonl(obj);
 }
+
+/**
+ * CLI kết thúc exit 0 nhưng không làm được gì vì tool bị tự từ chối ở chế độ headless
+ * (Antigravity: "no output produced — a tool required the "command" permission that headless mode cannot prompt for…").
+ */
+export const isPermissionDeniedLine = (line: string): boolean => /no output produced.*(headless mode cannot prompt|auto-denied)/i.test(line);

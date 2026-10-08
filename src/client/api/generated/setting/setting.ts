@@ -27,6 +27,9 @@ import type {
 import type {
   AgentSettingsView,
   ErrorResponse,
+  ExportedSettings,
+  ExportedSettingsOutput,
+  ImportSettingsResult,
   UpdateSettingsInput,
   ValidationErrorResponse,
   WorkspaceConfig,
@@ -792,4 +795,219 @@ export const useDeleteWorkspaceSecret = <TError = globalThis.Error & { info?: Er
         TContext
       > => {
       return useMutation(getDeleteWorkspaceSecretMutationOptions(options), queryClient);
+    }
+    export const getExportSettingsUrl = () => {
+
+
+
+
+  return `/api/settings/export`
+}
+
+/**
+ * @summary Xuất cấu hình cơ bản (Direct API, CLI Agent Runner, Connectors) — không kèm secret
+ */
+export const exportSettings = async ( options?: RequestInit): Promise<ExportedSettingsOutput> => {
+
+  const res = await fetch(getExportSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: ExportedSettingsOutput, status?: number} = new globalThis.Error();
+    const data : ExportedSettingsOutput = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: ExportedSettingsOutput = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getExportSettingsQueryKey = () => {
+    return [
+    `/api/settings/export`
+    ] as const;
+    }
+
+
+export const getExportSettingsQueryOptions = <TData = Awaited<ReturnType<typeof exportSettings>>, TError = globalThis.Error & { info?: ErrorResponse; status?: number }>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportSettings>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getExportSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportSettings>>> = ({ signal }) => exportSettings({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof exportSettings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ExportSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof exportSettings>>>
+export type ExportSettingsQueryError = globalThis.Error & { info?: ErrorResponse; status?: number }
+
+
+export function useExportSettings<TData = Awaited<ReturnType<typeof exportSettings>>, TError = globalThis.Error & { info?: ErrorResponse; status?: number }>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportSettings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof exportSettings>>,
+          TError,
+          Awaited<ReturnType<typeof exportSettings>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useExportSettings<TData = Awaited<ReturnType<typeof exportSettings>>, TError = globalThis.Error & { info?: ErrorResponse; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportSettings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof exportSettings>>,
+          TError,
+          Awaited<ReturnType<typeof exportSettings>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useExportSettings<TData = Awaited<ReturnType<typeof exportSettings>>, TError = globalThis.Error & { info?: ErrorResponse; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportSettings>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Xuất cấu hình cơ bản (Direct API, CLI Agent Runner, Connectors) — không kèm secret
+ */
+
+export function useExportSettings<TData = Awaited<ReturnType<typeof exportSettings>>, TError = globalThis.Error & { info?: ErrorResponse; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportSettings>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getExportSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getImportSettingsUrl = () => {
+
+
+
+
+  return `/api/settings/import`
+}
+
+/**
+ * @summary Nhập cấu hình cơ bản: ghi đè Direct API/CLI Runner, thêm connector mới (bỏ qua trùng tên)
+ */
+export const importSettings = async (exportedSettings: ExportedSettings, options?: RequestInit): Promise<ImportSettingsResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getImportSettingsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(exportedSettings)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: ImportSettingsResult, status?: number} = new globalThis.Error();
+    const data : ImportSettingsResult = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: ImportSettingsResult = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getImportSettingsMutationKey = () => ['importSettings'] as const;
+
+export const getImportSettingsMutationOptions = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importSettings>>, TError,ImportSettingsMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof importSettings>>, TError,ImportSettingsMutationVariables, TContext> => {
+
+const mutationKey = getImportSettingsMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof importSettings>>, ImportSettingsMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  importSettings(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ImportSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof importSettings>>>
+    export type ImportSettingsMutationBody = ExportedSettings
+    export type ImportSettingsMutationError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }
+    export type ImportSettingsMutationVariables = {data: ExportedSettings}
+
+    /**
+ * @summary Nhập cấu hình cơ bản: ghi đè Direct API/CLI Runner, thêm connector mới (bỏ qua trùng tên)
+ */
+export const useImportSettings = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importSettings>>, TError,ImportSettingsMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof importSettings>>,
+        TError,
+        ImportSettingsMutationVariables,
+        TContext
+      > => {
+      return useMutation(getImportSettingsMutationOptions(options), queryClient);
     }

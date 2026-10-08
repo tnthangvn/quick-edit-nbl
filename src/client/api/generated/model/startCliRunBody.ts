@@ -9,6 +9,11 @@
 export interface StartCliRunBody {
   /** @minLength 1 */
   workspaceId: string;
+  /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  sessionId: string;
   /** @minLength 1 */
   profileId: string;
   /**

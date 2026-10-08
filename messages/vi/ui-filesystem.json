@@ -1,0 +1,15 @@
+{
+  "filesystem": {
+    "browser": {
+      "title": "Chọn thư mục",
+      "description": "Điều hướng tới thư mục làm việc trên máy.",
+      "parentFolder": "Thư mục cha",
+      "empty": "Không có thư mục con.",
+      "loadFailed": "Không tải được danh sách thư mục.",
+      "notWritable": "Không ghi được vào thư mục này.",
+      "pathPlaceholder": "/home/you/projects",
+      "goTo": "Đi tới",
+      "select": "Chọn thư mục này"
+    }
+  }
+}

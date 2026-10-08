@@ -1,43 +1,40 @@
 "use client";
 
 import * as React from "react";
-import { Cloud, Copy, FileText, GitBranch, Trash } from "lucide-react";
+import { Copy, Trash } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFormContext, useWatch } from "react-hook-form";
-import { StorageType, type Workspace } from "@/client/api/generated/model";
+import type { Workspace } from "@/client/api/generated/model";
 import {
-  createWorkspaceBodyStorageTwoGitCommitMessageDefault,
-  createWorkspaceBodyStorageTwoGitPrBranchTemplateDefault,
+  createWorkspaceBodyStorageGitOneCommitMessageDefault,
+  createWorkspaceBodyStorageGitOnePrBranchTemplateDefault,
 } from "@/client/api/generated/zod/workspace/workspace.zod";
 import { useFlash } from "@/client/hooks/use-flash";
 import { Field } from "@/ui/molecules/field";
 import { Button, IconButton } from "@/ui/primitives/button";
-import { ChoiceCard, ChoiceCardGroup } from "@/ui/primitives/choice-card";
-import { Icon } from "@/ui/primitives/icon";
 import { Input } from "@/ui/primitives/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/ui/primitives/input-group";
+import { Switch } from "@/ui/primitives/switch";
 import { DEFAULT_HOST } from "@/ui/organisms/connectors/connector-utils";
 import { fieldError } from "@/ui/organisms/settings/form-errors";
 import type { ConfigForm } from "@/ui/organisms/settings/tabs/NotebookTab";
 import { DriveStorageFields, GitStorageFields } from "@/ui/organisms/wizard/StorageFields";
 
-const STORAGE_ICON = { LOCAL: FileText, GIT: GitBranch, DRIVE: Cloud } as const;
-
 /**
- * Tab 4 — Workspace & Storage (spec 4): tên, thư mục làm việc (chỉ đọc), Specs Dir, loại lưu trữ và cấu hình Git / Drive,
- * vùng nguy hiểm "Gỡ Workspace khỏi danh sách".
+ * Tab 4 — Workspace & Storage (spec 4): tên, thư mục làm việc (chỉ đọc), Specs Dir, Local luôn có + Git/Drive bật
+ * thêm độc lập, vùng nguy hiểm "Gỡ Workspace khỏi danh sách".
  */
 export function WorkspaceTab({ workspace, onRemove }: { workspace?: Workspace; onRemove: () => void }) {
   const t = useTranslations("settings.workspace");
   const tw = useTranslations("wizard.storage");
   const { control, register, setValue, getValues, formState } = useFormContext<ConfigForm>();
-  const type = useWatch({ control, name: "storage.type" });
+  const git = useWatch({ control, name: "storage.git" });
+  const drive = useWatch({ control, name: "storage.drive" });
   const [copied, flashCopied] = useFlash();
 
-  const changeType = (next: StorageType) => {
-    setValue("storage.type", next, { shouldDirty: true });
-    // Giữ cấu hình cũ (nếu có); lần đầu chuyển sang Git/Drive thì điền mặc định để form hợp lệ.
-    if (next === "GIT" && !getValues("storage.git")) {
+  const toggleGit = (enabled: boolean) => {
+    // Giữ cấu hình cũ (nếu có); lần đầu bật thì điền mặc định để form hợp lệ.
+    if (enabled && !getValues("storage.git")) {
       setValue(
         "storage.git",
         {
@@ -47,19 +44,25 @@ export function WorkspaceTab({ workspace, onRemove }: { workspace?: Workspace; o
           repo: null,
           remote: "",
           branch: "main",
-          subdir: ".",
+          subdir: "",
           publishMode: "PUSH",
-          prBranchTemplate: createWorkspaceBodyStorageTwoGitPrBranchTemplateDefault,
+          prBranchTemplate: createWorkspaceBodyStorageGitOnePrBranchTemplateDefault,
           autoCommit: true,
           autoPush: false,
-          commitMessage: createWorkspaceBodyStorageTwoGitCommitMessageDefault,
+          commitMessage: createWorkspaceBodyStorageGitOneCommitMessageDefault,
           pullOnOpen: true,
         },
         { shouldDirty: true },
       );
+    } else if (!enabled) {
+      setValue("storage.git", null, { shouldDirty: true });
     }
-    if (next === "DRIVE" && !getValues("storage.drive")) {
+  };
+  const toggleDrive = (enabled: boolean) => {
+    if (enabled && !getValues("storage.drive")) {
       setValue("storage.drive", { folderId: "", pullOnOpen: true, pushOnApprove: true }, { shouldDirty: true });
+    } else if (!enabled) {
+      setValue("storage.drive", null, { shouldDirty: true });
     }
   };
 
@@ -92,23 +95,15 @@ export function WorkspaceTab({ workspace, onRemove }: { workspace?: Workspace; o
         </InputGroup>
       </Field>
 
-      <Field label={t("storageType")} hint={t("storageTypeHint")}>
-        <ChoiceCardGroup columns={3} value={type} onValueChange={(v) => changeType(v as StorageType)} aria-label={t("storageType")}>
-          {Object.values(StorageType).map((st) => (
-            <ChoiceCard
-              key={st}
-              value={st}
-              size="sm"
-              title={tw(`types.${st}.title`)}
-              description={tw(`types.${st}.description`)}
-              trailing={<Icon icon={STORAGE_ICON[st]} tone="muted" />}
-            />
-          ))}
-        </ChoiceCardGroup>
+      <Field layout="inline" label={tw("gitToggle.label")} hint={tw("gitToggle.hint")}>
+        <Switch checked={Boolean(git)} onCheckedChange={toggleGit} />
       </Field>
+      {git ? <GitStorageFields /> : null}
 
-      {type === "GIT" ? <GitStorageFields /> : null}
-      {type === "DRIVE" ? <DriveStorageFields workspaceId={workspace?.id} /> : null}
+      <Field layout="inline" label={tw("driveToggle.label")} hint={tw("driveToggle.hint")}>
+        <Switch checked={Boolean(drive)} onCheckedChange={toggleDrive} />
+      </Field>
+      {drive ? <DriveStorageFields workspaceId={workspace?.id} /> : null}
 
       <section className="mt-2 flex items-center gap-3 rounded-lg border border-destructive-soft bg-card p-3">
         <div className="min-w-0 flex-1">

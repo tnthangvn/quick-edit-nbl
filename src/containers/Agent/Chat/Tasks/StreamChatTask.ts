@@ -7,6 +7,7 @@ import {
   toUIMessageStream,
   type LanguageModel,
   type ToolSet,
+  type UIMessage,
   type UIMessageChunk,
 } from "ai";
 import { logger } from "@/ship/adapters/logger";
@@ -23,6 +24,8 @@ export type StreamChatInput = {
   tools: ToolSet;
   temperature: number;
   signal?: AbortSignal;
+  /** Gọi khi stream kết thúc với toàn bộ hội thoại (lịch sử + câu trả lời) — để lưu vào agent session. */
+  onEnd?: (messages: UIMessage[]) => Promise<void>;
 };
 
 /** Số bước tối đa (gọi model ↔ chạy tool) trong một lượt chat. */
@@ -33,7 +36,7 @@ const MAX_STEPS = 10;
  * Lỗi giữa chừng đi ra dạng chunk `error` với `errorText` = mã lỗi (vd "AGENT.LLM_AUTH_FAILED"), không lộ message gốc của provider.
  */
 export class StreamChatTask extends Task<StreamChatInput, ReadableStream<UIMessageChunk>> {
-  async run({ model, modelId, instructions, messages, tools, temperature, signal }: StreamChatInput): Promise<ReadableStream<UIMessageChunk>> {
+  async run({ model, modelId, instructions, messages, tools, temperature, signal, onEnd }: StreamChatInput): Promise<ReadableStream<UIMessageChunk>> {
     const validated = await safeValidateUIMessages({ messages, tools });
     if (!validated.success) throw new InvalidChatMessagesException(undefined, { cause: validated.error });
 
@@ -56,6 +59,15 @@ export class StreamChatTask extends Task<StreamChatInput, ReadableStream<UIMessa
       tools,
       originalMessages: validated.data,
       onError: (error) => toLlmException(error, { model: modelId }).code,
+      onEnd: onEnd
+        ? async ({ messages: all }) => {
+            try {
+              await onEnd(all);
+            } catch (err) {
+              logger.error({ err }, "không lưu được hội thoại vào session");
+            }
+          }
+        : undefined,
     });
   }
 }

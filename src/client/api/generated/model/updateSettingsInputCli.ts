@@ -5,11 +5,13 @@
  * API local của Spec Studio. Lỗi chỉ trả mã (ErrorCode); FE tự dịch.
  * OpenAPI spec version: 1.0.0
  */
+import type { CliPermissionMode } from './cliPermissionMode';
 import type { CliProfile } from './cliProfile';
 
 export type UpdateSettingsInputCli = {
   activeProfileId: string;
   streamStdout: boolean;
+  permissionMode?: CliPermissionMode;
   /**
      * @minItems 1
      * @maxItems 50

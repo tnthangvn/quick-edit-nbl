@@ -5,7 +5,7 @@
  * API local của Spec Studio. Lỗi chỉ trả mã (ErrorCode); FE tự dịch.
  * OpenAPI spec version: 1.0.0
  */
-import type { CreateWorkspaceInputStorage } from './createWorkspaceInputStorage';
+import type { CreateWorkspaceStorageInput } from './createWorkspaceStorageInput';
 import type { NotebookInput } from './notebookInput';
 
 export interface CreateWorkspaceInput {
@@ -22,11 +22,11 @@ export interface CreateWorkspaceInput {
      */
   path: string;
   /**
-     * @minLength 1
+     * Thư mục con chứa spec; để trống = gốc workspace
      * @maxLength 255
      */
   specsDir?: string;
-  storage: CreateWorkspaceInputStorage;
+  storage: CreateWorkspaceStorageInput;
   /** null = Bỏ qua, kết nối sau */
   notebook?: NotebookInput | null;
 }

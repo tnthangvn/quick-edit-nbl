@@ -2,7 +2,9 @@ import "server-only";
 import type { RouteDefinition } from "@/ship/engine/defineRoute";
 import { routes as chat } from "./Agent/Chat/UI/API/Routes";
 import { routes as cliRunner } from "./Agent/CliRunner/UI/API/Routes";
+import { routes as agentSession } from "./Agent/Session/UI/API/Routes";
 import { routes as connector } from "./Studio/Connector/UI/API/Routes";
+import { routes as filesystem } from "./Studio/FileSystem/UI/API/Routes";
 import { routes as notebook } from "./Studio/Notebook/UI/API/Routes";
 import { routes as publish } from "./Studio/Publish/UI/API/Routes";
 import { routes as setting } from "./Studio/Setting/UI/API/Routes";
@@ -17,9 +19,11 @@ export const allRoutes: RouteDefinition<any, any>[] = [
   ...spec,
   ...setting,
   ...connector,
+  ...filesystem,
   ...storage,
   ...notebook,
   ...publish,
   ...chat,
   ...cliRunner,
+  ...agentSession,
 ];

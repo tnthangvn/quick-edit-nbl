@@ -18,6 +18,12 @@ export class CliSpecContextRequiredException extends AppException {
   readonly status = 400;
 }
 
+/** Loại CLI không chạy được mức quyền đã chọn ở chế độ headless (vd Antigravity + Plan). params: { mode, profileId } */
+export class CliPermissionUnsupportedException extends AppException {
+  readonly code = "AGENT.CLI_PERMISSION_UNSUPPORTED";
+  readonly status = 400;
+}
+
 export class SandboxFailedException extends AppException {
   readonly code = "AGENT.SANDBOX_FAILED";
   readonly status = 500;

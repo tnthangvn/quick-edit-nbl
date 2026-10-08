@@ -1,6 +1,7 @@
 import type { AgentSettings, CliProfile } from "@/ship/contracts/agentSettings";
 
-/** Profile CLI mặc định (spec Tab 2). "{prompt}" = yêu cầu kèm danh sách spec trong context; cwd luôn là workspacePath. */
+/** Profile CLI mặc định (spec Tab 2). "{prompt}" = yêu cầu kèm danh sách spec trong context; cwd là bản sao
+ * specsDir trong sandbox của agent session (CliRunner/PrepareSandboxTask), không phải thư mục thật. */
 export const DEFAULT_CLI_PROFILES: CliProfile[] = [
   {
     id: "claude-code",
@@ -25,7 +26,8 @@ export const DEFAULT_CLI_PROFILES: CliProfile[] = [
     name: "Antigravity CLI",
     kind: "ANTIGRAVITY",
     command: "agy",
-    args: ["-p", "{prompt}", "--mode=accept-edits", "--output-format", "stream-json"],
+    // Chế độ headless (-p) không hỏi quyền được: thiếu cờ này thì mọi tool cần quyền "command" bị tự từ chối.
+    args: ["-p", "{prompt}", "--output-format", "stream-json", "--dangerously-skip-permissions"],
     outputFormat: "STREAM_JSON",
     env: {},
   },
@@ -68,6 +70,7 @@ export function defaultAgentSettings(): AgentSettings {
     cli: {
       activeProfileId: "claude-code",
       streamStdout: true,
+      permissionMode: "BYPASS",
       profiles: structuredClone(DEFAULT_CLI_PROFILES),
     },
   };

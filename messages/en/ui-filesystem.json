@@ -1,0 +1,15 @@
+{
+  "filesystem": {
+    "browser": {
+      "title": "Choose a folder",
+      "description": "Navigate to the working folder on this machine.",
+      "parentFolder": "Parent folder",
+      "empty": "No subfolders.",
+      "loadFailed": "Could not load the folder list.",
+      "notWritable": "This folder is not writable.",
+      "pathPlaceholder": "/home/you/projects",
+      "goTo": "Go",
+      "select": "Select this folder"
+    }
+  }
+}

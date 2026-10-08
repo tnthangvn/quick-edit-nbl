@@ -16,7 +16,10 @@
       "CLI_TIMEOUT": "CLI agent chạy quá thời gian cho phép và đã bị dừng.",
       "SANDBOX_FAILED": "Không tạo được bản sao tạm để chạy CLI agent.",
       "RUN_NOT_FOUND": "Không tìm thấy lần chạy CLI agent.",
-      "RUN_ALREADY_ACTIVE": "Workspace này đang có một lần chạy CLI agent chưa kết thúc."
+      "RUN_ALREADY_ACTIVE": "Workspace này đang có một lần chạy CLI agent chưa kết thúc.",
+      "SESSION_NOT_FOUND": "Không tìm thấy phiên chat (có thể đã bị xoá).",
+      "CLI_PERMISSION_UNSUPPORTED": "Profile {profileId} không chạy được ở mức quyền {mode} khi chạy nền. Chọn Bypass hoặc Theo profile.",
+      "CLI_PERMISSION_DENIED": "CLI không làm được gì vì tool bị từ chối quyền ở chế độ chạy nền. Chọn mức quyền Bypass rồi gửi lại."
     }
   }
 }

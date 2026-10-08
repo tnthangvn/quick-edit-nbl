@@ -3,6 +3,7 @@ import type { CliRunEvent, PublishRun, PublishStepOutput } from "@/client/api/ge
 import { applyCliEvent, buildCliTimeline, newCliRun } from "./workbench-cli-store";
 import { draftKey, withContext, withDraft, withoutFiles, withRename, type WorkbenchEditorState } from "./workbench-editor-store";
 import { enqueueProposal, focusProposal, proposalKey, resolveProposal, type ProposalState } from "./workbench-proposal-store";
+import { withActiveSession } from "./workbench-session-store";
 import { headerSteps, panelRunning, panelSteps, seedRunList, summarizeSteps, upsertRun, usePublishStore, type PublishState } from "./workbench-publish-store";
 
 const at = "2026-10-08T00:00:00.000Z";
@@ -117,7 +118,7 @@ describe("workbench-cli-store", () => {
   const ev = (seq: number, e: Record<string, unknown>) => ({ runId: "run", seq, at, ...e }) as CliRunEvent;
 
   it("bỏ qua seq đã có khi server phát lại, STATUS cập nhật trạng thái", () => {
-    let run = newCliRun({ runId: "run", workspaceId: "ws", prompt: "p", profileId: "claude-code" });
+    let run = newCliRun({ runId: "run", workspaceId: "ws", sessionId: "s1", prompt: "p", profileId: "claude-code" });
     const events = [ev(0, { type: "LOG", stream: "STDOUT", text: "a" }), ev(1, { type: "STATUS", status: "DONE", exitCode: 0, error: null })];
     for (const e of [...events, ...events]) run = applyCliEvent(run, e);
     expect(run.events).toHaveLength(2);
@@ -138,5 +139,16 @@ describe("workbench-cli-store", () => {
     expect(items.map((i) => i.kind)).toEqual(["log", "message", "tool", "message", "proposal"]);
     expect(items[0]).toMatchObject({ text: "a\nb", streams: ["STDOUT", "STDERR"] });
     expect(items[1]).toMatchObject({ text: "Xin chào" });
+  });
+});
+
+describe("withActiveSession", () => {
+  it("đặt / bỏ phiên đang mở theo workspace, không đụng workspace khác", () => {
+    const a = withActiveSession({ active: {} }, "ws1", "s1");
+    const b = withActiveSession(a, "ws2", "s2");
+    expect(b.active).toEqual({ ws1: "s1", ws2: "s2" });
+    const c = withActiveSession(b, "ws1", null);
+    expect(c.active).toEqual({ ws2: "s2" });
+    expect(b.active).toEqual({ ws1: "s1", ws2: "s2" });
   });
 });

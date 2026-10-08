@@ -25,8 +25,8 @@ const step = (target: PublishTarget, skipReason?: string): PublishStep => ({
 /** Đích Workspace đã cấu hình (spec 6.4: chỉ chạy đích đã cấu hình). */
 function configuredTargets(config: WorkspaceConfig | undefined): Set<PublishTarget> {
   const out = new Set<PublishTarget>(["LOCAL"]);
-  if (config?.storage.type === "GIT" && config.storage.git) out.add("GIT");
-  if (config?.storage.type === "DRIVE" && config.storage.drive) out.add("DRIVE");
+  if (config?.storage.git) out.add("GIT");
+  if (config?.storage.drive) out.add("DRIVE");
   if (config?.nbl.notebookId) out.add("NOTEBOOK");
   return out;
 }

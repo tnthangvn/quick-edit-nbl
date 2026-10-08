@@ -11,6 +11,11 @@ export interface StreamChatBody {
   /** @minLength 1 */
   workspaceId: string;
   /**
+     * @minLength 1
+     * @maxLength 64
+     */
+  sessionId: string;
+  /**
      * @minItems 1
      * @maxItems 500
      */

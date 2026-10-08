@@ -1,6 +1,10 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { APICallError } from "ai";
 import { convertReadableStreamToArray, MockLanguageModelV4 } from "ai/test";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { JsonDataDriver, setDataDriverForTesting } from "@/ship/adapters/data";
 import type { AgentSettings } from "@/ship/contracts/agentSettings";
 import type { SpecProposedEvent } from "@/ship/contracts/events";
 import type { AgentSettingsAccess, SpecAccess } from "@/ship/contracts/studioAccess";
@@ -11,6 +15,8 @@ import { BuildChatInstructionsTask } from "../Tasks/BuildChatInstructionsTask";
 import { CreateChatToolsTask } from "../Tasks/CreateChatToolsTask";
 import type { CreateLanguageModelTask } from "../Tasks/CreateLanguageModelTask";
 import { ResolveApiKeyTask } from "../Tasks/ResolveApiKeyTask";
+import { CreateAgentSessionTask } from "../../Session/Tasks/CreateAgentSessionTask";
+import { GetAgentSessionTask } from "../../Session/Tasks/GetAgentSessionTask";
 
 class FakeSpecNotFound extends AppException {
   readonly code = "RESOURCE.NOT_FOUND";
@@ -37,7 +43,7 @@ const settings = (api: Partial<AgentSettings["api"]> = {}): AgentSettingsAccess 
   get: async () => ({
     activeMode: "API",
     api: { provider: "GOOGLE", model: "gemini-test", baseUrl: null, temperature: 0.2, systemPrompt: "Bạn là trợ lý viết spec.", apiKeyRef: "llm:google", ...api },
-    cli: { activeProfileId: "", streamStdout: true, profiles: [] },
+    cli: { activeProfileId: "", streamStdout: true, permissionMode: "DEFAULT", profiles: [] },
   }),
 });
 
@@ -134,6 +140,17 @@ describe("toLlmException", () => {
 });
 
 describe("StreamChatAction", () => {
+  let tmp: string;
+  let sessionId: string;
+  beforeEach(async () => {
+    tmp = await mkdtemp(path.join(os.tmpdir(), "chat-test-"));
+    setDataDriverForTesting(new JsonDataDriver(tmp));
+    sessionId = (await new CreateAgentSessionTask().run({ workspaceId: "ws1" })).id;
+  });
+  afterEach(async () => {
+    setDataDriverForTesting(undefined);
+    await rm(tmp, { recursive: true, force: true });
+  });
   const usage = {
     inputTokens: { total: 1, noCache: 1, cacheRead: 0, cacheWrite: 0 },
     outputTokens: { total: 1, text: 1, reasoning: 0 },
@@ -185,7 +202,7 @@ describe("StreamChatAction", () => {
     });
     const specs = fakeSpecs({ "a.md": "# Old" });
     const chunks = await convertReadableStreamToArray(
-      await action(model, specs, bus).run({ workspaceId: "ws1", messages: userMessage, contextFiles: ["a.md"] }),
+      await action(model, specs, bus).run({ workspaceId: "ws1", sessionId, messages: userMessage, contextFiles: ["a.md"] }),
     );
 
     const system = model.doStreamCalls[0].prompt[0];
@@ -195,6 +212,19 @@ describe("StreamChatAction", () => {
     expect(chunks.map((c) => c.type)).toContain("tool-output-available");
     expect(chunks).toContainEqual(expect.objectContaining({ type: "text-delta", delta: "Đã đề xuất." }));
     expect(bus.events).toEqual([expect.objectContaining({ file: "a.md", original: "# Old", proposed: "# New", sourceId: "tc1" })]);
+
+    // Stream xong → hội thoại (user + assistant) được lưu vào session, tiêu đề lấy từ prompt đầu.
+    await vi.waitFor(async () => {
+      const saved = await new GetAgentSessionTask().run({ sessionId });
+      expect(saved.messages.items.map((m) => m.role)).toEqual(["user", "assistant"]);
+      expect(saved.title).toBe("Sửa a.md");
+    });
+  });
+
+  it("session của workspace khác → AGENT.SESSION_NOT_FOUND", async () => {
+    await expect(
+      action(new MockLanguageModelV4(), fakeSpecs({})).run({ workspaceId: "ws2", sessionId, messages: userMessage, contextFiles: [] }),
+    ).rejects.toMatchObject({ code: "AGENT.SESSION_NOT_FOUND" });
   });
 
   it("lỗi provider giữa stream → chunk error với errorText là mã lỗi, không lộ message gốc", async () => {
@@ -204,7 +234,7 @@ describe("StreamChatAction", () => {
       },
     });
     const chunks = await convertReadableStreamToArray(
-      await action(model, fakeSpecs({})).run({ workspaceId: "ws1", messages: userMessage, contextFiles: [] }),
+      await action(model, fakeSpecs({})).run({ workspaceId: "ws1", sessionId, messages: userMessage, contextFiles: [] }),
     );
     expect(chunks).toContainEqual({ type: "error", errorText: "AGENT.LLM_AUTH_FAILED" });
     expect(JSON.stringify(chunks)).not.toContain("sk-leak");
@@ -213,7 +243,7 @@ describe("StreamChatAction", () => {
   it("messages sai định dạng → AGENT.INVALID_MESSAGES", async () => {
     const model = new MockLanguageModelV4();
     await expect(
-      action(model, fakeSpecs({})).run({ workspaceId: "ws1", messages: [{ id: "x", role: "robot", parts: [] }], contextFiles: [] }),
+      action(model, fakeSpecs({})).run({ workspaceId: "ws1", sessionId, messages: [{ id: "x", role: "robot", parts: [] }], contextFiles: [] }),
     ).rejects.toMatchObject({ code: "AGENT.INVALID_MESSAGES" });
   });
 });

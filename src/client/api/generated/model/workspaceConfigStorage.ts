@@ -7,10 +7,8 @@
  */
 import type { DriveStorageConfig } from './driveStorageConfig';
 import type { GitStorageConfig } from './gitStorageConfig';
-import type { StorageType } from './storageType';
 
 export type WorkspaceConfigStorage = {
-  type: StorageType;
   git: GitStorageConfig | null;
   drive: DriveStorageConfig | null;
 };

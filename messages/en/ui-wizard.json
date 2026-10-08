@@ -34,28 +34,19 @@
       "descriptionPlaceholder": "Specs for the AI-assisted .md workbench synced to NotebookLM"
     },
     "storage": {
-      "where": "Where .md files live",
-      "types": {
-        "LOCAL": {
-          "title": "Local only",
-          "description": "Files stay on this machine."
-        },
-        "GIT": {
-          "title": "Git repository",
-          "description": "GitHub, GitLab, Bitbucket, Gitea or a Git URL."
-        },
-        "DRIVE": {
-          "title": "Google Drive",
-          "description": "A Drive folder + a local copy."
-        }
-      },
-      "path": {
-        "LOCAL": "Working folder",
-        "GIT": "Clone into",
-        "DRIVE": "Local working folder"
-      },
+      "path": "Working folder",
       "pathHint": "Absolute path, writable and not used by another project.",
-      "specsDir": "Specs folder"
+      "specsDir": "Specs folder",
+      "specsDirHint": "Leave empty = spec files live at the working folder root.",
+      "specsDirPlaceholder": "empty = workspace root",
+      "gitToggle": {
+        "label": "Sync via Git",
+        "hint": "GitHub, GitLab, Bitbucket, Gitea or a Git URL."
+      },
+      "driveToggle": {
+        "label": "Sync via Google Drive",
+        "hint": "A Drive folder + a local copy."
+      }
     },
     "git": {
       "provider": "Provider",
@@ -80,7 +71,8 @@
       "remoteHint": "https://, ssh:// or git@host:owner/repo.git",
       "branch": "Branch",
       "subdir": "Spec folder in repo",
-      "subdirHint": "A dot means the repo root.",
+      "subdirHint": "Leave empty = repo root.",
+      "subdirPlaceholder": "empty = repo root",
       "publishMode": "How changes are pushed after Approve",
       "push": "Commit & push directly",
       "pushDescription": "To the selected branch. Fast, good for personal repos.",
@@ -160,6 +152,8 @@
       "description": "Description",
       "path": "Working folder",
       "storage": "Storage",
+      "specsDirRoot": "workspace root",
+      "subdirRoot": "repo root",
       "repo": "Repository",
       "subdir": "Spec folder",
       "publish": "Push changes",

@@ -13,6 +13,8 @@ import type { CliLogStream, CliRunEvent, CliRunStatus, CliRunStatusEventError } 
 export type CliRun = {
   runId: string;
   workspaceId: string;
+  /** Phiên chat chứa run; run kết thúc được lưu vào phiên này (đọc lại qua `getAgentSession`). */
+  sessionId: string;
   prompt: string;
   profileId: string;
   events: CliRunEvent[];
@@ -23,7 +25,7 @@ export type CliRun = {
 };
 
 type CliActions = {
-  start: (meta: Pick<CliRun, "runId" | "workspaceId" | "prompt" | "profileId">) => void;
+  start: (meta: Pick<CliRun, "runId" | "workspaceId" | "sessionId" | "prompt" | "profileId">) => void;
   apply: (event: CliRunEvent) => void;
   /** Mất run (server khởi động lại / 404): kết thúc ở trạng thái hiện có. */
   markLost: (runId: string) => void;
@@ -32,7 +34,7 @@ type CliActions = {
 
 /* ---------- Reducer thuần ---------- */
 
-export function newCliRun(meta: Pick<CliRun, "runId" | "workspaceId" | "prompt" | "profileId">): CliRun {
+export function newCliRun(meta: Pick<CliRun, "runId" | "workspaceId" | "sessionId" | "prompt" | "profileId">): CliRun {
   return { ...meta, events: [], lastSeq: -1, status: "RUNNING", exitCode: null, error: null };
 }
 

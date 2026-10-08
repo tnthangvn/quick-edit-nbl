@@ -32,7 +32,7 @@ export const ListWorkspacesResponse = zod.object({
   "description": zod.string().nullable(),
   "path": zod.string(),
   "specsDir": zod.string(),
-  "storageType": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
+  "storageTypes": zod.array(zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec')),
   "storageLabel": zod.string().nullable(),
   "notebookId": zod.string().nullable(),
   "status": zod.enum(['ACTIVE', 'FOLDER_MISSING']).describe('Trạng thái thư mục làm việc của Workspace'),
@@ -51,43 +51,45 @@ export const createWorkspaceBodyDescriptionOneMax = 500;
 export const createWorkspaceBodyDescriptionDefault = null;
 export const createWorkspaceBodyPathMax = 1024;
 
-export const createWorkspaceBodySpecsDirDefault = `./specs`;
+export const createWorkspaceBodySpecsDirDefault = ``;
 export const createWorkspaceBodySpecsDirMax = 255;
 
-export const createWorkspaceBodyStorageTwoGitHostMax = 255;
+export const createWorkspaceBodyStorageGitOneHostMax = 255;
 
 
-export const createWorkspaceBodyStorageTwoGitHostRegExp = new RegExp('^[a-z0-9.-]+(:\\d{1,5})?$');
-export const createWorkspaceBodyStorageTwoGitConnectorIdOneMax = 64;
+export const createWorkspaceBodyStorageGitOneHostRegExp = new RegExp('^[a-z0-9.-]+(:\\d{1,5})?$');
+export const createWorkspaceBodyStorageGitOneConnectorIdOneMax = 64;
 
-export const createWorkspaceBodyStorageTwoGitConnectorIdDefault = null;
-export const createWorkspaceBodyStorageTwoGitRepoOneMin = 3;
-export const createWorkspaceBodyStorageTwoGitRepoOneMax = 255;
+export const createWorkspaceBodyStorageGitOneConnectorIdDefault = null;
+export const createWorkspaceBodyStorageGitOneRepoOneMin = 3;
+export const createWorkspaceBodyStorageGitOneRepoOneMax = 255;
 
-export const createWorkspaceBodyStorageTwoGitRepoDefault = null;
-export const createWorkspaceBodyStorageTwoGitRemoteMax = 2048;
+export const createWorkspaceBodyStorageGitOneRepoDefault = null;
+export const createWorkspaceBodyStorageGitOneRemoteMax = 2048;
 
-export const createWorkspaceBodyStorageTwoGitBranchDefault = `main`;
-export const createWorkspaceBodyStorageTwoGitBranchMax = 255;
+export const createWorkspaceBodyStorageGitOneBranchDefault = `main`;
+export const createWorkspaceBodyStorageGitOneBranchMax = 255;
 
-export const createWorkspaceBodyStorageTwoGitSubdirDefault = `.`;
-export const createWorkspaceBodyStorageTwoGitSubdirMax = 255;
+export const createWorkspaceBodyStorageGitOneSubdirDefault = ``;
+export const createWorkspaceBodyStorageGitOneSubdirMax = 255;
 
-export const createWorkspaceBodyStorageTwoGitPublishModeDefault = `PUSH`;
-export const createWorkspaceBodyStorageTwoGitPrBranchTemplateDefault = `spec/{date}-{filename}`;
-export const createWorkspaceBodyStorageTwoGitPrBranchTemplateMax = 255;
+export const createWorkspaceBodyStorageGitOnePublishModeDefault = `PUSH`;
+export const createWorkspaceBodyStorageGitOnePrBranchTemplateDefault = `spec/{date}-{filename}`;
+export const createWorkspaceBodyStorageGitOnePrBranchTemplateMax = 255;
 
-export const createWorkspaceBodyStorageTwoGitAutoCommitDefault = true;
-export const createWorkspaceBodyStorageTwoGitAutoPushDefault = false;
-export const createWorkspaceBodyStorageTwoGitCommitMessageDefault = `docs(spec): {action} {filename}`;
-export const createWorkspaceBodyStorageTwoGitCommitMessageMax = 500;
+export const createWorkspaceBodyStorageGitOneAutoCommitDefault = true;
+export const createWorkspaceBodyStorageGitOneAutoPushDefault = false;
+export const createWorkspaceBodyStorageGitOneCommitMessageDefault = `docs(spec): {action} {filename}`;
+export const createWorkspaceBodyStorageGitOneCommitMessageMax = 500;
 
-export const createWorkspaceBodyStorageTwoGitPullOnOpenDefault = true;
-export const createWorkspaceBodyStorageTwoShareConfigDefault = false;
-export const createWorkspaceBodyStorageThreeDriveFolderIdMax = 500;
+export const createWorkspaceBodyStorageGitOnePullOnOpenDefault = true;
+export const createWorkspaceBodyStorageGitDefault = null;
+export const createWorkspaceBodyStorageDriveOneFolderIdMax = 500;
 
-export const createWorkspaceBodyStorageThreeDrivePullOnOpenDefault = true;
-export const createWorkspaceBodyStorageThreeDrivePushOnApproveDefault = true;
+export const createWorkspaceBodyStorageDriveOnePullOnOpenDefault = true;
+export const createWorkspaceBodyStorageDriveOnePushOnApproveDefault = true;
+export const createWorkspaceBodyStorageDriveDefault = null;
+export const createWorkspaceBodyStorageShareConfigDefault = false;
 export const createWorkspaceBodyNotebookOneNotebookIdOneMax = 500;
 
 export const createWorkspaceBodyNotebookOneNotebookIdDefault = null;
@@ -103,35 +105,30 @@ export const CreateWorkspaceBody = zod.object({
   "name": zod.string().min(1).max(createWorkspaceBodyNameMax),
   "description": zod.union([zod.string().max(createWorkspaceBodyDescriptionOneMax),zod.null()]).default(createWorkspaceBodyDescriptionDefault),
   "path": zod.string().min(1).max(createWorkspaceBodyPathMax).describe('Thư mục làm việc local (workspacePath), đường dẫn tuyệt đối'),
-  "specsDir": zod.string().min(1).max(createWorkspaceBodySpecsDirMax).default(createWorkspaceBodySpecsDirDefault),
-  "storage": zod.union([zod.object({
-  "type": zod.literal("LOCAL")
-}),zod.object({
-  "type": zod.literal("GIT"),
-  "git": zod.object({
+  "specsDir": zod.string().max(createWorkspaceBodySpecsDirMax).default(createWorkspaceBodySpecsDirDefault).describe('Thư mục con chứa spec; để trống = gốc workspace'),
+  "storage": zod.object({
+  "git": zod.union([zod.object({
   "provider": zod.enum(['GITHUB', 'GITLAB', 'BITBUCKET', 'GITEA', 'GENERIC']),
-  "host": zod.string().min(1).max(createWorkspaceBodyStorageTwoGitHostMax).regex(createWorkspaceBodyStorageTwoGitHostRegExp).optional().describe('Bỏ trống = host mặc định của provider (github.com, gitlab.com, bitbucket.org)'),
-  "connectorId": zod.union([zod.string().min(1).max(createWorkspaceBodyStorageTwoGitConnectorIdOneMax),zod.null()]).default(createWorkspaceBodyStorageTwoGitConnectorIdDefault),
-  "repo": zod.union([zod.string().min(createWorkspaceBodyStorageTwoGitRepoOneMin).max(createWorkspaceBodyStorageTwoGitRepoOneMax),zod.null()]).default(createWorkspaceBodyStorageTwoGitRepoDefault),
-  "remote": zod.string().min(1).max(createWorkspaceBodyStorageTwoGitRemoteMax).optional().describe('Bỏ trống khi đã chọn repo qua connector (suy ra https://<host>/<repo>.git)'),
-  "branch": zod.string().min(1).max(createWorkspaceBodyStorageTwoGitBranchMax).default(createWorkspaceBodyStorageTwoGitBranchDefault),
-  "subdir": zod.string().max(createWorkspaceBodyStorageTwoGitSubdirMax).default(createWorkspaceBodyStorageTwoGitSubdirDefault),
-  "publishMode": zod.enum(['PUSH', 'PULL_REQUEST']).default(createWorkspaceBodyStorageTwoGitPublishModeDefault),
-  "prBranchTemplate": zod.string().min(1).max(createWorkspaceBodyStorageTwoGitPrBranchTemplateMax).default(createWorkspaceBodyStorageTwoGitPrBranchTemplateDefault),
-  "autoCommit": zod.boolean().default(createWorkspaceBodyStorageTwoGitAutoCommitDefault),
-  "autoPush": zod.boolean().default(createWorkspaceBodyStorageTwoGitAutoPushDefault),
-  "commitMessage": zod.string().min(1).max(createWorkspaceBodyStorageTwoGitCommitMessageMax).default(createWorkspaceBodyStorageTwoGitCommitMessageDefault),
-  "pullOnOpen": zod.boolean().default(createWorkspaceBodyStorageTwoGitPullOnOpenDefault)
+  "host": zod.string().min(1).max(createWorkspaceBodyStorageGitOneHostMax).regex(createWorkspaceBodyStorageGitOneHostRegExp).optional().describe('Bỏ trống = host mặc định của provider (github.com, gitlab.com, bitbucket.org)'),
+  "connectorId": zod.union([zod.string().min(1).max(createWorkspaceBodyStorageGitOneConnectorIdOneMax),zod.null()]).default(createWorkspaceBodyStorageGitOneConnectorIdDefault),
+  "repo": zod.union([zod.string().min(createWorkspaceBodyStorageGitOneRepoOneMin).max(createWorkspaceBodyStorageGitOneRepoOneMax),zod.null()]).default(createWorkspaceBodyStorageGitOneRepoDefault),
+  "remote": zod.string().min(1).max(createWorkspaceBodyStorageGitOneRemoteMax).optional().describe('Bỏ trống khi đã chọn repo qua connector (suy ra https://<host>/<repo>.git)'),
+  "branch": zod.string().min(1).max(createWorkspaceBodyStorageGitOneBranchMax).default(createWorkspaceBodyStorageGitOneBranchDefault),
+  "subdir": zod.string().max(createWorkspaceBodyStorageGitOneSubdirMax).default(createWorkspaceBodyStorageGitOneSubdirDefault).describe('Thư mục con trong repo chứa spec; để trống = gốc repo'),
+  "publishMode": zod.enum(['PUSH', 'PULL_REQUEST']).default(createWorkspaceBodyStorageGitOnePublishModeDefault),
+  "prBranchTemplate": zod.string().min(1).max(createWorkspaceBodyStorageGitOnePrBranchTemplateMax).default(createWorkspaceBodyStorageGitOnePrBranchTemplateDefault),
+  "autoCommit": zod.boolean().default(createWorkspaceBodyStorageGitOneAutoCommitDefault),
+  "autoPush": zod.boolean().default(createWorkspaceBodyStorageGitOneAutoPushDefault),
+  "commitMessage": zod.string().min(1).max(createWorkspaceBodyStorageGitOneCommitMessageMax).default(createWorkspaceBodyStorageGitOneCommitMessageDefault),
+  "pullOnOpen": zod.boolean().default(createWorkspaceBodyStorageGitOnePullOnOpenDefault)
+}),zod.null()]).default(createWorkspaceBodyStorageGitDefault),
+  "drive": zod.union([zod.object({
+  "folderId": zod.string().max(createWorkspaceBodyStorageDriveOneFolderIdMax).describe('Drive Folder ID hoặc URL thư mục'),
+  "pullOnOpen": zod.boolean().default(createWorkspaceBodyStorageDriveOnePullOnOpenDefault),
+  "pushOnApprove": zod.boolean().default(createWorkspaceBodyStorageDriveOnePushOnApproveDefault)
+}),zod.null()]).default(createWorkspaceBodyStorageDriveDefault),
+  "shareConfig": zod.boolean().default(createWorkspaceBodyStorageShareConfigDefault).describe('true = không thêm .spec-studio/ vào .gitignore (chỉ áp dụng khi bật Git)')
 }),
-  "shareConfig": zod.boolean().default(createWorkspaceBodyStorageTwoShareConfigDefault).describe('true = không thêm .spec-studio/ vào .gitignore')
-}),zod.object({
-  "type": zod.literal("DRIVE"),
-  "drive": zod.object({
-  "folderId": zod.string().max(createWorkspaceBodyStorageThreeDriveFolderIdMax).describe('Drive Folder ID hoặc URL thư mục'),
-  "pullOnOpen": zod.boolean().default(createWorkspaceBodyStorageThreeDrivePullOnOpenDefault),
-  "pushOnApprove": zod.boolean().default(createWorkspaceBodyStorageThreeDrivePushOnApproveDefault)
-})
-})]),
   "notebook": zod.union([zod.object({
   "notebookId": zod.union([zod.string().max(createWorkspaceBodyNotebookOneNotebookIdOneMax),zod.null()]).default(createWorkspaceBodyNotebookOneNotebookIdDefault).describe('Notebook ID hoặc URL notebook (tự tách ID)'),
   "syncStrategy": zod.enum(['DRIVE_SYNC', 'RPC']).default(createWorkspaceBodyNotebookOneSyncStrategyDefault),
@@ -151,7 +148,7 @@ export const CreateWorkspaceResponse = zod.object({
   "description": zod.string().nullable(),
   "path": zod.string(),
   "specsDir": zod.string(),
-  "storageType": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
+  "storageTypes": zod.array(zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec')),
   "storageLabel": zod.string().nullable(),
   "notebookId": zod.string().nullable(),
   "status": zod.enum(['ACTIVE', 'FOLDER_MISSING']).describe('Trạng thái thư mục làm việc của Workspace'),
@@ -180,7 +177,7 @@ export const GetWorkspaceResponse = zod.object({
   "description": zod.string().nullable(),
   "path": zod.string(),
   "specsDir": zod.string(),
-  "storageType": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
+  "storageTypes": zod.array(zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec')),
   "storageLabel": zod.string().nullable(),
   "notebookId": zod.string().nullable(),
   "status": zod.enum(['ACTIVE', 'FOLDER_MISSING']).describe('Trạng thái thư mục làm việc của Workspace'),
@@ -223,7 +220,7 @@ export const UpdateWorkspaceResponse = zod.object({
   "description": zod.string().nullable(),
   "path": zod.string(),
   "specsDir": zod.string(),
-  "storageType": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
+  "storageTypes": zod.array(zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec')),
   "storageLabel": zod.string().nullable(),
   "notebookId": zod.string().nullable(),
   "status": zod.enum(['ACTIVE', 'FOLDER_MISSING']).describe('Trạng thái thư mục làm việc của Workspace'),
@@ -268,7 +265,7 @@ export const ImportWorkspaceResponse = zod.object({
   "description": zod.string().nullable(),
   "path": zod.string(),
   "specsDir": zod.string(),
-  "storageType": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
+  "storageTypes": zod.array(zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec')),
   "storageLabel": zod.string().nullable(),
   "notebookId": zod.string().nullable(),
   "status": zod.enum(['ACTIVE', 'FOLDER_MISSING']).describe('Trạng thái thư mục làm việc của Workspace'),
@@ -325,7 +322,7 @@ export const OpenWorkspaceResponse = zod.object({
   "description": zod.string().nullable(),
   "path": zod.string(),
   "specsDir": zod.string(),
-  "storageType": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
+  "storageTypes": zod.array(zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec')),
   "storageLabel": zod.string().nullable(),
   "notebookId": zod.string().nullable(),
   "status": zod.enum(['ACTIVE', 'FOLDER_MISSING']).describe('Trạng thái thư mục làm việc của Workspace'),
@@ -337,10 +334,9 @@ export const OpenWorkspaceResponse = zod.object({
   "workspace": zod.object({
   "id": zod.string(),
   "name": zod.string().min(1).max(openWorkspaceResponseConfigOneWorkspaceNameMax),
-  "specsDir": zod.string().min(1).max(openWorkspaceResponseConfigOneWorkspaceSpecsDirMax)
+  "specsDir": zod.string().max(openWorkspaceResponseConfigOneWorkspaceSpecsDirMax)
 }),
   "storage": zod.object({
-  "type": zod.enum(['LOCAL', 'GIT', 'DRIVE']).describe('Nơi lưu file spec'),
   "git": zod.union([zod.object({
   "provider": zod.enum(['GITHUB', 'GITLAB', 'BITBUCKET', 'GITEA', 'GENERIC']),
   "host": zod.string().min(1).max(openWorkspaceResponseConfigOneStorageGitOneHostMax).regex(openWorkspaceResponseConfigOneStorageGitOneHostRegExp),
@@ -400,7 +396,7 @@ export const CheckWorkspaceResponse = zod.object({
   "target": zod.enum(['FOLDER', 'GIT_REMOTE', 'DRIVE', 'NOTEBOOK']),
   "status": zod.enum(['OK', 'ERROR', 'SKIPPED']),
   "error": zod.union([zod.object({
-  "code": zod.enum(['INTERNAL.UNEXPECTED', 'VALIDATION.FAILED', 'FIELD.REQUIRED', 'FIELD.INVALID_FORMAT', 'FIELD.TOO_SHORT', 'FIELD.TOO_LONG', 'FIELD.INVALID_VALUE', 'REQUEST.MALFORMED_JSON', 'RESOURCE.NOT_FOUND', 'RESOURCE.CONFLICT', 'WORKSPACE.NOT_FOUND', 'WORKSPACE.NAME_TAKEN', 'WORKSPACE.PATH_IN_USE', 'WORKSPACE.ALREADY_REGISTERED', 'WORKSPACE.CONFIG_EXISTS', 'WORKSPACE.CONFIG_NOT_FOUND', 'WORKSPACE.CONFIG_INVALID', 'WORKSPACE.FOLDER_NOT_FOUND', 'WORKSPACE.FOLDER_MISSING', 'WORKSPACE.FOLDER_NOT_WRITABLE', 'WORKSPACE.FOLDER_NOT_EMPTY', 'WORKSPACE.INVALID_PATH', 'WORKSPACE.INVALID_SPECS_DIR', 'WORKSPACE.INVALID_GIT_REMOTE', 'WORKSPACE.INVALID_BRANCH', 'WORKSPACE.INVALID_REPO', 'WORKSPACE.CLONE_FAILED', 'WORKSPACE.DRIVE_DOWNLOAD_FAILED', 'WORKSPACE.GIT_REMOTE_UNREACHABLE', 'WORKSPACE.GIT_BRANCH_NOT_FOUND', 'WORKSPACE.DRIVE_NOT_CONFIGURED', 'WORKSPACE.DRIVE_ACCESS_DENIED', 'WORKSPACE.NOTEBOOK_UNREACHABLE', 'SPEC.NOT_FOUND', 'SPEC.ALREADY_EXISTS', 'SPEC.INVALID_NAME', 'SPEC.PATH_OUTSIDE_WORKSPACE', 'SPEC.SPECS_DIR_NOT_FOUND', 'SETTING.CLI_PROFILE_NOT_FOUND', 'SETTING.CLI_PROFILE_DUPLICATE', 'SETTING.WORKSPACE_ID_MISMATCH', 'SETTING.SECRET_NOT_SET', 'CONNECTOR.NOT_FOUND', 'CONNECTOR.NOT_SUPPORTED', 'CONNECTOR.CLI_NOT_FOUND', 'CONNECTOR.NEEDS_LOGIN', 'CONNECTOR.TOKEN_MISSING', 'CONNECTOR.PROVIDER_ERROR', 'CONNECTOR.REPO_NOT_FOUND', 'CONNECTOR.MCP_UNREACHABLE', 'CONNECTOR.MCP_TOOL_MISSING', 'CONNECTOR.INVALID_COMMAND', 'CONNECTOR.INVALID_URL', 'CONNECTOR.INVALID_SECRET_KEY', 'STORAGE.NOT_SUPPORTED', 'STORAGE.CONFIG_MISSING', 'STORAGE.PULL_CONFLICT', 'STORAGE.PUSH_REJECTED', 'STORAGE.GIT_AUTH_FAILED', 'STORAGE.GIT_COMMAND_FAILED', 'STORAGE.CLONE_FAILED', 'STORAGE.GOOGLE_NOT_CONFIGURED', 'STORAGE.GOOGLE_AUTH_REQUIRED', 'STORAGE.GOOGLE_OAUTH_STATE_INVALID', 'STORAGE.GOOGLE_OAUTH_FAILED', 'STORAGE.DRIVE_NOT_FOUND', 'STORAGE.DRIVE_REQUEST_FAILED', 'NOTEBOOK.NOT_CONFIGURED', 'NOTEBOOK.CLI_NOT_FOUND', 'NOTEBOOK.AUTH_REQUIRED', 'NOTEBOOK.NOT_FOUND', 'NOTEBOOK.COMMAND_FAILED', 'PUBLISH.TARGET_NOT_CONFIGURED', 'PUBLISH.PREREQUISITE_FAILED', 'AGENT.API_KEY_MISSING', 'AGENT.LLM_AUTH_FAILED', 'AGENT.MODEL_NOT_FOUND', 'AGENT.LLM_RATE_LIMITED', 'AGENT.LLM_UNREACHABLE', 'AGENT.LLM_REQUEST_FAILED', 'AGENT.INVALID_MESSAGES', 'AGENT.CLI_PROFILE_NOT_FOUND', 'AGENT.CLI_NOT_INSTALLED', 'AGENT.CLI_SPEC_CONTEXT_REQUIRED', 'AGENT.CLI_SPAWN_FAILED', 'AGENT.CLI_EXIT_NONZERO', 'AGENT.CLI_TIMEOUT', 'AGENT.SANDBOX_FAILED', 'AGENT.RUN_NOT_FOUND', 'AGENT.RUN_ALREADY_ACTIVE']).describe('Mã lỗi dạng DOMAIN.REASON'),
+  "code": zod.enum(['INTERNAL.UNEXPECTED', 'VALIDATION.FAILED', 'FIELD.REQUIRED', 'FIELD.INVALID_FORMAT', 'FIELD.TOO_SHORT', 'FIELD.TOO_LONG', 'FIELD.INVALID_VALUE', 'REQUEST.MALFORMED_JSON', 'RESOURCE.NOT_FOUND', 'RESOURCE.CONFLICT', 'WORKSPACE.NOT_FOUND', 'WORKSPACE.NAME_TAKEN', 'WORKSPACE.PATH_IN_USE', 'WORKSPACE.ALREADY_REGISTERED', 'WORKSPACE.CONFIG_EXISTS', 'WORKSPACE.CONFIG_NOT_FOUND', 'WORKSPACE.CONFIG_INVALID', 'WORKSPACE.FOLDER_NOT_FOUND', 'WORKSPACE.FOLDER_MISSING', 'WORKSPACE.FOLDER_NOT_WRITABLE', 'WORKSPACE.FOLDER_NOT_EMPTY', 'WORKSPACE.INVALID_PATH', 'WORKSPACE.INVALID_SPECS_DIR', 'WORKSPACE.INVALID_GIT_REMOTE', 'WORKSPACE.INVALID_BRANCH', 'WORKSPACE.INVALID_REPO', 'WORKSPACE.CLONE_FAILED', 'WORKSPACE.DRIVE_DOWNLOAD_FAILED', 'WORKSPACE.GIT_REMOTE_UNREACHABLE', 'WORKSPACE.GIT_BRANCH_NOT_FOUND', 'WORKSPACE.DRIVE_NOT_CONFIGURED', 'WORKSPACE.DRIVE_ACCESS_DENIED', 'WORKSPACE.NOTEBOOK_UNREACHABLE', 'SPEC.NOT_FOUND', 'SPEC.ALREADY_EXISTS', 'SPEC.INVALID_NAME', 'SPEC.PATH_OUTSIDE_WORKSPACE', 'SPEC.SPECS_DIR_NOT_FOUND', 'SETTING.CLI_PROFILE_NOT_FOUND', 'SETTING.CLI_PROFILE_DUPLICATE', 'SETTING.WORKSPACE_ID_MISMATCH', 'SETTING.SECRET_NOT_SET', 'CONNECTOR.NOT_FOUND', 'CONNECTOR.NOT_SUPPORTED', 'CONNECTOR.CLI_NOT_FOUND', 'CONNECTOR.NEEDS_LOGIN', 'CONNECTOR.TOKEN_MISSING', 'CONNECTOR.PROVIDER_ERROR', 'CONNECTOR.REPO_NOT_FOUND', 'CONNECTOR.MCP_UNREACHABLE', 'CONNECTOR.MCP_TOOL_MISSING', 'CONNECTOR.INVALID_COMMAND', 'CONNECTOR.INVALID_URL', 'CONNECTOR.INVALID_SECRET_KEY', 'FILESYSTEM.DIRECTORY_NOT_FOUND', 'STORAGE.NOT_SUPPORTED', 'STORAGE.CONFIG_MISSING', 'STORAGE.PULL_CONFLICT', 'STORAGE.PUSH_REJECTED', 'STORAGE.GIT_AUTH_FAILED', 'STORAGE.GIT_COMMAND_FAILED', 'STORAGE.CLONE_FAILED', 'STORAGE.GOOGLE_NOT_CONFIGURED', 'STORAGE.GOOGLE_AUTH_REQUIRED', 'STORAGE.GOOGLE_OAUTH_STATE_INVALID', 'STORAGE.GOOGLE_OAUTH_FAILED', 'STORAGE.DRIVE_NOT_FOUND', 'STORAGE.DRIVE_REQUEST_FAILED', 'NOTEBOOK.NOT_CONFIGURED', 'NOTEBOOK.CLI_NOT_FOUND', 'NOTEBOOK.AUTH_REQUIRED', 'NOTEBOOK.NOT_FOUND', 'NOTEBOOK.COMMAND_FAILED', 'PUBLISH.TARGET_NOT_CONFIGURED', 'PUBLISH.PREREQUISITE_FAILED', 'AGENT.API_KEY_MISSING', 'AGENT.LLM_AUTH_FAILED', 'AGENT.MODEL_NOT_FOUND', 'AGENT.LLM_RATE_LIMITED', 'AGENT.LLM_UNREACHABLE', 'AGENT.LLM_REQUEST_FAILED', 'AGENT.INVALID_MESSAGES', 'AGENT.CLI_PROFILE_NOT_FOUND', 'AGENT.CLI_NOT_INSTALLED', 'AGENT.CLI_SPEC_CONTEXT_REQUIRED', 'AGENT.CLI_SPAWN_FAILED', 'AGENT.CLI_EXIT_NONZERO', 'AGENT.CLI_TIMEOUT', 'AGENT.SANDBOX_FAILED', 'AGENT.RUN_NOT_FOUND', 'AGENT.RUN_ALREADY_ACTIVE', 'AGENT.CLI_PERMISSION_UNSUPPORTED', 'AGENT.CLI_PERMISSION_DENIED', 'AGENT.SESSION_NOT_FOUND']).describe('Mã lỗi dạng DOMAIN.REASON'),
   "params": zod.record(zod.string(), zod.union([zod.string(),zod.number(),zod.boolean()])).optional().describe('Giá trị chèn vào bản dịch; không chứa câu thông báo')
 }),zod.null()]),
   "info": zod.union([zod.record(zod.string(), zod.union([zod.string(),zod.number(),zod.boolean()])),zod.null()])

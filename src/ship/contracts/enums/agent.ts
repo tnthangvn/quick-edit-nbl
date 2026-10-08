@@ -15,3 +15,10 @@ export type CliAgentKind = z.infer<typeof CliAgentKind>;
 /** Định dạng stdout của CLI để parser đọc. */
 export const CliOutputFormat = z.enum(["STREAM_JSON", "JSONL", "TEXT"]).meta({ id: "CliOutputFormat" });
 export type CliOutputFormat = z.infer<typeof CliOutputFormat>;
+
+/**
+ * Mức quyền của CLI agent khi chạy headless (Quick Setting Toolbar). DEFAULT = giữ nguyên cờ trong args của profile;
+ * các mức khác thay cờ quyền theo loại CLI (Claude Code, Codex, Antigravity). Aider / Custom luôn theo profile.
+ */
+export const CliPermissionMode = z.enum(["DEFAULT", "PLAN", "ACCEPT_EDITS", "BYPASS"]).meta({ id: "CliPermissionMode" });
+export type CliPermissionMode = z.infer<typeof CliPermissionMode>;

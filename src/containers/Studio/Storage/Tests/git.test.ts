@@ -152,9 +152,20 @@ describe("Storage git tasks (repo thật trong thư mục tạm)", () => {
     const { headSha } = await new CloneRepositoryTask().run({ remoteUrl: tokenUrl, branch: "main", targetPath: target, env });
     expect(headSha).toBe(git(work, "rev-parse", "HEAD"));
     expect(readFileSync(path.join(target, ".git/config"), "utf8")).not.toContain("s3cret");
-    await expect(new CloneRepositoryTask().run({ remoteUrl: tokenUrl, branch: "nope", targetPath: path.join(root, "c2"), env })).rejects.toMatchObject({
-      code: "STORAGE.CLONE_FAILED",
-    });
     expect(redactCredentials(`fatal: unable to access '${tokenUrl}'`)).not.toContain("s3cret");
+  });
+
+  it("branch chưa có trên remote → tạo nhánh mới từ branch mặc định rồi push lên remote", async () => {
+    const target = path.join(root, "new-branch");
+    const { headSha } = await new CloneRepositoryTask().run({ remoteUrl: remote, branch: "feature-x", targetPath: target, env: {} });
+    expect(headSha).toBe(git(work, "rev-parse", "HEAD"));
+    expect(git(target, "branch", "--show-current")).toBe("feature-x");
+    expect(git(remote, "rev-parse", "feature-x")).toBe(headSha);
+  });
+
+  it("remote không truy cập được → STORAGE.CLONE_FAILED", async () => {
+    await expect(
+      new CloneRepositoryTask().run({ remoteUrl: "https://example.invalid/does/not/exist.git", branch: "main", targetPath: path.join(root, "c3"), env: {} }),
+    ).rejects.toMatchObject({ code: "STORAGE.CLONE_FAILED" });
   });
 });

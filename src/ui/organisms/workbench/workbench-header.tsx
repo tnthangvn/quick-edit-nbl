@@ -16,8 +16,8 @@ const REMOTE_TARGETS: PublishTarget[] = ["GIT", "DRIVE", "NOTEBOOK"];
 export function configuredRemoteTargets(config: WorkspaceConfigOutput | undefined): Set<PublishTarget> {
   const out = new Set<PublishTarget>();
   if (!config) return out;
-  if (config.storage.type === "GIT" && config.storage.git) out.add("GIT");
-  if (config.storage.type === "DRIVE" && config.storage.drive) out.add("DRIVE");
+  if (config.storage.git) out.add("GIT");
+  if (config.storage.drive) out.add("DRIVE");
   if (config.nbl.notebookId) out.add("NOTEBOOK");
   return out;
 }

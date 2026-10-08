@@ -107,7 +107,34 @@
       "profile": "CLI profile",
       "profilePlaceholder": "Chọn CLI profile",
       "context": "{count, plural, other {# spec trong context}}",
-      "settings": "Cấu hình Agent"
+      "settings": "Cấu hình Agent",
+      "newSession": "New session",
+      "history": "History",
+      "historyLoading": "Đang tải…",
+      "historyEmpty": "Chưa có phiên nào",
+      "deleteSession": "Xoá phiên hiện tại",
+      "deleteSessionFailed": "Không xoá được phiên chat",
+      "permissionLabel": "Mức quyền của CLI",
+      "permission": {
+        "DEFAULT": "Theo profile",
+        "PLAN": "Plan",
+        "ACCEPT_EDITS": "Accept edits",
+        "BYPASS": "Bypass"
+      },
+      "permissionHint": {
+        "DEFAULT": "Dùng cờ trong args của profile",
+        "PLAN": "Chỉ đọc, lập kế hoạch",
+        "ACCEPT_EDITS": "Tự sửa file, hỏi khi chạy lệnh",
+        "BYPASS": "Bỏ qua mọi xác nhận"
+      },
+      "dock": "Vị trí khung chat",
+      "dockOption": {
+        "BOTTOM": "Dưới editor",
+        "LEFT": "Bên trái",
+        "RIGHT": "Bên phải"
+      },
+      "resizeChat": "Kéo để đổi chiều rộng khung chat",
+      "permissionUnsupported": "CLI này không hỗ trợ khi chạy nền"
     },
     "chat": {
       "hint": "Tick các spec liên quan bên trái rồi mô tả thay đổi bạn muốn.",
@@ -129,7 +156,8 @@
         "pendingReview": "Chờ duyệt",
         "reviewed": "Đã xử lý",
         "openDiff": "Mở Diff"
-      }
+      },
+      "untitled": "Phiên chưa đặt tên"
     },
     "composer": {
       "placeholderApi": "Yêu cầu Agent sửa spec…",
@@ -137,7 +165,8 @@
       "noContext": "Chưa chọn spec làm context",
       "contextLabel": "{count, plural, other {# spec trong context}}",
       "cliStartFailed": "Không chạy được CLI Agent",
-      "cliStopFailed": "Không dừng được CLI Agent"
+      "cliStopFailed": "Không dừng được CLI Agent",
+      "sessionFailed": "Không tạo được phiên chat"
     }
   }
 }

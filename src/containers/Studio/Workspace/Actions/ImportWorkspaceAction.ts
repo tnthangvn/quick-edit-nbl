@@ -1,6 +1,6 @@
 import "server-only";
 import { Action } from "@/ship/parents/Action";
-import { storageLabelOf } from "../../Setting/Models/WorkspaceConfig";
+import { storageLabelOf, storageTypesOf } from "../../Setting/Models/WorkspaceConfig";
 import { ReadWorkspaceConfigTask } from "../../Setting/Tasks/ReadWorkspaceConfigTask";
 import { WriteWorkspaceConfigTask } from "../../Setting/Tasks/WriteWorkspaceConfigTask";
 import { WorkspaceConfigNotFoundException } from "../Exceptions/WorkspaceConfigNotFoundException";
@@ -42,7 +42,7 @@ export class ImportWorkspaceAction extends Action<{ path: string; name?: string 
       description: null,
       path,
       specs_dir: config.workspace.specsDir,
-      storage_type: config.storage.type,
+      storage_type: storageTypesOf(config.storage),
       storage_label: storageLabelOf(config),
       notebook_id: config.nbl.notebookId,
       status: "ACTIVE",

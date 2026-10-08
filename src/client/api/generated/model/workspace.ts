@@ -15,7 +15,7 @@ export interface Workspace {
   description: string | null;
   path: string;
   specsDir: string;
-  storageType: StorageType;
+  storageTypes: StorageType[];
   /** @nullable */
   storageLabel: string | null;
   /** @nullable */

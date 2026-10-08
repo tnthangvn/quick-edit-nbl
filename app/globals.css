@@ -85,6 +85,8 @@
   --size-header: 48px;
   --size-sidebar: 264px;
   --size-sidebar-collapsed: 48px;
+  /* Khung chat Agent khi neo trái / phải (cao hết màn). */
+  --size-chat-panel: 420px; /* mặc định; Workbench ghi đè theo chiều rộng người dùng kéo */
   --size-row: 32px;
   --size-control: 32px;
   --size-control-sm: 28px;

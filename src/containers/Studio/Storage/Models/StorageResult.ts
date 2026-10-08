@@ -32,7 +32,6 @@ export type StorageStatus = {
  */
 export const sharesDriveFolder = (config: WorkspaceConfig | undefined): boolean =>
   !!config?.storage.drive &&
-  config.storage.type === "DRIVE" &&
   config.nbl.syncStrategy === "DRIVE_SYNC" &&
   !!config.nbl.driveFolderId &&
   config.nbl.driveFolderId === config.storage.drive.folderId;

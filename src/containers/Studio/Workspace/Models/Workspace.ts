@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { StorageType } from "@/ship/contracts/enums/StorageType";
 import { WorkspaceStatus } from "../Enums/WorkspaceStatus";
 
 /** Một bản ghi trong registry Workspace (spec 5.3). Model nội bộ: snake_case, khớp file JSON / bảng Postgres. */
@@ -9,7 +8,8 @@ export const WorkspaceRow = z.object({
   description: z.string().nullable(),
   path: z.string().min(1),
   specs_dir: z.string(),
-  storage_type: StorageType,
+  /** CSV thứ tự cố định "LOCAL[,GIT][,DRIVE]" — storageTypesOf() trong Setting/Models/WorkspaceConfig sinh ra. */
+  storage_type: z.string(),
   storage_label: z.string().nullable(),
   notebook_id: z.string().nullable(),
   status: WorkspaceStatus,

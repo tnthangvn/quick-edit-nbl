@@ -55,15 +55,6 @@
       "confirm": "Remove",
       "removed": "Đã gỡ {name} khỏi danh sách"
     },
-    "folder": {
-      "title": "Thư mục của {name}",
-      "description": "Sao chép đường dẫn để mở bằng trình quản lý file hoặc terminal.",
-      "path": "Thư mục làm việc",
-      "specsDir": "Specs Dir",
-      "copy": "Copy Path",
-      "copied": "Đã sao chép",
-      "copyFailed": "Trình duyệt không cho sao chép"
-    },
     "import": {
       "title": "Mở thư mục có sẵn",
       "description": "Thêm thư mục đã có .spec-studio/config.json vào danh sách Projects.",

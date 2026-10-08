@@ -1,7 +1,9 @@
 import type { RouteDefinition } from "@/ship/engine/defineRoute";
 import { deleteWorkspaceSecretRoute } from "./deleteWorkspaceSecret.route";
+import { exportSettingsRoute } from "./exportSettings.route";
 import { getSettingsRoute } from "./getSettings.route";
 import { getWorkspaceConfigRoute } from "./getWorkspaceConfig.route";
+import { importSettingsRoute } from "./importSettings.route";
 import { listWorkspaceSecretsRoute } from "./listWorkspaceSecrets.route";
 import { setWorkspaceSecretRoute } from "./setWorkspaceSecret.route";
 import { updateSettingsRoute } from "./updateSettings.route";
@@ -17,4 +19,6 @@ export const routes: RouteDefinition<any, any>[] = [
   listWorkspaceSecretsRoute,
   setWorkspaceSecretRoute,
   deleteWorkspaceSecretRoute,
+  exportSettingsRoute,
+  importSettingsRoute,
 ];

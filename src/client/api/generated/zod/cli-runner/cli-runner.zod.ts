@@ -28,6 +28,8 @@ export const DetectCliAgentsResponse = zod.object({
  * @summary Chạy CLI agent trong sandbox (bản sao specsDir)
  */
 
+export const startCliRunBodySessionIdMax = 64;
+
 
 export const startCliRunBodyPromptMax = 20000;
 
@@ -40,6 +42,7 @@ export const startCliRunBodyContextFilesMax = 50;
 
 export const StartCliRunBody = zod.object({
   "workspaceId": zod.string().min(1),
+  "sessionId": zod.string().min(1).max(startCliRunBodySessionIdMax),
   "profileId": zod.string().min(1),
   "prompt": zod.string().min(1).max(startCliRunBodyPromptMax),
   "contextFiles": zod.array(zod.string().min(1).max(startCliRunBodyContextFilesItemMax)).max(startCliRunBodyContextFilesMax).default(startCliRunBodyContextFilesDefault)

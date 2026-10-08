@@ -42,7 +42,7 @@ const localInput = (dir: string, name = "Demo"): CreateWorkspaceInput => ({
   description: null,
   path: dir,
   specsDir: "./specs",
-  storage: { type: "LOCAL" },
+  storage: { git: null, drive: null, shareConfig: false },
   notebook: null,
 });
 
@@ -111,8 +111,8 @@ describe("Workspace", () => {
       ...localInput(dir),
       specsDir: "docs",
       storage: {
-        type: "GIT",
         shareConfig: false,
+        drive: null,
         git: {
           provider: "GITHUB",
           connectorId: null,
@@ -138,8 +138,8 @@ describe("Workspace", () => {
     mkdirSync(dir);
     writeFileSync(path.join(dir, "x"), "");
     const git = {
-      type: "GIT" as const,
       shareConfig: true,
+      drive: null,
       git: { ...{ provider: "GENERIC" as const, connectorId: null, repo: null, remote: "git@example.com:a/b.git", branch: "main", subdir: "." }, publishMode: "PUSH" as const, prBranchTemplate: "x", autoCommit: false, autoPush: false, commitMessage: "m", pullOnOpen: false },
     };
     expect(await codeOf(createAction().run({ ...localInput(dir), storage: git }))).toBe("WORKSPACE.FOLDER_NOT_EMPTY");

@@ -8,23 +8,23 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { FormProvider, useForm, type FieldPath } from "react-hook-form";
 import { getListWorkspacesQueryKey, useCheckWorkspace, useCreateWorkspace, useOpenWorkspace } from "@/client/api/generated";
-import type { StorageType, Workspace, WorkspaceCheckItem } from "@/client/api/generated/model";
+import type { Workspace, WorkspaceCheckItem } from "@/client/api/generated/model";
 import {
   CreateWorkspaceBody,
   createWorkspaceBodyNotebookOneAutoSyncOnApproveDefault,
   createWorkspaceBodyNotebookOneConfirmBeforeSyncDefault,
   createWorkspaceBodyNotebookOneSyncStrategyDefault,
   createWorkspaceBodySpecsDirDefault,
-  createWorkspaceBodyStorageThreeDrivePullOnOpenDefault,
-  createWorkspaceBodyStorageThreeDrivePushOnApproveDefault,
-  createWorkspaceBodyStorageTwoGitAutoCommitDefault,
-  createWorkspaceBodyStorageTwoGitAutoPushDefault,
-  createWorkspaceBodyStorageTwoGitBranchDefault,
-  createWorkspaceBodyStorageTwoGitCommitMessageDefault,
-  createWorkspaceBodyStorageTwoGitPrBranchTemplateDefault,
-  createWorkspaceBodyStorageTwoGitPublishModeDefault,
-  createWorkspaceBodyStorageTwoGitPullOnOpenDefault,
-  createWorkspaceBodyStorageTwoGitSubdirDefault,
+  createWorkspaceBodyStorageDriveOnePullOnOpenDefault,
+  createWorkspaceBodyStorageDriveOnePushOnApproveDefault,
+  createWorkspaceBodyStorageGitOneAutoCommitDefault,
+  createWorkspaceBodyStorageGitOneAutoPushDefault,
+  createWorkspaceBodyStorageGitOneBranchDefault,
+  createWorkspaceBodyStorageGitOneCommitMessageDefault,
+  createWorkspaceBodyStorageGitOnePrBranchTemplateDefault,
+  createWorkspaceBodyStorageGitOnePublishModeDefault,
+  createWorkspaceBodyStorageGitOnePullOnOpenDefault,
+  createWorkspaceBodyStorageGitOneSubdirDefault,
 } from "@/client/api/generated/zod/workspace/workspace.zod";
 import { extractApiError, useErrorMessage } from "@/client/api/useErrorMessage";
 import { Stepper, type StepperItem, type StepStatus } from "@/ui/molecules/stepper";
@@ -39,46 +39,43 @@ import { InfoStep, NotebookStep, ReviewSummary, StorageStep, type WizardForm } f
  * Drive phải có Folder ID/URL.
  */
 const WizardSchema = CreateWorkspaceBody.superRefine((v, ctx) => {
-  if (v.storage.type === "GIT") {
-    const g = v.storage.git;
+  const g = v.storage.git;
+  if (g) {
     if (g.connectorId && !g.repo) ctx.addIssue({ code: "custom", path: ["storage", "git", "repo"], message: "FIELD.REQUIRED" });
     if (!g.connectorId && !g.remote) ctx.addIssue({ code: "custom", path: ["storage", "git", "remote"], message: "FIELD.REQUIRED" });
   }
-  if (v.storage.type === "DRIVE" && !v.storage.drive.folderId.trim()) {
+  if (v.storage.drive && !v.storage.drive.folderId.trim()) {
     ctx.addIssue({ code: "custom", path: ["storage", "drive", "folderId"], message: "FIELD.REQUIRED" });
   }
 });
 
-type GitDraft = Extract<WizardForm["storage"], { type: "GIT" }>;
-type DriveDraft = Extract<WizardForm["storage"], { type: "DRIVE" }>;
+type GitDraft = NonNullable<WizardForm["storage"]["git"]>;
+type DriveDraft = NonNullable<WizardForm["storage"]["drive"]>;
 
 const GIT_DEFAULTS: GitDraft = {
-  type: "GIT",
-  shareConfig: false,
-  git: {
-    provider: "GITHUB",
-    connectorId: null,
-    repo: null,
-    branch: createWorkspaceBodyStorageTwoGitBranchDefault,
-    subdir: createWorkspaceBodyStorageTwoGitSubdirDefault,
-    publishMode: createWorkspaceBodyStorageTwoGitPublishModeDefault,
-    prBranchTemplate: createWorkspaceBodyStorageTwoGitPrBranchTemplateDefault,
-    autoCommit: createWorkspaceBodyStorageTwoGitAutoCommitDefault,
-    autoPush: createWorkspaceBodyStorageTwoGitAutoPushDefault,
-    commitMessage: createWorkspaceBodyStorageTwoGitCommitMessageDefault,
-    pullOnOpen: createWorkspaceBodyStorageTwoGitPullOnOpenDefault,
-  },
+  provider: "GITHUB",
+  connectorId: null,
+  repo: null,
+  branch: createWorkspaceBodyStorageGitOneBranchDefault,
+  subdir: createWorkspaceBodyStorageGitOneSubdirDefault,
+  publishMode: createWorkspaceBodyStorageGitOnePublishModeDefault,
+  prBranchTemplate: createWorkspaceBodyStorageGitOnePrBranchTemplateDefault,
+  autoCommit: createWorkspaceBodyStorageGitOneAutoCommitDefault,
+  autoPush: createWorkspaceBodyStorageGitOneAutoPushDefault,
+  commitMessage: createWorkspaceBodyStorageGitOneCommitMessageDefault,
+  pullOnOpen: createWorkspaceBodyStorageGitOnePullOnOpenDefault,
 };
 const DRIVE_DEFAULTS: DriveDraft = {
-  type: "DRIVE",
-  drive: { folderId: "", pullOnOpen: createWorkspaceBodyStorageThreeDrivePullOnOpenDefault, pushOnApprove: createWorkspaceBodyStorageThreeDrivePushOnApproveDefault },
+  folderId: "",
+  pullOnOpen: createWorkspaceBodyStorageDriveOnePullOnOpenDefault,
+  pushOnApprove: createWorkspaceBodyStorageDriveOnePushOnApproveDefault,
 };
 const DEFAULTS: WizardForm = {
   name: "",
   description: "",
   path: "",
   specsDir: createWorkspaceBodySpecsDirDefault,
-  storage: { type: "LOCAL" },
+  storage: { git: null, drive: null, shareConfig: false },
   notebook: {
     notebookId: "",
     syncStrategy: createWorkspaceBodyNotebookOneSyncStrategyDefault,
@@ -135,12 +132,12 @@ export function NewProjectDialog({ open, onOpenChange }: NewProjectDialogProps) 
   const [step, setStep] = React.useState<StepIndex>(0);
   const [skipNotebook, setSkipNotebook] = React.useState(false);
   const [run, setRun] = React.useState<RunState | null>(null);
-  const drafts = React.useRef<{ GIT: GitDraft; DRIVE: DriveDraft }>({ GIT: GIT_DEFAULTS, DRIVE: DRIVE_DEFAULTS });
+  const drafts = React.useRef<{ git: GitDraft; drive: DriveDraft }>({ git: GIT_DEFAULTS, drive: DRIVE_DEFAULTS });
 
   React.useEffect(() => {
     if (!open) return;
     reset(DEFAULTS);
-    drafts.current = { GIT: GIT_DEFAULTS, DRIVE: DRIVE_DEFAULTS };
+    drafts.current = { git: GIT_DEFAULTS, drive: DRIVE_DEFAULTS };
     setStep(0);
     setSkipNotebook(false);
     setRun(null);
@@ -151,12 +148,17 @@ export function NewProjectDialog({ open, onOpenChange }: NewProjectDialogProps) 
   const openWs = useOpenWorkspace();
   const running = createWs.isPending || checkWs.isPending || openWs.isPending;
 
-  const changeStorage = (type: StorageType) => {
-    const current = getValues("storage");
-    if (current.type === "GIT") drafts.current.GIT = current;
-    if (current.type === "DRIVE") drafts.current.DRIVE = current;
-    clearErrors("storage");
-    setValue("storage", type === "LOCAL" ? { type: "LOCAL" } : drafts.current[type], { shouldDirty: true });
+  const toggleGit = (enabled: boolean) => {
+    const current = getValues("storage.git");
+    if (current) drafts.current.git = current;
+    clearErrors("storage.git");
+    setValue("storage.git", enabled ? drafts.current.git : null, { shouldDirty: true });
+  };
+  const toggleDrive = (enabled: boolean) => {
+    const current = getValues("storage.drive");
+    if (current) drafts.current.drive = current;
+    clearErrors("storage.drive");
+    setValue("storage.drive", enabled ? drafts.current.drive : null, { shouldDirty: true });
   };
 
   const next = async () => {
@@ -238,7 +240,9 @@ export function NewProjectDialog({ open, onOpenChange }: NewProjectDialogProps) 
 
   /* ------------------------------------------------ hiển thị */
 
-  const storageType = form.watch("storage.type");
+  const storage = form.watch("storage");
+  const activeStorageTypes = [...(storage.git ? (["GIT"] as const) : []), ...(storage.drive ? (["DRIVE"] as const) : [])];
+  const createTitle = activeStorageTypes.length ? activeStorageTypes.map((k) => t(`run.create.${k}`)).join(" + ") : t("run.create.LOCAL");
   const navItems: StepperItem[] = STEPS.map((id, i) => ({
     id,
     title: t(`steps.${id}.title`),
@@ -259,7 +263,7 @@ export function NewProjectDialog({ open, onOpenChange }: NewProjectDialogProps) 
     ? [
         {
           id: "CREATE",
-          title: t(`run.create.${storageType}`),
+          title: createTitle,
           description: statusOf("CREATE") === "ERROR" ? errorMessage(run.error) : t("run.createDescription"),
           status: statusOf("CREATE"),
         },
@@ -313,7 +317,7 @@ export function NewProjectDialog({ open, onOpenChange }: NewProjectDialogProps) 
               <DialogBody key={step} className="animate-[pop-in_var(--duration-slow)_var(--ease-out)]">
                 <h3 className="m-0 text-sm leading-5 font-semibold sm:hidden">{t(`steps.${STEPS[step]}.title`)}</h3>
                 {step === 0 ? <InfoStep /> : null}
-                {step === 1 ? <StorageStep onTypeChange={changeStorage} /> : null}
+                {step === 1 ? <StorageStep onGitToggle={toggleGit} onDriveToggle={toggleDrive} /> : null}
                 {step === 2 ? <NotebookStep skip={skipNotebook} onSkipChange={setSkipNotebook} /> : null}
                 {step === 3 ? (
                   <>

@@ -46,7 +46,7 @@ const WORKSPACES: Workspace[] = [
     description: null,
     path: "~/projects/quick-edit-nbl",
     specsDir: "specs",
-    storageType: "GIT",
+    storageTypes: ["LOCAL", "GIT"],
     storageLabel: "acme/quick-edit@main",
     notebookId: "9f1c2e7a",
     status: "ACTIVE",
@@ -59,7 +59,7 @@ const WORKSPACES: Workspace[] = [
     description: null,
     path: "~/work/billing/docs/specs",
     specsDir: "specs",
-    storageType: "DRIVE",
+    storageTypes: ["LOCAL", "DRIVE"],
     storageLabel: "Specs/Billing",
     notebookId: null,
     status: "ACTIVE",
@@ -72,7 +72,7 @@ const WORKSPACES: Workspace[] = [
     description: null,
     path: "~/tmp/old-prototype",
     specsDir: "specs",
-    storageType: "LOCAL",
+    storageTypes: ["LOCAL"],
     storageLabel: null,
     notebookId: null,
     status: "FOLDER_MISSING",
@@ -196,7 +196,7 @@ function ProjectsDemo() {
     <Section id="projects" title={t("sections.projects")}>
       <ProjectsGrid>
         <NewProjectCard onClick={() => undefined} />
-        <ProjectCard workspace={WORKSPACES[0]} specCount={12} syncStatus="SYNCED" notebookLabel="Spec Studio" href="#projects" onOpenFolder={() => undefined} onRename={() => undefined} onEditConfig={() => undefined} onRemove={() => undefined} />
+        <ProjectCard workspace={WORKSPACES[0]} specCount={12} syncStatus="SYNCED" notebookLabel="Spec Studio" href="#projects" onRename={() => undefined} onEditConfig={() => undefined} onRemove={() => undefined} />
         <ProjectCard workspace={WORKSPACES[1]} specCount={4} syncStatus="UNSAVED" onOpen={() => undefined} onRename={() => undefined} onRemove={() => undefined} />
         <ProjectCard workspace={WORKSPACES[2]} syncStatus="ERROR" onLocate={() => undefined} onRemove={() => undefined} />
       </ProjectsGrid>

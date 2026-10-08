@@ -25,8 +25,8 @@ export function isInsideRelative(dir: string): boolean {
   return normalized !== ".." && !normalized.startsWith("../");
 }
 
-/** Thư mục con chứa spec, tương đối với workspacePath (mặc định "./specs"). */
-export const SpecsDir = z.string().trim().min(1).max(255).refine(isInsideRelative, { message: "WORKSPACE.INVALID_SPECS_DIR" });
+/** Thư mục con chứa spec, tương đối với workspacePath; "" = gốc workspace. */
+export const SpecsDir = z.string().trim().max(255).refine(isInsideRelative, { message: "WORKSPACE.INVALID_SPECS_DIR" });
 
 /** Thư mục con trong repo; "." = gốc repo. */
 export const RepoSubdir = z.string().trim().max(255).refine((d) => d === "" || isInsideRelative(d), { message: "WORKSPACE.INVALID_SPECS_DIR" });

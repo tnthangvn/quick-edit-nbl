@@ -73,7 +73,7 @@ export class CheckWorkspaceAction extends Action<{ workspaceId: string }, Worksp
   }
 
   private async checkGit(config: WorkspaceConfig | undefined): Promise<WorkspaceCheckItem> {
-    const git = config?.storage.type === "GIT" ? config.storage.git : null;
+    const git = config?.storage.git ?? null;
     if (!git) return skipped("GIT_REMOTE");
     const { env, remoteUrl } = await this.resolveGitCredentials.run({ connectorId: git.connectorId, remote: git.remote });
     const r = await this.checkGitRemote.run({ remoteUrl, branch: git.branch, env });
@@ -83,9 +83,7 @@ export class CheckWorkspaceAction extends Action<{ workspaceId: string }, Worksp
   }
 
   private async checkDrive(workspaceId: string, config: WorkspaceConfig | undefined): Promise<WorkspaceCheckItem> {
-    const folderId =
-      (config?.storage.type === "DRIVE" ? config.storage.drive?.folderId : undefined) ??
-      (config?.nbl.syncStrategy === "DRIVE_SYNC" ? config.nbl.driveFolderId : null);
+    const folderId = config?.storage.drive?.folderId ?? (config?.nbl.syncStrategy === "DRIVE_SYNC" ? config.nbl.driveFolderId : null);
     if (!folderId) return skipped("DRIVE");
     const { folderName } = await this.checkDriveAccess.run({ workspaceId, folderId });
     return ok("DRIVE", { folderId, folderName });

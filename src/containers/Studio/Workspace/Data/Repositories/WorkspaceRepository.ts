@@ -9,9 +9,10 @@ export type WorkspaceSort = "RECENT" | "NAME";
 export class WorkspaceRepository extends RepositoryBase<"workspaces"> {
   protected readonly model = "workspaces" as const;
 
+  /** `storageType` lọc theo workspace có BẬT loại này (storage_type lưu dạng CSV "LOCAL,GIT,..."), không phải khớp đúng 1 giá trị. */
   search(opts: { q?: string; storageType?: StorageType; sort: WorkspaceSort }): Promise<WorkspaceRow[]> {
     const filter: Filter<WorkspaceRow> = {};
-    if (opts.storageType) filter.storage_type = opts.storageType;
+    if (opts.storageType) filter.storage_type = { like: `%${opts.storageType}%` };
     if (opts.q) filter.name = { like: `%${opts.q}%` };
     return this.findMany(filter, {
       orderBy: opts.sort === "NAME" ? [["name", "asc"]] : [["last_opened_at", "desc"], ["created_at", "desc"]],

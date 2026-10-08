@@ -34,28 +34,19 @@
       "descriptionPlaceholder": "Spec cho workbench sửa .md bằng AI và sync NotebookLM"
     },
     "storage": {
-      "where": "Nơi lưu file .md",
-      "types": {
-        "LOCAL": {
-          "title": "Chỉ Local",
-          "description": "File nằm trên máy."
-        },
-        "GIT": {
-          "title": "Git repository",
-          "description": "GitHub, GitLab, Bitbucket, Gitea hoặc Git URL."
-        },
-        "DRIVE": {
-          "title": "Google Drive",
-          "description": "Thư mục Drive + bản sao local."
-        }
-      },
-      "path": {
-        "LOCAL": "Thư mục làm việc",
-        "GIT": "Clone vào",
-        "DRIVE": "Thư mục làm việc local"
-      },
+      "path": "Thư mục làm việc",
       "pathHint": "Đường dẫn tuyệt đối, ghi được và chưa thuộc project khác.",
-      "specsDir": "Thư mục spec"
+      "specsDir": "Thư mục spec",
+      "specsDirHint": "Để trống = file spec nằm ở gốc thư mục làm việc.",
+      "specsDirPlaceholder": "để trống = gốc workspace",
+      "gitToggle": {
+        "label": "Đồng bộ qua Git",
+        "hint": "GitHub, GitLab, Bitbucket, Gitea hoặc Git URL."
+      },
+      "driveToggle": {
+        "label": "Đồng bộ qua Google Drive",
+        "hint": "Thư mục Drive + bản sao local."
+      }
     },
     "git": {
       "provider": "Provider",
@@ -80,7 +71,8 @@
       "remoteHint": "https://, ssh:// hoặc git@host:owner/repo.git",
       "branch": "Branch",
       "subdir": "Thư mục spec trong repo",
-      "subdirHint": "Dấu . là gốc repo.",
+      "subdirHint": "Để trống = gốc repo.",
+      "subdirPlaceholder": "để trống = gốc repo",
       "publishMode": "Cách đẩy thay đổi sau khi Approve",
       "push": "Commit & push thẳng",
       "pushDescription": "Lên branch đã chọn. Nhanh, hợp repo cá nhân.",
@@ -160,6 +152,8 @@
       "description": "Mô tả",
       "path": "Thư mục làm việc",
       "storage": "Nơi lưu",
+      "specsDirRoot": "gốc workspace",
+      "subdirRoot": "gốc repo",
       "repo": "Repository",
       "subdir": "Thư mục spec",
       "publish": "Đẩy thay đổi",

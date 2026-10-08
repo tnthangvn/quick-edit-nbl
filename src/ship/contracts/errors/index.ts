@@ -2,6 +2,7 @@ import { z } from "zod";
 import { AGENT_ERROR_CODES } from "./agent";
 import { CONNECTOR_ERROR_CODES } from "./connector";
 import { CORE_ERROR_CODES } from "./core";
+import { FILESYSTEM_ERROR_CODES } from "./filesystem";
 import { NOTEBOOK_ERROR_CODES } from "./notebook";
 import { PUBLISH_ERROR_CODES } from "./publish";
 import { SETTING_ERROR_CODES } from "./setting";
@@ -19,6 +20,7 @@ export const ERROR_CODES = [
   ...SPEC_ERROR_CODES,
   ...SETTING_ERROR_CODES,
   ...CONNECTOR_ERROR_CODES,
+  ...FILESYSTEM_ERROR_CODES,
   ...STORAGE_ERROR_CODES,
   ...NOTEBOOK_ERROR_CODES,
   ...PUBLISH_ERROR_CODES,

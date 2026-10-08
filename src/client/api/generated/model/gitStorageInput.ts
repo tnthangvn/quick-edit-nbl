@@ -30,7 +30,10 @@ export interface GitStorageInput {
      * @maxLength 255
      */
   branch?: string;
-  /** @maxLength 255 */
+  /**
+     * Thư mục con trong repo chứa spec; để trống = gốc repo
+     * @maxLength 255
+     */
   subdir?: string;
   publishMode?: PublishMode;
   /**

@@ -24,7 +24,7 @@ const GitStorageInput = z
     repo: RepoFullName.nullable().default(null),
     remote: GitRemoteUrl.optional().meta({ description: "Bỏ trống khi đã chọn repo qua connector (suy ra https://<host>/<repo>.git)" }),
     branch: GitBranchName.default("main"),
-    subdir: RepoSubdir.default("."),
+    subdir: RepoSubdir.default("").meta({ description: "Thư mục con trong repo chứa spec; để trống = gốc repo" }),
     publishMode: PublishMode.default("PUSH"),
     prBranchTemplate: z.string().trim().min(1).max(255).default("spec/{date}-{filename}"),
     autoCommit: z.boolean().default(true),
@@ -55,23 +55,22 @@ export const CreateWorkspaceBody = z
     name: WorkspaceName,
     description: WorkspaceDescription.default(null),
     path: AbsolutePath.meta({ description: "Thư mục làm việc local (workspacePath), đường dẫn tuyệt đối" }),
-    specsDir: SpecsDir.default("./specs"),
-    storage: z.discriminatedUnion("type", [
-      z.object({ type: z.literal("LOCAL") }),
-      z.object({
-        type: z.literal("GIT"),
-        git: GitStorageInput,
-        shareConfig: z.boolean().default(false).meta({ description: "true = không thêm .spec-studio/ vào .gitignore" }),
-      }),
-      z.object({
-        type: z.literal("DRIVE"),
-        drive: z.object({
-          folderId: DriveFolderIdField.meta({ description: "Drive Folder ID hoặc URL thư mục" }),
-          pullOnOpen: z.boolean().default(true),
-          pushOnApprove: z.boolean().default(true),
-        }),
-      }),
-    ]),
+    specsDir: SpecsDir.default("").meta({ description: "Thư mục con chứa spec; để trống = gốc workspace" }),
+    /** Local luôn ngầm định có; Git/Drive bật thêm độc lập, không loại trừ nhau. */
+    storage: z
+      .object({
+        git: GitStorageInput.nullable().default(null),
+        drive: z
+          .object({
+            folderId: DriveFolderIdField.meta({ description: "Drive Folder ID hoặc URL thư mục" }),
+            pullOnOpen: z.boolean().default(true),
+            pushOnApprove: z.boolean().default(true),
+          })
+          .nullable()
+          .default(null),
+        shareConfig: z.boolean().default(false).meta({ description: "true = không thêm .spec-studio/ vào .gitignore (chỉ áp dụng khi bật Git)" }),
+      })
+      .meta({ id: "CreateWorkspaceStorageInput" }),
     notebook: NotebookInput.nullable().default(null).meta({ description: "null = Bỏ qua, kết nối sau" }),
   })
   .meta({ id: "CreateWorkspaceInput" });

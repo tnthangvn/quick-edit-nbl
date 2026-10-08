@@ -30,10 +30,10 @@ import type {
   GetGoogleOAuthStatusParams,
   GoogleOAuthStart,
   GoogleOAuthStatus,
-  PullResult,
-  PushResult,
+  PullResultList,
+  PushResultList,
   StartGoogleOAuthParams,
-  StorageStatus,
+  StorageStatusList,
   ValidationErrorResponse
 } from '../model';
 
@@ -67,7 +67,7 @@ export const getPullWorkspaceUrl = (workspaceId: string,) => {
 /**
  * @summary Pull từ nơi lưu trữ (Git: pull --ff-only, Drive: tải file .md về)
  */
-export const pullWorkspace = async (workspaceId: string, options?: RequestInit): Promise<PullResult> => {
+export const pullWorkspace = async (workspaceId: string, options?: RequestInit): Promise<PullResultList> => {
 
   const res = await fetch(getPullWorkspaceUrl(workspaceId),
   {
@@ -82,13 +82,13 @@ export const pullWorkspace = async (workspaceId: string, options?: RequestInit):
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
   if (!res.ok) {
 
-    const err: globalThis.Error & {info?: PullResult, status?: number} = new globalThis.Error();
-    const data : PullResult = body ? JSON.parse(body) : {}
+    const err: globalThis.Error & {info?: PullResultList, status?: number} = new globalThis.Error();
+    const data : PullResultList = body ? JSON.parse(body) : {}
     err.info = data;
     err.status = res.status;
     throw err;
   }
-  const data: PullResult = body ? JSON.parse(body) : {}
+  const data: PullResultList = body ? JSON.parse(body) : {}
   return data
 }
 
@@ -154,7 +154,7 @@ export const usePullWorkspace = <TError = globalThis.Error & { info?: ErrorRespo
 /**
  * @summary Đẩy thay đổi spec lên nơi lưu trữ (Git: commit + push hoặc branch + PR theo publishMode, Drive: tải lên)
  */
-export const pushWorkspace = async (workspaceId: string, options?: RequestInit): Promise<PushResult> => {
+export const pushWorkspace = async (workspaceId: string, options?: RequestInit): Promise<PushResultList> => {
 
   const res = await fetch(getPushWorkspaceUrl(workspaceId),
   {
@@ -169,13 +169,13 @@ export const pushWorkspace = async (workspaceId: string, options?: RequestInit):
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
   if (!res.ok) {
 
-    const err: globalThis.Error & {info?: PushResult, status?: number} = new globalThis.Error();
-    const data : PushResult = body ? JSON.parse(body) : {}
+    const err: globalThis.Error & {info?: PushResultList, status?: number} = new globalThis.Error();
+    const data : PushResultList = body ? JSON.parse(body) : {}
     err.info = data;
     err.status = res.status;
     throw err;
   }
-  const data: PushResult = body ? JSON.parse(body) : {}
+  const data: PushResultList = body ? JSON.parse(body) : {}
   return data
 }
 
@@ -241,7 +241,7 @@ export const usePushWorkspace = <TError = globalThis.Error & { info?: ErrorRespo
 /**
  * @summary Storage Status trên Header: thay đổi chưa commit / push (không gọi mạng)
  */
-export const getStorageStatus = async (workspaceId: string, options?: RequestInit): Promise<StorageStatus> => {
+export const getStorageStatus = async (workspaceId: string, options?: RequestInit): Promise<StorageStatusList> => {
 
   const res = await fetch(getGetStorageStatusUrl(workspaceId),
   {
@@ -256,13 +256,13 @@ export const getStorageStatus = async (workspaceId: string, options?: RequestIni
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
   if (!res.ok) {
 
-    const err: globalThis.Error & {info?: StorageStatus, status?: number} = new globalThis.Error();
-    const data : StorageStatus = body ? JSON.parse(body) : {}
+    const err: globalThis.Error & {info?: StorageStatusList, status?: number} = new globalThis.Error();
+    const data : StorageStatusList = body ? JSON.parse(body) : {}
     err.info = data;
     err.status = res.status;
     throw err;
   }
-  const data: StorageStatus = body ? JSON.parse(body) : {}
+  const data: StorageStatusList = body ? JSON.parse(body) : {}
   return data
 }
 

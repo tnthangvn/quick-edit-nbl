@@ -8,6 +8,7 @@ import { extractDriveFolderId, extractNotebookId } from "../../Setting/Models/Co
 import {
   DEFAULT_NOTEBOOK_CONFIG,
   storageLabelOf,
+  storageTypesOf,
   type GitStorageConfig,
   type NotebookConfig,
   type WorkspaceConfig,
@@ -33,10 +34,13 @@ export type CreateWorkspaceInput = {
   /** Đường dẫn tuyệt đối đã chuẩn hoá. */
   path: string;
   specsDir: string;
-  storage:
-    | { type: "LOCAL" }
-    | { type: "GIT"; git: GitStorageInput; /** true = commit cả .spec-studio/ lên repo */ shareConfig: boolean }
-    | { type: "DRIVE"; drive: { folderId: string; pullOnOpen: boolean; pushOnApprove: boolean } };
+  /** Local luôn ngầm định có; Git/Drive bật thêm độc lập, không loại trừ nhau. */
+  storage: {
+    git: GitStorageInput | null;
+    drive: { folderId: string; pullOnOpen: boolean; pushOnApprove: boolean } | null;
+    /** true = commit cả .spec-studio/ lên repo (chỉ áp dụng khi có Git). */
+    shareConfig: boolean;
+  };
   /** null = "Bỏ qua, kết nối sau". */
   notebook: NotebookConfig | null;
 };
@@ -86,7 +90,7 @@ export class CreateWorkspaceAction extends Action<CreateWorkspaceInput, Workspac
       description: input.description,
       path: input.path,
       specs_dir: input.specsDir,
-      storage_type: storage.type,
+      storage_type: storageTypesOf(storage),
       storage_label: storageLabelOf(config),
       notebook_id: notebook.notebookId,
       status: "ACTIVE",
@@ -94,33 +98,36 @@ export class CreateWorkspaceAction extends Action<CreateWorkspaceInput, Workspac
     });
   }
 
+  /**
+   * Git trước (CLONE_TARGET, ràng buộc thư mục trống chặt nhất) → Drive sau (tải vào thư mục Git vừa clone, không
+   * chuẩn bị thư mục lần 2) → Local luôn ngầm định. Chỉ Drive hoặc chỉ Local: WORKING_DIR như cũ.
+   */
   private async prepareStorage(input: CreateWorkspaceInput): Promise<WorkspaceConfig["storage"]> {
     const { storage } = input;
-    switch (storage.type) {
-      case "LOCAL":
-        await this.prepareFolder.run({ path: input.path, mode: "WORKING_DIR" });
-        return { type: "LOCAL", git: null, drive: null };
 
-      case "DRIVE": {
-        await this.prepareFolder.run({ path: input.path, mode: "WORKING_DIR" });
-        const folderId = extractDriveFolderId(storage.drive.folderId) ?? storage.drive.folderId;
-        const targetDir = await this.createSpecsDir.run({ workspacePath: input.path, specsDir: input.specsDir });
-        await wrap(() => this.downloadDriveFolder.run({ folderId, targetDir }), (cause) => new WorkspaceDriveDownloadFailedException(undefined, { cause }));
-        return { type: "DRIVE", git: null, drive: { ...storage.drive, folderId } };
-      }
-
-      case "GIT": {
-        const git = this.completeGit(storage.git);
-        await this.prepareFolder.run({ path: input.path, mode: "CLONE_TARGET" });
-        const { env, remoteUrl } = await this.resolveGitCredentials.run({ connectorId: git.connectorId, remote: git.remote });
-        await wrap(
-          () => this.cloneRepository.run({ remoteUrl, branch: git.branch, targetPath: input.path, env }),
-          (cause) => new WorkspaceCloneFailedException(undefined, { cause }),
-        );
-        if (!storage.shareConfig) await this.addGitignoreEntry.run({ repoPath: input.path, entry: SPEC_STUDIO_DIR_ENTRY });
-        return { type: "GIT", git, drive: null };
-      }
+    let git: GitStorageConfig | null = null;
+    if (storage.git) {
+      git = this.completeGit(storage.git);
+      await this.prepareFolder.run({ path: input.path, mode: "CLONE_TARGET" });
+      const { env, remoteUrl } = await this.resolveGitCredentials.run({ connectorId: git.connectorId, remote: git.remote });
+      await wrap(
+        () => this.cloneRepository.run({ remoteUrl, branch: git!.branch, targetPath: input.path, env }),
+        (cause) => new WorkspaceCloneFailedException(undefined, { cause }),
+      );
+      if (!storage.shareConfig) await this.addGitignoreEntry.run({ repoPath: input.path, entry: SPEC_STUDIO_DIR_ENTRY });
+    } else {
+      await this.prepareFolder.run({ path: input.path, mode: "WORKING_DIR" });
     }
+
+    let drive: { folderId: string; pullOnOpen: boolean; pushOnApprove: boolean } | null = null;
+    if (storage.drive) {
+      const folderId = extractDriveFolderId(storage.drive.folderId) ?? storage.drive.folderId;
+      const targetDir = await this.createSpecsDir.run({ workspacePath: input.path, specsDir: input.specsDir });
+      await wrap(() => this.downloadDriveFolder.run({ folderId, targetDir }), (cause) => new WorkspaceDriveDownloadFailedException(undefined, { cause }));
+      drive = { ...storage.drive, folderId };
+    }
+
+    return { git, drive };
   }
 
   /** Host mặc định theo provider; remote suy ra https://<host>/<repo>.git khi chọn repo từ connector. */

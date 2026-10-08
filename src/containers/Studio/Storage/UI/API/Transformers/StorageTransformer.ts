@@ -36,6 +36,11 @@ export const StorageStatusResponse = z
   })
   .meta({ id: "StorageStatus" });
 
+/** 1 item / storage đang bật (Git, Drive); rỗng = chỉ Local. */
+export const PullResultListResponse = z.object({ items: z.array(PullResultResponse) }).meta({ id: "PullResultList" });
+export const PushResultListResponse = z.object({ items: z.array(PushResultResponse) }).meta({ id: "PushResultList" });
+export const StorageStatusListResponse = z.object({ items: z.array(StorageStatusResponse) }).meta({ id: "StorageStatusList" });
+
 export const GoogleOAuthStartResponse = z.object({ authUrl: z.string() }).meta({ id: "GoogleOAuthStart" });
 
 export const GoogleOAuthStatusResponse = z
