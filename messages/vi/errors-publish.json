@@ -1,0 +1,8 @@
+{
+  "errors": {
+    "PUBLISH": {
+      "TARGET_NOT_CONFIGURED": "Đích {target} chưa được cấu hình cho Workspace.",
+      "PREREQUISITE_FAILED": "Bỏ qua vì bước ghi file local lỗi."
+    }
+  }
+}

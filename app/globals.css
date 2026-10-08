@@ -1,0 +1,179 @@
+/* Spec Studio — generated from the design system tokens (light | dark, blue + gray).
+   Next.js + Tailwind CSS v4 + shadcn/ui. Đặt vào app/globals.css. */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Dark mode bằng class .dark trên <html> (next-themes: attribute="class") */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Colors — light (mặc định) */
+  --color-background: #f9fafb;
+  --color-foreground: #111827;
+  --color-card: #ffffff;
+  --color-card-foreground: var(--color-foreground);
+  --color-popover: #ffffff;
+  --color-popover-foreground: var(--color-foreground);
+  --color-sidebar: #f3f4f6;
+  --color-sidebar-foreground: var(--color-foreground);
+  --color-sidebar-accent: #e5e7eb;
+  --color-muted: #f3f4f6;
+  --color-muted-foreground: #4b5563;
+  --color-accent: #eceef1;
+  --color-accent-foreground: var(--color-foreground);
+  --color-secondary: #eceef1;
+  --color-secondary-foreground: var(--color-foreground);
+  --color-border: #e5e7eb;
+  --color-input: #878d98;
+  --color-primary: #1d5fd6;
+  --color-primary-foreground: #ffffff;
+  --color-primary-soft: #e7effd;
+  --color-ring: var(--color-primary);
+  --color-destructive: #c0262d;
+  --color-destructive-foreground: #ffffff;
+  --color-destructive-soft: #fdeceb;
+  --color-info: var(--color-primary);
+  --color-info-soft: var(--color-primary-soft);
+  --color-info-border: #b7cdf7;
+  --color-warning: #8f5200;
+  --color-warning-soft: #fff6e5;
+  --color-warning-border: #f1cf8f;
+  --color-error: var(--color-destructive);
+  --color-error-soft: var(--color-destructive-soft);
+  --color-error-border: #f3bbb7;
+  --color-editor: #ffffff;
+  --color-editor-gutter: #6b7280;
+  --color-editor-line: #f6f7f9;
+  --color-editor-selection: #d6e4fc;
+  --color-diff-added: #e3edfd;
+  --color-diff-added-text: #bcd3fa;
+  --color-diff-removed: #fce8e7;
+  --color-diff-removed-text: #f6bdb9;
+
+  /* Fonts: nạp Geist + Geist Mono bằng next/font/google, gán variable --font-geist-sans / --font-geist-mono */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Spacing: lưới 4px (p-1 = 4px, p-1.5 = 6px, …) */
+  --spacing: 4px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* Shadows: giá trị đổi theo theme qua --shadow-*-value */
+  --shadow-popover: var(--shadow-popover-value);
+  --shadow-dialog: var(--shadow-dialog-value);
+  --shadow-float: var(--shadow-float-value);
+
+  /* Motion: ease-out ngắn, không nảy */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-pop-in: pop-in 150ms var(--ease-out);
+  --animate-pop-up: pop-up 150ms var(--ease-out);
+  --animate-slide-in: slide-in 220ms var(--ease-out);
+  --animate-scale-in: scale-in 220ms var(--ease-out);
+  @keyframes pop-in { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes pop-up { from { opacity: 0; transform: translateY(4px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes slide-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+  @keyframes scale-in { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+
+  /* Layout sizes: dùng h-(--size-header), w-(--size-sidebar)… */
+  --size-header: 48px;
+  --size-sidebar: 264px;
+  --size-sidebar-collapsed: 48px;
+  --size-row: 32px;
+  --size-control: 32px;
+  --size-control-sm: 28px;
+  --size-icon: 16px;
+}
+
+:root {
+  /* Motion durations */
+  --duration-fast: 100ms;
+  --duration-base: 150ms;
+  --duration-slow: 220ms;
+
+  /* Shadow values — light */
+  --shadow-popover-value: 0 4px 16px rgba(17, 24, 39, 0.10), 0 1px 2px rgba(17, 24, 39, 0.06);
+  --shadow-dialog-value: 0 24px 64px rgba(17, 24, 39, 0.18), 0 2px 6px rgba(17, 24, 39, 0.08);
+  --shadow-float-value: 0 2px 8px rgba(17, 24, 39, 0.08);
+}
+
+.dark {
+  /* Colors — dark */
+  --color-background: #0f1113;
+  --color-foreground: #e5e7eb;
+  --color-card: #16181b;
+  --color-card-foreground: var(--color-foreground);
+  --color-popover: #1c1f23;
+  --color-popover-foreground: var(--color-foreground);
+  --color-sidebar: #131518;
+  --color-sidebar-foreground: var(--color-foreground);
+  --color-sidebar-accent: #24272c;
+  --color-muted: #1b1e22;
+  --color-muted-foreground: #9ca3af;
+  --color-accent: #25282d;
+  --color-accent-foreground: var(--color-foreground);
+  --color-secondary: #25282d;
+  --color-secondary-foreground: var(--color-foreground);
+  --color-border: #2a2d33;
+  --color-input: #70757e;
+  --color-primary: #5b9df8;
+  --color-primary-foreground: #0b1526;
+  --color-primary-soft: #162640;
+  --color-ring: var(--color-primary);
+  --color-destructive: #f2877f;
+  --color-destructive-foreground: #0f1113;
+  --color-destructive-soft: #3a1a1a;
+  --color-info: var(--color-primary);
+  --color-info-soft: var(--color-primary-soft);
+  --color-info-border: #2a4a80;
+  --color-warning: #f2b544;
+  --color-warning-soft: #2b2111;
+  --color-warning-border: #5e4618;
+  --color-error: var(--color-destructive);
+  --color-error-soft: var(--color-destructive-soft);
+  --color-error-border: #6b2b2b;
+  --color-editor: #131518;
+  --color-editor-gutter: #8b919c;
+  --color-editor-line: #1b1e22;
+  --color-editor-selection: #1f3a66;
+  --color-diff-added: #14294a;
+  --color-diff-added-text: #22447a;
+  --color-diff-removed: #36191a;
+  --color-diff-removed-text: #6a2a2a;
+  --shadow-popover-value: 0 4px 16px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-dialog-value: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --shadow-float-value: 0 2px 8px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+/* Nút: hover đổi màu 150ms, nhấn lún .97. Gắn class "press" vào Button của shadcn. */
+@utility press {
+  transition-property: background-color, border-color, color, box-shadow, transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-out);
+  &:active:not(:disabled) { transform: scale(.97); transition-duration: var(--duration-fast); }
+}
+
+/* Icon trong nút diễn động từ khi hover: thêm group vào nút, class tương ứng vào icon */
+@utility icon-nudge { transition: transform var(--duration-slow) var(--ease-out); :where(.group):hover:not(:disabled) & { transform: translateX(2px); } }
+@utility icon-spin-half { transition: transform var(--duration-slow) var(--ease-out); :where(.group):hover:not(:disabled) & { transform: rotate(180deg); } }
+@utility icon-lift { transition: transform var(--duration-slow) var(--ease-out); :where(.group):hover:not(:disabled) & { transform: translateY(-2px); } }
+@utility icon-turn { transition: transform var(--duration-slow) var(--ease-out); :where(.group):hover:not(:disabled) & { transform: rotate(90deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+  .animate-spin { animation-duration: 1.6s !important; }
+  .press:active { transform: none !important; }
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  body { background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); font-size: 14px; line-height: 20px; -webkit-font-smoothing: antialiased; }
+  :focus-visible { outline: 2px solid var(--color-ring); outline-offset: 1px; }
+}

@@ -1,0 +1,19 @@
+{
+  "errors": {
+    "STORAGE": {
+      "NOT_SUPPORTED": "The Workspace storage type does not support this action.",
+      "CONFIG_MISSING": "The Workspace storage is not configured (.spec-studio/config.json).",
+      "PULL_CONFLICT": "Cannot pull due to conflicts or diverged history. Resolve manually and retry.",
+      "PUSH_REJECTED": "Push was rejected.",
+      "GIT_AUTH_FAILED": "Git authentication failed. Check the connector.",
+      "GIT_COMMAND_FAILED": "git {command} failed.",
+      "CLONE_FAILED": "Cloning the repository failed.",
+      "GOOGLE_NOT_CONFIGURED": "Google OAuth is not configured (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).",
+      "GOOGLE_AUTH_REQUIRED": "Sign in with Google to use Drive.",
+      "GOOGLE_OAUTH_STATE_INVALID": "The Google sign-in session expired or is invalid. Try again.",
+      "GOOGLE_OAUTH_FAILED": "Google sign-in failed.",
+      "DRIVE_NOT_FOUND": "Drive folder or file not found (or access denied).",
+      "DRIVE_REQUEST_FAILED": "Google Drive request failed."
+    }
+  }
+}

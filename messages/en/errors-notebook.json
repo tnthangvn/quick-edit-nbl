@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "NOTEBOOK": {
+      "NOT_CONFIGURED": "NotebookLM is not configured for this Workspace.",
+      "CLI_NOT_FOUND": "The nlm CLI was not found (install the notebooklm-mcp-cli package).",
+      "AUTH_REQUIRED": "The NotebookLM session expired. Run \"nlm login\" and retry.",
+      "NOT_FOUND": "Notebook not found or access denied.",
+      "COMMAND_FAILED": "The NotebookLM operation failed."
+    }
+  }
+}

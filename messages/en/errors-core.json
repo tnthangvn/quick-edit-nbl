@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "INTERNAL": { "UNEXPECTED": "Something went wrong. Reference: {traceId}." },
+    "VALIDATION": { "FAILED": "Some fields are invalid." },
+    "FIELD": {
+      "REQUIRED": "Required.",
+      "INVALID_FORMAT": "Invalid format.",
+      "TOO_SHORT": "At least {min} characters.",
+      "TOO_LONG": "At most {max} characters.",
+      "INVALID_VALUE": "Invalid value."
+    },
+    "REQUEST": { "MALFORMED_JSON": "Request body is not valid JSON." },
+    "RESOURCE": {
+      "NOT_FOUND": "Not found.",
+      "CONFLICT": "The data changed or is being processed. Try again later."
+    }
+  }
+}

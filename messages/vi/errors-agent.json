@@ -1,0 +1,22 @@
+{
+  "errors": {
+    "AGENT": {
+      "API_KEY_MISSING": "Chưa cấu hình API key cho provider này. Mở Settings → Direct API để nhập key.",
+      "LLM_AUTH_FAILED": "Provider từ chối API key. Kiểm tra lại key trong Settings.",
+      "MODEL_NOT_FOUND": "Không tìm thấy model \"{model}\" ở provider đã chọn.",
+      "LLM_RATE_LIMITED": "Provider đang giới hạn tần suất gọi. Thử lại sau ít phút.",
+      "LLM_UNREACHABLE": "Không kết nối được tới provider. Kiểm tra mạng hoặc Base URL.",
+      "LLM_REQUEST_FAILED": "Provider trả lỗi khi xử lý yêu cầu.",
+      "INVALID_MESSAGES": "Lịch sử hội thoại không hợp lệ.",
+      "CLI_PROFILE_NOT_FOUND": "Không tìm thấy CLI profile đã chọn.",
+      "CLI_NOT_INSTALLED": "Không tìm thấy lệnh \"{command}\" trên máy.",
+      "CLI_SPEC_CONTEXT_REQUIRED": "Profile này cần chọn ít nhất một spec làm context.",
+      "CLI_SPAWN_FAILED": "Không khởi chạy được CLI agent.",
+      "CLI_EXIT_NONZERO": "CLI agent kết thúc với mã lỗi {exitCode}.",
+      "CLI_TIMEOUT": "CLI agent chạy quá thời gian cho phép và đã bị dừng.",
+      "SANDBOX_FAILED": "Không tạo được bản sao tạm để chạy CLI agent.",
+      "RUN_NOT_FOUND": "Không tìm thấy lần chạy CLI agent.",
+      "RUN_ALREADY_ACTIVE": "Workspace này đang có một lần chạy CLI agent chưa kết thúc."
+    }
+  }
+}

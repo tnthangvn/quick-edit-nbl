@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "SPEC": {
+      "NOT_FOUND": "Không tìm thấy file spec {file}.",
+      "ALREADY_EXISTS": "File spec {file} đã tồn tại.",
+      "INVALID_NAME": "Tên file không hợp lệ: chỉ nhận file .md, không chứa ký tự đặc biệt hay thư mục ẩn.",
+      "PATH_OUTSIDE_WORKSPACE": "Đường dẫn nằm ngoài thư mục spec của Workspace.",
+      "SPECS_DIR_NOT_FOUND": "Không tìm thấy thư mục spec của Workspace."
+    }
+  }
+}

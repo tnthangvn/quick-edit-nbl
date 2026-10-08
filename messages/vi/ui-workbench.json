@@ -1,0 +1,143 @@
+{
+  "workbench": {
+    "toast": {
+      "saveFailed": "Không lưu được {file}",
+      "openFailed": "Không mở được Workspace",
+      "settingsFailed": "Không lưu được cấu hình Agent"
+    },
+    "storage": {
+      "label": "Trạng thái lưu trữ",
+      "pending": "{count, plural, =0 {Đã đồng bộ} other {# thay đổi}}",
+      "gitSummary": "Nhánh {branch} · {uncommitted} thay đổi chưa commit · {ahead} commit chưa push · {behind} commit chưa pull",
+      "driveSummary": "{count, plural, =0 {Không có file chờ tải lên} other {# file chờ tải lên Drive}}",
+      "pull": "Pull",
+      "push": "Push",
+      "pulled": "{count, plural, =0 {Đã pull, không có thay đổi} other {Đã pull # file}}",
+      "pushed": "{count, plural, other {Đã push # file}}",
+      "nothingToPush": "Không có gì để push",
+      "openPr": "Mở PR #{number}",
+      "pullFailed": "Pull thất bại",
+      "pushFailed": "Push thất bại"
+    },
+    "sidebar": {
+      "label": "Danh sách spec",
+      "title": "Specs",
+      "expand": "Mở sidebar",
+      "count": "{count, plural, other {# spec}}",
+      "selectAll": "Chọn tất cả spec làm context",
+      "inContext": "{count} trong context",
+      "newSpec": "Spec mới",
+      "loadFailed": "Không tải được danh sách spec",
+      "retry": "Thử lại",
+      "emptyTitle": "Chưa có spec nào",
+      "emptyDescription": "Tạo file .md đầu tiên trong {dir}.",
+      "forceSyncFailed": "Không chạy được Force Sync cho {file}"
+    },
+    "dialogs": {
+      "new": {
+        "title": "Spec mới",
+        "description": "Tạo file Markdown trong thư mục spec của Workspace.",
+        "fileLabel": "Tên file",
+        "fileHint": "Đường dẫn tương đối, vd overview.md hoặc ui/header.md.",
+        "submit": "Create",
+        "created": "Đã tạo {file}"
+      },
+      "rename": {
+        "title": "Đổi tên spec",
+        "description": "Đổi tên {file} trong thư mục spec trên máy.",
+        "fileLabel": "Tên mới",
+        "renamed": "Đã đổi {from} thành {to}"
+      },
+      "delete": {
+        "title": "Xoá {file}?",
+        "description": "File sẽ bị xoá khỏi thư mục spec trên máy. Source tương ứng trên NotebookLM vẫn giữ cho tới lần sync sau.",
+        "deleted": "Đã xoá {file}",
+        "failed": "Không xoá được {file}"
+      }
+    },
+    "editor": {
+      "label": "Workspace",
+      "loading": "Đang tải editor…",
+      "monacoFailed": "Không tải được Monaco Editor",
+      "noSpecsTitle": "Bắt đầu với spec đầu tiên",
+      "noSpecsDescription": "Workspace chưa có file .md nào. Tạo spec mới rồi sửa cùng Agent.",
+      "newSpec": "New spec",
+      "noSelectionTitle": "Chọn một spec",
+      "noSelectionDescription": "Bấm vào một file bên trái để mở trên editor; tick checkbox để đính kèm vào context của Agent.",
+      "pendingProposals": "{count, plural, other {# đề xuất chờ duyệt}}",
+      "loadFailed": "Không mở được {file}",
+      "editorLabel": "Nội dung {file}",
+      "markdown": "Markdown",
+      "draftHint": "Nháp tự lưu trên máy · chưa ghi file",
+      "approveSave": "Approve & Save",
+      "saving": "Đang lưu…",
+      "saved": "Đã lưu"
+    },
+    "diff": {
+      "label": "Duyệt thay đổi của Agent",
+      "toolbar": "Duyệt thay đổi",
+      "title": "Agent đề xuất sửa <code>{file}</code>",
+      "titleNew": "Agent đề xuất tạo <code>{file}</code>",
+      "stats": "Thêm {added} dòng, xoá {removed} dòng",
+      "queue": "{index}/{total}",
+      "original": "Original",
+      "proposed": "Proposed",
+      "editorLabel": "So sánh thay đổi của {file}",
+      "reject": "Reject",
+      "approveSave": "Approve & Save",
+      "saving": "Đang lưu…",
+      "rejected": "Đã huỷ đề xuất cho {file}"
+    },
+    "sync": {
+      "label": "Tiến trình đồng bộ",
+      "running": "Đang đồng bộ <code>{file}</code>",
+      "done": "Đã đồng bộ <code>{file}</code>",
+      "withErrors": "Đồng bộ {done}/{total} nơi · {errors} lỗi",
+      "progress": "{done}/{total} nơi",
+      "waiting": "Đang chờ pipeline bắt đầu…",
+      "gitPullRequest": "Git · Pull Request",
+      "collapse": "Thu gọn",
+      "expand": "Mở rộng",
+      "close": "Đóng",
+      "retryFailed": "Không chạy lại được đích này"
+    },
+    "toolbar": {
+      "model": "Model",
+      "modelPlaceholder": "Chọn model",
+      "profile": "CLI profile",
+      "profilePlaceholder": "Chọn CLI profile",
+      "context": "{count, plural, other {# spec trong context}}",
+      "settings": "Cấu hình Agent"
+    },
+    "chat": {
+      "hint": "Tick các spec liên quan bên trái rồi mô tả thay đổi bạn muốn.",
+      "thinking": "Agent đang xử lý",
+      "cliTitle": "{profile} · stdout",
+      "cliStarting": "Đang khởi chạy…",
+      "cliStatus": {
+        "RUNNING": "Đang chạy",
+        "DONE": "Xong · exit {code}",
+        "FAILED": "Thất bại · exit {code}",
+        "STOPPED": "Đã dừng"
+      },
+      "tool": {
+        "running": "Đang chạy",
+        "drafting": "Đang soạn",
+        "done": "Xong",
+        "error": "Lỗi",
+        "noChanges": "Không có thay đổi",
+        "pendingReview": "Chờ duyệt",
+        "reviewed": "Đã xử lý",
+        "openDiff": "Mở Diff"
+      }
+    },
+    "composer": {
+      "placeholderApi": "Yêu cầu Agent sửa spec…",
+      "placeholderCli": "Yêu cầu cho CLI Agent…",
+      "noContext": "Chưa chọn spec làm context",
+      "contextLabel": "{count, plural, other {# spec trong context}}",
+      "cliStartFailed": "Không chạy được CLI Agent",
+      "cliStopFailed": "Không dừng được CLI Agent"
+    }
+  }
+}

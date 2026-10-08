@@ -1,0 +1,22 @@
+{
+  "errors": {
+    "AGENT": {
+      "API_KEY_MISSING": "No API key is configured for this provider. Open Settings → Direct API to add one.",
+      "LLM_AUTH_FAILED": "The provider rejected the API key. Check the key in Settings.",
+      "MODEL_NOT_FOUND": "Model \"{model}\" was not found at the selected provider.",
+      "LLM_RATE_LIMITED": "The provider is rate limiting requests. Try again in a few minutes.",
+      "LLM_UNREACHABLE": "Could not reach the provider. Check your network or Base URL.",
+      "LLM_REQUEST_FAILED": "The provider returned an error while handling the request.",
+      "INVALID_MESSAGES": "The conversation history is invalid.",
+      "CLI_PROFILE_NOT_FOUND": "The selected CLI profile was not found.",
+      "CLI_NOT_INSTALLED": "Command \"{command}\" was not found on this machine.",
+      "CLI_SPEC_CONTEXT_REQUIRED": "This profile needs at least one spec selected as context.",
+      "CLI_SPAWN_FAILED": "Could not start the CLI agent.",
+      "CLI_EXIT_NONZERO": "The CLI agent exited with code {exitCode}.",
+      "CLI_TIMEOUT": "The CLI agent ran past the time limit and was stopped.",
+      "SANDBOX_FAILED": "Could not create the temporary copy to run the CLI agent.",
+      "RUN_NOT_FOUND": "CLI agent run not found.",
+      "RUN_ALREADY_ACTIVE": "This workspace already has a CLI agent run in progress."
+    }
+  }
+}

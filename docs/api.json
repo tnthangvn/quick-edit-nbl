@@ -1,0 +1,7188 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Spec Studio API",
+    "version": "1.0.0",
+    "description": "API local của Spec Studio. Lỗi chỉ trả mã (ErrorCode); FE tự dịch."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Spec Studio local"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Chat",
+      "description": "AI Agent qua Direct API"
+    },
+    {
+      "name": "CliRunner",
+      "description": "AI Agent qua CLI (Claude Code, Codex, Antigravity, Aider)"
+    },
+    {
+      "name": "Connector",
+      "description": "Kết nối Git provider: CLI, MCP, Token, SSH (spec 3.0.2)"
+    },
+    {
+      "name": "Notebook",
+      "description": "Đồng bộ NotebookLM"
+    },
+    {
+      "name": "Publish",
+      "description": "Pipeline sau Approve (spec 6.4)"
+    },
+    {
+      "name": "Setting",
+      "description": "Cấu hình app và Workspace, secret"
+    },
+    {
+      "name": "Spec",
+      "description": "Đọc / ghi / đổi tên / xoá file spec .md"
+    },
+    {
+      "name": "Storage",
+      "description": "Pull / publish cho Local, Git, Drive"
+    },
+    {
+      "name": "Workspace",
+      "description": "Registry Workspace: tạo, mở, kiểm tra (spec 3.0, 6.3)"
+    }
+  ],
+  "paths": {
+    "/api/workspaces": {
+      "get": {
+        "operationId": "listWorkspaces",
+        "tags": [
+          "Workspace"
+        ],
+        "summary": "Danh sách Workspace (màn hình Projects)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Tìm theo tên",
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Tìm theo tên"
+          },
+          {
+            "in": "query",
+            "name": "storageType",
+            "schema": {
+              "$ref": "#/components/schemas/StorageType"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "default": "RECENT",
+              "$ref": "#/components/schemas/WorkspaceSort"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createWorkspace",
+        "tags": [
+          "Workspace"
+        ],
+        "summary": "Tạo Workspace theo Wizard + New Project (spec 3.0.1, 6.3)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkspaceInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workspace"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}": {
+      "get": {
+        "operationId": "getWorkspace",
+        "tags": [
+          "Workspace"
+        ],
+        "summary": "Chi tiết một Workspace",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workspace"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateWorkspace",
+        "tags": [
+          "Workspace"
+        ],
+        "summary": "Đổi tên / mô tả / tìm lại thư mục Workspace",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorkspaceInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workspace"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "removeWorkspace",
+        "tags": [
+          "Workspace"
+        ],
+        "summary": "Gỡ Workspace khỏi danh sách (không xoá file)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/import": {
+      "post": {
+        "operationId": "importWorkspace",
+        "tags": [
+          "Workspace"
+        ],
+        "summary": "Mở thư mục có sẵn .spec-studio/config.json",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportWorkspaceInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workspace"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/open": {
+      "post": {
+        "operationId": "openWorkspace",
+        "tags": [
+          "Workspace"
+        ],
+        "summary": "Mở Workspace: ghi thời điểm mở, trả kèm cấu hình",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenedWorkspace"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/check": {
+      "post": {
+        "operationId": "checkWorkspace",
+        "tags": [
+          "Workspace"
+        ],
+        "summary": "Kiểm tra thư mục, Git remote, quyền Drive, Notebook",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceCheckResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/specs": {
+      "get": {
+        "operationId": "listSpecs",
+        "tags": [
+          "Spec"
+        ],
+        "summary": "Danh sách file spec .md kèm trạng thái sync (Sidebar)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecFileList"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createSpec",
+        "tags": [
+          "Spec"
+        ],
+        "summary": "Tạo file spec mới",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpecBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/specs/{file}": {
+      "get": {
+        "operationId": "getSpec",
+        "tags": [
+          "Spec"
+        ],
+        "summary": "Đọc nội dung một file spec",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "file",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "description": "Tên file spec, encodeURIComponent (\"/\" → %2F)"
+            },
+            "required": true,
+            "description": "Tên file spec, encodeURIComponent (\"/\" → %2F)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "approveSpec",
+        "tags": [
+          "Spec"
+        ],
+        "summary": "Approve & Save: ghi file rồi chạy pipeline publish (6.4) nền",
+        "description": "Ghi nguyên tử nội dung vào file (tạo mới nếu chưa có), trả runId của pipeline; tiến trình qua SSE PUBLISH_PROGRESS.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "file",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "description": "Tên file spec, encodeURIComponent (\"/\" → %2F)"
+            },
+            "required": true,
+            "description": "Tên file spec, encodeURIComponent (\"/\" → %2F)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveSpecBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApproveSpecResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "renameSpec",
+        "tags": [
+          "Spec"
+        ],
+        "summary": "Đổi tên file spec",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "file",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "description": "Tên file spec, encodeURIComponent (\"/\" → %2F)"
+            },
+            "required": true,
+            "description": "Tên file spec, encodeURIComponent (\"/\" → %2F)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameSpecBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecFile"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSpec",
+        "tags": [
+          "Spec"
+        ],
+        "summary": "Xoá file spec local",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "file",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024,
+              "description": "Tên file spec, encodeURIComponent (\"/\" → %2F)"
+            },
+            "required": true,
+            "description": "Tên file spec, encodeURIComponent (\"/\" → %2F)"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/events": {
+      "get": {
+        "operationId": "streamWorkspaceEvents",
+        "tags": [
+          "Spec"
+        ],
+        "summary": "SSE: SPEC_CHANGED, SPEC_PROPOSED, PUBLISH_PROGRESS của Workspace",
+        "description": "Mỗi message `data:` là một WorkspaceEvent. Watcher thư mục spec bật khi có subscriber đầu tiên và đóng khi subscriber cuối ngắt. Heartbeat `: ping` mỗi 15 giây.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Server-Sent Events",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceEvent"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "operationId": "getSettings",
+        "tags": [
+          "Setting"
+        ],
+        "summary": "Cấu hình Agent chung (Tab 1, 2)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSettingsView"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateSettings",
+        "tags": [
+          "Setting"
+        ],
+        "summary": "Lưu cấu hình Agent chung; API key chỉ ghi",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSettingsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSettingsView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/config": {
+      "get": {
+        "operationId": "getWorkspaceConfig",
+        "tags": [
+          "Setting"
+        ],
+        "summary": "Cấu hình Workspace (.spec-studio/config.json, Tab 3, 4)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceConfigOutput"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateWorkspaceConfig",
+        "tags": [
+          "Setting"
+        ],
+        "summary": "Lưu cấu hình Workspace (Tab 3, 4)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkspaceConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceConfigOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/secrets": {
+      "get": {
+        "operationId": "listWorkspaceSecrets",
+        "tags": [
+          "Setting"
+        ],
+        "summary": "Loại secret nào của Workspace đã nhập (chỉ boolean)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceSecretList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/secrets/{kind}": {
+      "put": {
+        "operationId": "setWorkspaceSecret",
+        "tags": [
+          "Setting"
+        ],
+        "summary": "Ghi secret của Workspace (chỉ ghi)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "kind",
+            "schema": {
+              "$ref": "#/components/schemas/WorkspaceSecretKind"
+            },
+            "required": true,
+            "description": "Loại secret riêng của Workspace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkspaceSecretInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteWorkspaceSecret",
+        "tags": [
+          "Setting"
+        ],
+        "summary": "Xoá secret của Workspace",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "kind",
+            "schema": {
+              "$ref": "#/components/schemas/WorkspaceSecretKind"
+            },
+            "required": true,
+            "description": "Loại secret riêng của Workspace"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connectors": {
+      "get": {
+        "operationId": "listConnectors",
+        "tags": [
+          "Connector"
+        ],
+        "summary": "Danh sách connector (Tab 5)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectorList"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createConnector",
+        "tags": [
+          "Connector"
+        ],
+        "summary": "Thêm connector Git provider",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConnectorInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connector"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connectors/{connectorId}": {
+      "patch": {
+        "operationId": "updateConnector",
+        "tags": [
+          "Connector"
+        ],
+        "summary": "Sửa connector, bật/tắt tool MCP cho Agent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connectorId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConnectorInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connector"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteConnector",
+        "tags": [
+          "Connector"
+        ],
+        "summary": "Xoá connector và secret của nó",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connectorId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connectors/{connectorId}/check": {
+      "post": {
+        "operationId": "checkConnector",
+        "tags": [
+          "Connector"
+        ],
+        "summary": "Kiểm tra connector: tài khoản, host, phạm vi, trạng thái",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connectorId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectorCheck"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connectors/detect": {
+      "get": {
+        "operationId": "detectConnectors",
+        "tags": [
+          "Connector"
+        ],
+        "summary": "Tự dò CLI Git provider trên máy (gh, glab, tea)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetectedCliList"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connectors/{connectorId}/repos": {
+      "get": {
+        "operationId": "listConnectorRepos",
+        "tags": [
+          "Connector"
+        ],
+        "summary": "Liệt kê repo qua connector",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connectorId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Lọc theo tên hoặc owner/repo",
+              "type": "string",
+              "maxLength": 200
+            },
+            "description": "Lọc theo tên hoặc owner/repo"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepositoryList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connectors/{connectorId}/branches": {
+      "get": {
+        "operationId": "listConnectorBranches",
+        "tags": [
+          "Connector"
+        ],
+        "summary": "Liệt kê branch của repo qua connector",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connectorId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "repo",
+            "schema": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 255
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitBranchList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connectors/{connectorId}/tools": {
+      "get": {
+        "operationId": "listConnectorTools",
+        "tags": [
+          "Connector"
+        ],
+        "summary": "Danh sách tool của MCP server",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connectorId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectorToolList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/pull": {
+      "post": {
+        "operationId": "pullWorkspace",
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Pull từ nơi lưu trữ (Git: pull --ff-only, Drive: tải file .md về)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PullResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/push": {
+      "post": {
+        "operationId": "pushWorkspace",
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Đẩy thay đổi spec lên nơi lưu trữ (Git: commit + push hoặc branch + PR theo publishMode, Drive: tải lên)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/storage/status": {
+      "get": {
+        "operationId": "getStorageStatus",
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Storage Status trên Header: thay đổi chưa commit / push (không gọi mạng)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/google/oauth/start": {
+      "get": {
+        "operationId": "startGoogleOAuth",
+        "tags": [
+          "Storage"
+        ],
+        "summary": "URL đăng nhập Google (Drive) để FE mở",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleOAuthStart"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/google/oauth/callback": {
+      "get": {
+        "operationId": "completeGoogleOAuth",
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Callback OAuth của Google: lưu refresh token vào secret store",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "code",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleOAuthStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/google/oauth/status": {
+      "get": {
+        "operationId": "getGoogleOAuthStatus",
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Đã cấu hình / đã đăng nhập Google chưa",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleOAuthStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/notebook/check": {
+      "post": {
+        "operationId": "checkNotebook",
+        "tags": [
+          "Notebook"
+        ],
+        "summary": "Kiểm tra truy cập notebook NotebookLM (qua CLI nlm) và đếm source",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckNotebookBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotebookCheckResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/sync/{file}": {
+      "post": {
+        "operationId": "forceSyncSpec",
+        "tags": [
+          "Publish"
+        ],
+        "summary": "Force Sync / Thử lại một đích cho file spec",
+        "description": "Xếp một lần chạy pipeline (sau lần đang chạy của cùng file, nếu có). Tiến trình qua SSE PUBLISH_PROGRESS.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "file",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForceSyncBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/workspaces/{workspaceId}/publish/runs": {
+      "get": {
+        "operationId": "listPublishRuns",
+        "tags": [
+          "Publish"
+        ],
+        "summary": "Lần chạy pipeline mới nhất của từng file (khôi phục Sync Activity sau khi kết nối lại)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishRunList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat": {
+      "post": {
+        "operationId": "streamChat",
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Chat với Agent (Direct API), trả UI message stream cho useChat",
+        "description": "Body của useChat (DefaultChatTransport) + workspaceId + contextFiles. Tools: list_specs, read_spec, propose_spec_update (phát SPEC_PROPOSED trên GET /api/workspaces/{workspaceId}/events, không ghi file). Lỗi giữa stream: chunk `error` với errorText = ErrorCode.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamChatBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Server-Sent Events",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatStreamChunk"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/test-connection": {
+      "post": {
+        "operationId": "testLlmConnection",
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Kiểm tra API key / model / base URL (Settings Tab 1, nút Test)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestLlmConnectionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LlmConnectionTestResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/detect": {
+      "get": {
+        "operationId": "detectCliAgents",
+        "tags": [
+          "CliRunner"
+        ],
+        "summary": "Dò CLI agent đã cài (which, version, đăng nhập) cho Settings Tab 2",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CliAgentDetectionList"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/runs": {
+      "post": {
+        "operationId": "startCliRun",
+        "tags": [
+          "CliRunner"
+        ],
+        "summary": "Chạy CLI agent trong sandbox (bản sao specsDir)",
+        "description": "Trả runId ngay; theo dõi qua GET /api/agent/runs/{runId}/events. Khi xong, mỗi file .md CLI sửa được đẩy thành SPEC_PROPOSED (sourceId = runId) trên SSE của workspace. Không ghi file thật. Mỗi workspace một run đang chạy (409).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartCliRunBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CliRunStarted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/runs/{runId}/events": {
+      "get": {
+        "operationId": "streamCliRunEvents",
+        "tags": [
+          "CliRunner"
+        ],
+        "summary": "SSE event của một run CLI (phát lại từ đầu cho client vào muộn)",
+        "description": "Mỗi event là CliRunEvent; khử trùng theo `seq` khi EventSource nối lại. Đóng EventSource khi nhận STATUS DONE / FAILED / STOPPED.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Server-Sent Events",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/CliRunEvent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/runs/{runId}": {
+      "delete": {
+        "operationId": "stopCliRun",
+        "tags": [
+          "CliRunner"
+        ],
+        "summary": "Dừng run CLI (idempotent); STATUS STOPPED đi qua SSE",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "runId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "WorkspaceSort": {
+        "type": "string",
+        "enum": [
+          "RECENT",
+          "NAME"
+        ]
+      },
+      "CreateWorkspaceInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "path": {
+            "description": "Thư mục làm việc local (workspacePath), đường dẫn tuyệt đối",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "specsDir": {
+            "default": "./specs",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "storage": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "LOCAL"
+                  }
+                },
+                "required": [
+                  "type"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "GIT"
+                  },
+                  "git": {
+                    "$ref": "#/components/schemas/GitStorageInput"
+                  },
+                  "shareConfig": {
+                    "default": false,
+                    "description": "true = không thêm .spec-studio/ vào .gitignore",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "type",
+                  "git"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "DRIVE"
+                  },
+                  "drive": {
+                    "type": "object",
+                    "properties": {
+                      "folderId": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "description": "Drive Folder ID hoặc URL thư mục"
+                      },
+                      "pullOnOpen": {
+                        "default": true,
+                        "type": "boolean"
+                      },
+                      "pushOnApprove": {
+                        "default": true,
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "folderId"
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "drive"
+                ]
+              }
+            ],
+            "type": "object"
+          },
+          "notebook": {
+            "default": null,
+            "description": "null = Bỏ qua, kết nối sau",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NotebookInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "path",
+          "storage"
+        ]
+      },
+      "GitStorageInput": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/GitProvider"
+          },
+          "host": {
+            "description": "Bỏ trống = host mặc định của provider (github.com, gitlab.com, bitbucket.org)",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[a-z0-9.-]+(:\\d{1,5})?$"
+          },
+          "connectorId": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "repo": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "remote": {
+            "description": "Bỏ trống khi đã chọn repo qua connector (suy ra https://<host>/<repo>.git)",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "branch": {
+            "default": "main",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "subdir": {
+            "default": ".",
+            "type": "string",
+            "maxLength": 255
+          },
+          "publishMode": {
+            "default": "PUSH",
+            "$ref": "#/components/schemas/PublishMode"
+          },
+          "prBranchTemplate": {
+            "default": "spec/{date}-{filename}",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "autoCommit": {
+            "default": true,
+            "type": "boolean"
+          },
+          "autoPush": {
+            "default": false,
+            "type": "boolean"
+          },
+          "commitMessage": {
+            "default": "docs(spec): {action} {filename}",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "pullOnOpen": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "provider"
+        ]
+      },
+      "NotebookInput": {
+        "type": "object",
+        "properties": {
+          "notebookId": {
+            "default": null,
+            "description": "Notebook ID hoặc URL notebook (tự tách ID)",
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "syncStrategy": {
+            "default": "DRIVE_SYNC",
+            "$ref": "#/components/schemas/SyncStrategy"
+          },
+          "driveFolderId": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "autoSyncOnApprove": {
+            "default": false,
+            "type": "boolean"
+          },
+          "confirmBeforeSync": {
+            "default": true,
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateWorkspaceInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "path": {
+            "description": "Tìm lại thư mục đã di chuyển (phải có .spec-studio/config.json)",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        }
+      },
+      "ImportWorkspaceInput": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "name": {
+            "description": "Đặt tên khác khi tên trong config.json đã trùng",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "path"
+        ]
+      },
+      "CreateSpecBody": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Tên file .md tương đối trong thư mục spec (vd \"sidebar.md\", \"ui/header.md\")"
+          },
+          "content": {
+            "default": "",
+            "type": "string",
+            "maxLength": 5000000
+          }
+        },
+        "required": [
+          "file"
+        ]
+      },
+      "ApproveSpecBody": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "maxLength": 5000000
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "RenameSpecBody": {
+        "type": "object",
+        "properties": {
+          "newFile": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Tên file .md tương đối trong thư mục spec (vd \"sidebar.md\", \"ui/header.md\")"
+          }
+        },
+        "required": [
+          "newFile"
+        ]
+      },
+      "UpdateSettingsInput": {
+        "type": "object",
+        "properties": {
+          "activeMode": {
+            "$ref": "#/components/schemas/AgentMode"
+          },
+          "api": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "$ref": "#/components/schemas/LlmProvider"
+              },
+              "model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "baseUrl": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "temperature": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "systemPrompt": {
+                "type": "string"
+              },
+              "apiKey": {
+                "description": "Chỉ ghi: chuỗi = lưu key cho provider đang chọn, null = xoá, bỏ trống = giữ nguyên",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "provider",
+              "model",
+              "baseUrl",
+              "temperature",
+              "systemPrompt"
+            ]
+          },
+          "cli": {
+            "type": "object",
+            "properties": {
+              "activeProfileId": {
+                "type": "string"
+              },
+              "streamStdout": {
+                "type": "boolean"
+              },
+              "profiles": {
+                "minItems": 1,
+                "maxItems": 50,
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CliProfile"
+                }
+              }
+            },
+            "required": [
+              "activeProfileId",
+              "streamStdout",
+              "profiles"
+            ]
+          }
+        },
+        "required": [
+          "activeMode",
+          "api",
+          "cli"
+        ]
+      },
+      "WorkspaceConfig": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number",
+            "const": 1
+          },
+          "workspace": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "specsDir": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "specsDir"
+            ]
+          },
+          "storage": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "$ref": "#/components/schemas/StorageType"
+              },
+              "git": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/GitStorageConfig"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "drive": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DriveStorageConfig"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "git",
+              "drive"
+            ]
+          },
+          "nbl": {
+            "$ref": "#/components/schemas/NotebookConfig"
+          },
+          "agent": {
+            "$ref": "#/components/schemas/AgentSettingsOverride"
+          }
+        },
+        "required": [
+          "version",
+          "workspace",
+          "storage",
+          "nbl"
+        ]
+      },
+      "GitStorageConfig": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/GitProvider"
+          },
+          "host": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[a-z0-9.-]+(:\\d{1,5})?$"
+          },
+          "connectorId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "repo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "remote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "branch": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "subdir": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "publishMode": {
+            "$ref": "#/components/schemas/PublishMode"
+          },
+          "prBranchTemplate": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "autoCommit": {
+            "type": "boolean"
+          },
+          "autoPush": {
+            "type": "boolean"
+          },
+          "commitMessage": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "pullOnOpen": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "provider",
+          "host",
+          "connectorId",
+          "repo",
+          "remote",
+          "branch",
+          "subdir",
+          "publishMode",
+          "prBranchTemplate",
+          "autoCommit",
+          "autoPush",
+          "commitMessage",
+          "pullOnOpen"
+        ]
+      },
+      "DriveStorageConfig": {
+        "type": "object",
+        "properties": {
+          "folderId": {
+            "type": "string",
+            "pattern": "^[\\w-]+$"
+          },
+          "pullOnOpen": {
+            "type": "boolean"
+          },
+          "pushOnApprove": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "folderId",
+          "pullOnOpen",
+          "pushOnApprove"
+        ]
+      },
+      "NotebookConfig": {
+        "type": "object",
+        "properties": {
+          "notebookId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "syncStrategy": {
+            "$ref": "#/components/schemas/SyncStrategy"
+          },
+          "driveFolderId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "autoSyncOnApprove": {
+            "type": "boolean"
+          },
+          "confirmBeforeSync": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "notebookId",
+          "syncStrategy",
+          "driveFolderId",
+          "autoSyncOnApprove",
+          "confirmBeforeSync"
+        ]
+      },
+      "AgentSettingsOverride": {
+        "type": "object",
+        "properties": {
+          "activeMode": {
+            "$ref": "#/components/schemas/AgentMode"
+          },
+          "api": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "$ref": "#/components/schemas/LlmProvider"
+              },
+              "model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "temperature": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "systemPrompt": {
+                "type": "string"
+              }
+            }
+          },
+          "cli": {
+            "type": "object",
+            "properties": {
+              "activeProfileId": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      },
+      "WorkspaceSecretKind": {
+        "type": "string",
+        "enum": [
+          "NOTEBOOK_COOKIE",
+          "NOTEBOOK_TOKEN",
+          "GIT_TOKEN",
+          "GOOGLE_OAUTH"
+        ],
+        "description": "Loại secret riêng của Workspace"
+      },
+      "WorkspaceSecretInput": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16384
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "CreateConnectorInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "type": {
+            "$ref": "#/components/schemas/ConnectorType"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/GitProvider"
+          },
+          "host": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255,
+                "pattern": "^[a-z0-9.-]+(:\\d{1,5})?$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "command": {
+            "default": null,
+            "description": "CLI: gh / glab / tea (bỏ trống = theo provider); MCP stdio: lệnh chạy server",
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "args": {
+            "default": [],
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 1024
+            }
+          },
+          "env": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 4096
+            }
+          },
+          "transport": {
+            "default": null,
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/McpTransport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "default": null,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2048
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "headers": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 4096
+            }
+          },
+          "secrets": {
+            "default": {},
+            "description": "Chỉ ghi: env (stdio) / header (HTTP) bí mật của MCP server, lưu trong secret store",
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192
+            }
+          },
+          "token": {
+            "description": "Chỉ ghi: Personal Access Token cho connector TOKEN",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8192
+          },
+          "agentTools": {
+            "default": [],
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "provider"
+        ]
+      },
+      "McpTransport": {
+        "type": "string",
+        "enum": [
+          "STDIO",
+          "HTTP"
+        ]
+      },
+      "UpdateConnectorInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "provider": {
+            "$ref": "#/components/schemas/GitProvider"
+          },
+          "host": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255,
+                "pattern": "^[a-z0-9.-]+(:\\d{1,5})?$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "command": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "args": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 1024
+            }
+          },
+          "env": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 4096
+            }
+          },
+          "transport": {
+            "$ref": "#/components/schemas/McpTransport"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "headers": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 4096
+            }
+          },
+          "secrets": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "token": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 8192
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "agentTools": {
+            "description": "Tool MCP cấp cho AI Agent (bật/tắt ở Tab 5)",
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        }
+      },
+      "CheckNotebookBody": {
+        "type": "object",
+        "properties": {
+          "notebookId": {
+            "description": "Bỏ trống = notebook đã cấu hình của Workspace",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "syncStrategy": {
+            "$ref": "#/components/schemas/SyncStrategy"
+          }
+        }
+      },
+      "ForceSyncBody": {
+        "default": {},
+        "type": "object",
+        "properties": {
+          "target": {
+            "description": "Chỉ chạy lại đích này (nút Thử lại); bỏ trống = mọi đích đã cấu hình",
+            "$ref": "#/components/schemas/PublishTarget"
+          }
+        }
+      },
+      "StreamChatBody": {
+        "type": "object",
+        "properties": {
+          "workspaceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "messages": {
+            "minItems": 1,
+            "maxItems": 500,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatUiMessage"
+            }
+          },
+          "contextFiles": {
+            "default": [],
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          }
+        },
+        "required": [
+          "workspaceId",
+          "messages"
+        ]
+      },
+      "ChatUiMessage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "description": "system | user | assistant (giá trị của AI SDK)"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": {}
+            }
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "parts"
+        ],
+        "additionalProperties": {},
+        "description": "UIMessage của Vercel AI SDK v7; FE dùng type của @ai-sdk/react"
+      },
+      "TestLlmConnectionBody": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/LlmProvider"
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "baseUrl": {
+            "type": "string",
+            "maxLength": 500,
+            "format": "uri"
+          },
+          "apiKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "workspaceId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "provider",
+          "model"
+        ]
+      },
+      "StartCliRunBody": {
+        "type": "object",
+        "properties": {
+          "workspaceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "profileId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "contextFiles": {
+            "default": [],
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          }
+        },
+        "required": [
+          "workspaceId",
+          "profileId",
+          "prompt"
+        ]
+      },
+      "SpecProposedEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "SPEC_PROPOSED"
+          },
+          "workspaceId": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "original": {
+            "type": "string"
+          },
+          "proposed": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "workspaceId",
+          "file",
+          "original",
+          "proposed",
+          "sourceId"
+        ]
+      },
+      "SpecChangedEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "SPEC_CHANGED"
+          },
+          "workspaceId": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "change": {
+            "$ref": "#/components/schemas/SpecChangeKind"
+          },
+          "syncStatus": {
+            "$ref": "#/components/schemas/SpecSyncStatus"
+          }
+        },
+        "required": [
+          "type",
+          "workspaceId",
+          "file",
+          "change",
+          "syncStatus"
+        ]
+      },
+      "SpecChangeKind": {
+        "type": "string",
+        "enum": [
+          "CREATED",
+          "UPDATED",
+          "DELETED"
+        ]
+      },
+      "PublishProgressEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "PUBLISH_PROGRESS"
+          },
+          "workspaceId": {
+            "type": "string"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublishStep"
+            }
+          },
+          "finished": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "workspaceId",
+          "runId",
+          "file",
+          "steps",
+          "finished"
+        ]
+      },
+      "PublishStep": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "$ref": "#/components/schemas/PublishTarget"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PublishStepStatus"
+          },
+          "detail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "$ref": "#/components/schemas/ErrorCode"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/ErrorParams"
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "status",
+          "detail",
+          "url",
+          "error"
+        ]
+      },
+      "ErrorParams": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string"
+        },
+        "additionalProperties": {
+          "type": [
+            "string",
+            "number",
+            "boolean"
+          ]
+        },
+        "description": "Giá trị chèn vào bản dịch; không chứa câu thông báo"
+      },
+      "ErrorCode": {
+        "type": "string",
+        "enum": [
+          "INTERNAL.UNEXPECTED",
+          "VALIDATION.FAILED",
+          "FIELD.REQUIRED",
+          "FIELD.INVALID_FORMAT",
+          "FIELD.TOO_SHORT",
+          "FIELD.TOO_LONG",
+          "FIELD.INVALID_VALUE",
+          "REQUEST.MALFORMED_JSON",
+          "RESOURCE.NOT_FOUND",
+          "RESOURCE.CONFLICT",
+          "WORKSPACE.NOT_FOUND",
+          "WORKSPACE.NAME_TAKEN",
+          "WORKSPACE.PATH_IN_USE",
+          "WORKSPACE.ALREADY_REGISTERED",
+          "WORKSPACE.CONFIG_EXISTS",
+          "WORKSPACE.CONFIG_NOT_FOUND",
+          "WORKSPACE.CONFIG_INVALID",
+          "WORKSPACE.FOLDER_NOT_FOUND",
+          "WORKSPACE.FOLDER_MISSING",
+          "WORKSPACE.FOLDER_NOT_WRITABLE",
+          "WORKSPACE.FOLDER_NOT_EMPTY",
+          "WORKSPACE.INVALID_PATH",
+          "WORKSPACE.INVALID_SPECS_DIR",
+          "WORKSPACE.INVALID_GIT_REMOTE",
+          "WORKSPACE.INVALID_BRANCH",
+          "WORKSPACE.INVALID_REPO",
+          "WORKSPACE.CLONE_FAILED",
+          "WORKSPACE.DRIVE_DOWNLOAD_FAILED",
+          "WORKSPACE.GIT_REMOTE_UNREACHABLE",
+          "WORKSPACE.GIT_BRANCH_NOT_FOUND",
+          "WORKSPACE.DRIVE_NOT_CONFIGURED",
+          "WORKSPACE.DRIVE_ACCESS_DENIED",
+          "WORKSPACE.NOTEBOOK_UNREACHABLE",
+          "SPEC.NOT_FOUND",
+          "SPEC.ALREADY_EXISTS",
+          "SPEC.INVALID_NAME",
+          "SPEC.PATH_OUTSIDE_WORKSPACE",
+          "SPEC.SPECS_DIR_NOT_FOUND",
+          "SETTING.CLI_PROFILE_NOT_FOUND",
+          "SETTING.CLI_PROFILE_DUPLICATE",
+          "SETTING.WORKSPACE_ID_MISMATCH",
+          "SETTING.SECRET_NOT_SET",
+          "CONNECTOR.NOT_FOUND",
+          "CONNECTOR.NOT_SUPPORTED",
+          "CONNECTOR.CLI_NOT_FOUND",
+          "CONNECTOR.NEEDS_LOGIN",
+          "CONNECTOR.TOKEN_MISSING",
+          "CONNECTOR.PROVIDER_ERROR",
+          "CONNECTOR.REPO_NOT_FOUND",
+          "CONNECTOR.MCP_UNREACHABLE",
+          "CONNECTOR.MCP_TOOL_MISSING",
+          "CONNECTOR.INVALID_COMMAND",
+          "CONNECTOR.INVALID_URL",
+          "CONNECTOR.INVALID_SECRET_KEY",
+          "STORAGE.NOT_SUPPORTED",
+          "STORAGE.CONFIG_MISSING",
+          "STORAGE.PULL_CONFLICT",
+          "STORAGE.PUSH_REJECTED",
+          "STORAGE.GIT_AUTH_FAILED",
+          "STORAGE.GIT_COMMAND_FAILED",
+          "STORAGE.CLONE_FAILED",
+          "STORAGE.GOOGLE_NOT_CONFIGURED",
+          "STORAGE.GOOGLE_AUTH_REQUIRED",
+          "STORAGE.GOOGLE_OAUTH_STATE_INVALID",
+          "STORAGE.GOOGLE_OAUTH_FAILED",
+          "STORAGE.DRIVE_NOT_FOUND",
+          "STORAGE.DRIVE_REQUEST_FAILED",
+          "NOTEBOOK.NOT_CONFIGURED",
+          "NOTEBOOK.CLI_NOT_FOUND",
+          "NOTEBOOK.AUTH_REQUIRED",
+          "NOTEBOOK.NOT_FOUND",
+          "NOTEBOOK.COMMAND_FAILED",
+          "PUBLISH.TARGET_NOT_CONFIGURED",
+          "PUBLISH.PREREQUISITE_FAILED",
+          "AGENT.API_KEY_MISSING",
+          "AGENT.LLM_AUTH_FAILED",
+          "AGENT.MODEL_NOT_FOUND",
+          "AGENT.LLM_RATE_LIMITED",
+          "AGENT.LLM_UNREACHABLE",
+          "AGENT.LLM_REQUEST_FAILED",
+          "AGENT.INVALID_MESSAGES",
+          "AGENT.CLI_PROFILE_NOT_FOUND",
+          "AGENT.CLI_NOT_INSTALLED",
+          "AGENT.CLI_SPEC_CONTEXT_REQUIRED",
+          "AGENT.CLI_SPAWN_FAILED",
+          "AGENT.CLI_EXIT_NONZERO",
+          "AGENT.CLI_TIMEOUT",
+          "AGENT.SANDBOX_FAILED",
+          "AGENT.RUN_NOT_FOUND",
+          "AGENT.RUN_ALREADY_ACTIVE"
+        ],
+        "description": "Mã lỗi dạng DOMAIN.REASON"
+      },
+      "StorageType": {
+        "type": "string",
+        "enum": [
+          "LOCAL",
+          "GIT",
+          "DRIVE"
+        ],
+        "description": "Nơi lưu file spec"
+      },
+      "SpecSyncStatus": {
+        "type": "string",
+        "enum": [
+          "SYNCED",
+          "UNSAVED",
+          "SYNCING",
+          "ERROR"
+        ]
+      },
+      "PublishTarget": {
+        "type": "string",
+        "enum": [
+          "LOCAL",
+          "GIT",
+          "DRIVE",
+          "NOTEBOOK"
+        ]
+      },
+      "PublishStepStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "RUNNING",
+          "DONE",
+          "ERROR",
+          "SKIPPED"
+        ]
+      },
+      "SyncStrategy": {
+        "type": "string",
+        "enum": [
+          "DRIVE_SYNC",
+          "RPC"
+        ]
+      },
+      "PublishMode": {
+        "type": "string",
+        "enum": [
+          "PUSH",
+          "PULL_REQUEST"
+        ]
+      },
+      "GitProvider": {
+        "type": "string",
+        "enum": [
+          "GITHUB",
+          "GITLAB",
+          "BITBUCKET",
+          "GITEA",
+          "GENERIC"
+        ]
+      },
+      "ConnectorType": {
+        "type": "string",
+        "enum": [
+          "CLI",
+          "MCP",
+          "TOKEN",
+          "SSH"
+        ]
+      },
+      "AgentMode": {
+        "type": "string",
+        "enum": [
+          "API",
+          "CLI"
+        ]
+      },
+      "LlmProvider": {
+        "type": "string",
+        "enum": [
+          "GOOGLE",
+          "ANTHROPIC",
+          "OPENAI",
+          "DEEPSEEK",
+          "OLLAMA"
+        ]
+      },
+      "CliAgentKind": {
+        "type": "string",
+        "enum": [
+          "CLAUDE_CODE",
+          "CODEX",
+          "ANTIGRAVITY",
+          "AIDER",
+          "CUSTOM"
+        ]
+      },
+      "CliOutputFormat": {
+        "type": "string",
+        "enum": [
+          "STREAM_JSON",
+          "JSONL",
+          "TEXT"
+        ]
+      },
+      "CliProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "$ref": "#/components/schemas/CliAgentKind"
+          },
+          "command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "outputFormat": {
+            "$ref": "#/components/schemas/CliOutputFormat"
+          },
+          "env": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "command",
+          "args",
+          "outputFormat"
+        ]
+      },
+      "WorkspaceList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Workspace"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "Workspace": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "specsDir": {
+            "type": "string"
+          },
+          "storageType": {
+            "$ref": "#/components/schemas/StorageType"
+          },
+          "storageLabel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notebookId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkspaceStatus"
+          },
+          "lastOpenedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "path",
+          "specsDir",
+          "storageType",
+          "storageLabel",
+          "notebookId",
+          "status",
+          "lastOpenedAt",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "WorkspaceStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "FOLDER_MISSING"
+        ],
+        "description": "Trạng thái thư mục làm việc của Workspace"
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "const": "VALIDATION.FAILED"
+              },
+              "fields": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/FieldError"
+                }
+              },
+              "traceId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "fields"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "FieldError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ErrorCode"
+          },
+          "params": {
+            "$ref": "#/components/schemas/ErrorParams"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "additionalProperties": false
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "$ref": "#/components/schemas/ErrorCode"
+              },
+              "params": {
+                "$ref": "#/components/schemas/ErrorParams"
+              },
+              "traceId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "OpenedWorkspace": {
+        "type": "object",
+        "properties": {
+          "workspace": {
+            "$ref": "#/components/schemas/Workspace"
+          },
+          "config": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkspaceConfigOutput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "workspace",
+          "config"
+        ],
+        "additionalProperties": false
+      },
+      "WorkspaceCheckResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceCheckItem"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "WorkspaceCheckItem": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "$ref": "#/components/schemas/WorkspaceCheckTarget"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkspaceCheckStatus"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "$ref": "#/components/schemas/ErrorCode"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/ErrorParams"
+                  }
+                },
+                "required": [
+                  "code"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "info": {
+            "anyOf": [
+              {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "status",
+          "error",
+          "info"
+        ],
+        "additionalProperties": false
+      },
+      "WorkspaceCheckTarget": {
+        "type": "string",
+        "enum": [
+          "FOLDER",
+          "GIT_REMOTE",
+          "DRIVE",
+          "NOTEBOOK"
+        ]
+      },
+      "WorkspaceCheckStatus": {
+        "type": "string",
+        "enum": [
+          "OK",
+          "ERROR",
+          "SKIPPED"
+        ]
+      },
+      "SpecFileList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpecFile"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "SpecFile": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "syncStatus": {
+            "$ref": "#/components/schemas/SpecSyncStatus"
+          }
+        },
+        "required": [
+          "file",
+          "size",
+          "updatedAt",
+          "syncStatus"
+        ],
+        "additionalProperties": false
+      },
+      "SpecDetail": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "syncStatus": {
+            "$ref": "#/components/schemas/SpecSyncStatus"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "file",
+          "size",
+          "updatedAt",
+          "syncStatus",
+          "content"
+        ],
+        "additionalProperties": false
+      },
+      "ApproveSpecResult": {
+        "type": "object",
+        "properties": {
+          "spec": {
+            "$ref": "#/components/schemas/SpecDetail"
+          },
+          "runId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "spec",
+          "runId"
+        ],
+        "additionalProperties": false
+      },
+      "AgentSettingsView": {
+        "type": "object",
+        "properties": {
+          "activeMode": {
+            "$ref": "#/components/schemas/AgentMode"
+          },
+          "api": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "$ref": "#/components/schemas/LlmProvider"
+              },
+              "model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "baseUrl": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "temperature": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "systemPrompt": {
+                "type": "string"
+              },
+              "hasApiKey": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "provider",
+              "model",
+              "baseUrl",
+              "temperature",
+              "systemPrompt",
+              "hasApiKey"
+            ],
+            "additionalProperties": false
+          },
+          "cli": {
+            "type": "object",
+            "properties": {
+              "activeProfileId": {
+                "type": "string"
+              },
+              "streamStdout": {
+                "type": "boolean"
+              },
+              "profiles": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CliProfileOutput"
+                }
+              }
+            },
+            "required": [
+              "activeProfileId",
+              "streamStdout",
+              "profiles"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "activeMode",
+          "api",
+          "cli"
+        ],
+        "additionalProperties": false
+      },
+      "WorkspaceSecretList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceSecretState"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "WorkspaceSecretState": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/WorkspaceSecretKind"
+          },
+          "isSet": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kind",
+          "isSet"
+        ],
+        "additionalProperties": false
+      },
+      "ConnectorList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Connector"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "Connector": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ConnectorType"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/GitProvider"
+          },
+          "host": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "command": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "env": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "transport": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/McpTransport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "headers": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "secretKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "agentTools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hasToken": {
+            "type": "boolean"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConnectorStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "account": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "checkedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "provider",
+          "host",
+          "command",
+          "args",
+          "env",
+          "transport",
+          "url",
+          "headers",
+          "secretKeys",
+          "agentTools",
+          "hasToken",
+          "status",
+          "account",
+          "scopes",
+          "checkedAt",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "ConnectorStatus": {
+        "type": "string",
+        "enum": [
+          "CONNECTED",
+          "NEEDS_LOGIN",
+          "CLI_NOT_FOUND",
+          "ERROR"
+        ],
+        "description": "Trạng thái kết nối của connector"
+      },
+      "ConnectorCheck": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ConnectorStatus"
+          },
+          "account": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "host": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "loginCommand": {
+            "description": "Lệnh gợi ý khi CLI chưa đăng nhập",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "status",
+          "account",
+          "host",
+          "scopes",
+          "loginCommand",
+          "checkedAt"
+        ],
+        "additionalProperties": false
+      },
+      "DetectedCliList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DetectedCli"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "DetectedCli": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/GitProvider"
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "loggedIn": {
+            "type": "boolean"
+          },
+          "host": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "account": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "loginCommand": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "command",
+          "provider",
+          "path",
+          "version",
+          "loggedIn",
+          "host",
+          "account",
+          "loginCommand"
+        ],
+        "additionalProperties": false
+      },
+      "GitRepositoryList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GitRepository"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "GitRepository": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "defaultBranch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "private": {
+            "type": "boolean"
+          },
+          "cloneUrl": {
+            "type": "string"
+          },
+          "sshUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "webUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fullName",
+          "defaultBranch",
+          "private",
+          "cloneUrl",
+          "sshUrl",
+          "webUrl"
+        ],
+        "additionalProperties": false
+      },
+      "GitBranchList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GitBranch"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "GitBranch": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "isDefault"
+        ],
+        "additionalProperties": false
+      },
+      "ConnectorToolList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConnectorTool"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "ConnectorTool": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "enabled"
+        ],
+        "additionalProperties": false
+      },
+      "PullResult": {
+        "type": "object",
+        "properties": {
+          "storageType": {
+            "$ref": "#/components/schemas/StorageType"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "headSha": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "storageType",
+          "files",
+          "headSha"
+        ],
+        "additionalProperties": false
+      },
+      "PushResult": {
+        "type": "object",
+        "properties": {
+          "storageType": {
+            "$ref": "#/components/schemas/StorageType"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "commitSha": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pushed": {
+            "type": "boolean"
+          },
+          "pullRequest": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "url": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "number",
+                  "url"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "storageType",
+          "files",
+          "branch",
+          "commitSha",
+          "pushed",
+          "pullRequest"
+        ],
+        "additionalProperties": false
+      },
+      "StorageStatus": {
+        "type": "object",
+        "properties": {
+          "storageType": {
+            "$ref": "#/components/schemas/StorageType"
+          },
+          "branch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "currentBranch": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "uncommitted": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "ahead": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "behind": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pendingFiles": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "storageType",
+          "branch",
+          "currentBranch",
+          "uncommitted",
+          "ahead",
+          "behind",
+          "pendingFiles"
+        ],
+        "additionalProperties": false
+      },
+      "GoogleOAuthStart": {
+        "type": "object",
+        "properties": {
+          "authUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "authUrl"
+        ],
+        "additionalProperties": false
+      },
+      "GoogleOAuthStatus": {
+        "type": "object",
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "connected": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "configured",
+          "connected"
+        ],
+        "additionalProperties": false
+      },
+      "NotebookCheckResult": {
+        "type": "object",
+        "properties": {
+          "notebookId": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "sourceCount": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "notebookId",
+          "ok",
+          "sourceCount",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "PublishRun": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string"
+          },
+          "workspaceId": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublishStepOutput"
+            }
+          },
+          "finished": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "runId",
+          "workspaceId",
+          "file",
+          "steps",
+          "finished",
+          "createdAt",
+          "finishedAt"
+        ],
+        "additionalProperties": false
+      },
+      "PublishRunList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublishRun"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "ChatStreamChunk": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": {},
+        "description": "UIMessageChunk của Vercel AI SDK v7"
+      },
+      "LlmConnectionTestResult": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "latencyMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "ok",
+          "latencyMs"
+        ],
+        "additionalProperties": false
+      },
+      "CliAgentDetectionList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CliAgentDetection"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "CliAgentDetection": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/CliAgentKind"
+          },
+          "binary": {
+            "type": "string"
+          },
+          "found": {
+            "type": "boolean"
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "loginStatus": {
+            "$ref": "#/components/schemas/CliLoginStatus"
+          },
+          "installCommand": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "binary",
+          "found",
+          "path",
+          "version",
+          "loginStatus",
+          "installCommand"
+        ],
+        "additionalProperties": false
+      },
+      "CliLoginStatus": {
+        "type": "string",
+        "enum": [
+          "LOGGED_IN",
+          "LOGGED_OUT",
+          "UNKNOWN",
+          "NOT_APPLICABLE"
+        ]
+      },
+      "CliRunStarted": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "runId"
+        ],
+        "additionalProperties": false
+      },
+      "CliRunEvent": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CliRunStatusEvent"
+          },
+          {
+            "$ref": "#/components/schemas/CliRunLogEvent"
+          },
+          {
+            "$ref": "#/components/schemas/CliRunToolCallEvent"
+          },
+          {
+            "$ref": "#/components/schemas/CliRunMessageEvent"
+          },
+          {
+            "$ref": "#/components/schemas/CliRunProposalEvent"
+          }
+        ],
+        "type": "object",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "STATUS": "#/components/schemas/CliRunStatusEvent",
+            "LOG": "#/components/schemas/CliRunLogEvent",
+            "TOOL_CALL": "#/components/schemas/CliRunToolCallEvent",
+            "MESSAGE": "#/components/schemas/CliRunMessageEvent",
+            "PROPOSAL": "#/components/schemas/CliRunProposalEvent"
+          }
+        }
+      },
+      "CliRunStatusEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "STATUS"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CliRunStatus"
+          },
+          "exitCode": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "$ref": "#/components/schemas/ErrorCode"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/ErrorParams"
+                  }
+                },
+                "required": [
+                  "code"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "runId",
+          "seq",
+          "at",
+          "status",
+          "exitCode",
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "CliRunStatus": {
+        "type": "string",
+        "enum": [
+          "RUNNING",
+          "DONE",
+          "FAILED",
+          "STOPPED"
+        ],
+        "description": "Trạng thái lần chạy CLI agent"
+      },
+      "CliRunLogEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "LOG"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "stream": {
+            "$ref": "#/components/schemas/CliLogStream"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "runId",
+          "seq",
+          "at",
+          "stream",
+          "text"
+        ],
+        "additionalProperties": false
+      },
+      "CliLogStream": {
+        "type": "string",
+        "enum": [
+          "STDOUT",
+          "STDERR"
+        ]
+      },
+      "CliRunToolCallEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "TOOL_CALL"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "input": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "runId",
+          "seq",
+          "at",
+          "name",
+          "input"
+        ],
+        "additionalProperties": false
+      },
+      "CliRunMessageEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "MESSAGE"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "text": {
+            "type": "string"
+          },
+          "delta": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "runId",
+          "seq",
+          "at",
+          "text",
+          "delta"
+        ],
+        "additionalProperties": false
+      },
+      "CliRunProposalEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "PROPOSAL"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "file": {
+            "type": "string"
+          },
+          "isNewFile": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "runId",
+          "seq",
+          "at",
+          "file",
+          "isNewFile"
+        ],
+        "additionalProperties": false
+      },
+      "WorkspaceEvent": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/SpecProposedEventOutput"
+          },
+          {
+            "$ref": "#/components/schemas/SpecChangedEventOutput"
+          },
+          {
+            "$ref": "#/components/schemas/PublishProgressEventOutput"
+          }
+        ],
+        "type": "object",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "SPEC_PROPOSED": "#/components/schemas/SpecProposedEventOutput",
+            "SPEC_CHANGED": "#/components/schemas/SpecChangedEventOutput",
+            "PUBLISH_PROGRESS": "#/components/schemas/PublishProgressEventOutput"
+          }
+        }
+      },
+      "WorkspaceConfigOutput": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number",
+            "const": 1
+          },
+          "workspace": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "specsDir": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "specsDir"
+            ],
+            "additionalProperties": false
+          },
+          "storage": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "$ref": "#/components/schemas/StorageType"
+              },
+              "git": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/GitStorageConfigOutput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "drive": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/DriveStorageConfigOutput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "git",
+              "drive"
+            ],
+            "additionalProperties": false
+          },
+          "nbl": {
+            "$ref": "#/components/schemas/NotebookConfigOutput"
+          },
+          "agent": {
+            "$ref": "#/components/schemas/AgentSettingsOverrideOutput"
+          }
+        },
+        "required": [
+          "version",
+          "workspace",
+          "storage",
+          "nbl"
+        ],
+        "additionalProperties": false
+      },
+      "GitStorageConfigOutput": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/GitProvider"
+          },
+          "host": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[a-z0-9.-]+(:\\d{1,5})?$"
+          },
+          "connectorId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "repo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "remote": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "branch": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "subdir": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "publishMode": {
+            "$ref": "#/components/schemas/PublishMode"
+          },
+          "prBranchTemplate": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "autoCommit": {
+            "type": "boolean"
+          },
+          "autoPush": {
+            "type": "boolean"
+          },
+          "commitMessage": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "pullOnOpen": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "provider",
+          "host",
+          "connectorId",
+          "repo",
+          "remote",
+          "branch",
+          "subdir",
+          "publishMode",
+          "prBranchTemplate",
+          "autoCommit",
+          "autoPush",
+          "commitMessage",
+          "pullOnOpen"
+        ],
+        "additionalProperties": false
+      },
+      "DriveStorageConfigOutput": {
+        "type": "object",
+        "properties": {
+          "folderId": {
+            "type": "string",
+            "pattern": "^[\\w-]+$"
+          },
+          "pullOnOpen": {
+            "type": "boolean"
+          },
+          "pushOnApprove": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "folderId",
+          "pullOnOpen",
+          "pushOnApprove"
+        ],
+        "additionalProperties": false
+      },
+      "NotebookConfigOutput": {
+        "type": "object",
+        "properties": {
+          "notebookId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "syncStrategy": {
+            "$ref": "#/components/schemas/SyncStrategy"
+          },
+          "driveFolderId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "autoSyncOnApprove": {
+            "type": "boolean"
+          },
+          "confirmBeforeSync": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "notebookId",
+          "syncStrategy",
+          "driveFolderId",
+          "autoSyncOnApprove",
+          "confirmBeforeSync"
+        ],
+        "additionalProperties": false
+      },
+      "AgentSettingsOverrideOutput": {
+        "type": "object",
+        "properties": {
+          "activeMode": {
+            "$ref": "#/components/schemas/AgentMode"
+          },
+          "api": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "$ref": "#/components/schemas/LlmProvider"
+              },
+              "model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "temperature": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "systemPrompt": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "cli": {
+            "type": "object",
+            "properties": {
+              "activeProfileId": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "SpecProposedEventOutput": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "SPEC_PROPOSED"
+          },
+          "workspaceId": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "original": {
+            "type": "string"
+          },
+          "proposed": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "workspaceId",
+          "file",
+          "original",
+          "proposed",
+          "sourceId"
+        ],
+        "additionalProperties": false
+      },
+      "SpecChangedEventOutput": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "SPEC_CHANGED"
+          },
+          "workspaceId": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "change": {
+            "$ref": "#/components/schemas/SpecChangeKind"
+          },
+          "syncStatus": {
+            "$ref": "#/components/schemas/SpecSyncStatus"
+          }
+        },
+        "required": [
+          "type",
+          "workspaceId",
+          "file",
+          "change",
+          "syncStatus"
+        ],
+        "additionalProperties": false
+      },
+      "PublishProgressEventOutput": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "PUBLISH_PROGRESS"
+          },
+          "workspaceId": {
+            "type": "string"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublishStepOutput"
+            }
+          },
+          "finished": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "workspaceId",
+          "runId",
+          "file",
+          "steps",
+          "finished"
+        ],
+        "additionalProperties": false
+      },
+      "PublishStepOutput": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "$ref": "#/components/schemas/PublishTarget"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PublishStepStatus"
+          },
+          "detail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "$ref": "#/components/schemas/ErrorCode"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/ErrorParams"
+                  }
+                },
+                "required": [
+                  "code"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "status",
+          "detail",
+          "url",
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "CliProfileOutput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "$ref": "#/components/schemas/CliAgentKind"
+          },
+          "command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "outputFormat": {
+            "$ref": "#/components/schemas/CliOutputFormat"
+          },
+          "env": {
+            "default": {},
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "command",
+          "args",
+          "outputFormat",
+          "env"
+        ],
+        "additionalProperties": false
+      },
+      "AgentSettings": {
+        "type": "object",
+        "properties": {
+          "activeMode": {
+            "$ref": "#/components/schemas/AgentMode"
+          },
+          "api": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "$ref": "#/components/schemas/LlmProvider"
+              },
+              "model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "baseUrl": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "temperature": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "systemPrompt": {
+                "type": "string"
+              },
+              "apiKeyRef": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "provider",
+              "model",
+              "baseUrl",
+              "temperature",
+              "systemPrompt",
+              "apiKeyRef"
+            ],
+            "additionalProperties": false
+          },
+          "cli": {
+            "type": "object",
+            "properties": {
+              "activeProfileId": {
+                "type": "string"
+              },
+              "streamStdout": {
+                "type": "boolean"
+              },
+              "profiles": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CliProfileOutput"
+                }
+              }
+            },
+            "required": [
+              "activeProfileId",
+              "streamStdout",
+              "profiles"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "activeMode",
+          "api",
+          "cli"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

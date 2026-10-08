@@ -1,0 +1,199 @@
+{
+  "wizard": {
+    "title": "New Project",
+    "description": "Tạo workspace spec mới: nơi lưu file .md và notebook NotebookLM đích.",
+    "stepsLabel": "Các bước",
+    "stepOf": "Bước {current}/{total}",
+    "back": "Back",
+    "next": "Next",
+    "create": "Create Project",
+    "creating": "Đang tạo…",
+    "steps": {
+      "info": {
+        "title": "Thông tin",
+        "description": "Tên project"
+      },
+      "storage": {
+        "title": "Nơi lưu file",
+        "description": "Local · Git · Drive"
+      },
+      "notebook": {
+        "title": "NotebookLM",
+        "description": "Notebook đích"
+      },
+      "review": {
+        "title": "Xem lại & Tạo",
+        "description": "Tóm tắt cấu hình"
+      }
+    },
+    "info": {
+      "name": "Tên project",
+      "nameHint": "Hiện trên màn Projects và Workspace Switcher. Không trùng project khác.",
+      "namePlaceholder": "Spec Studio Design",
+      "description": "Mô tả (tuỳ chọn)",
+      "descriptionPlaceholder": "Spec cho workbench sửa .md bằng AI và sync NotebookLM"
+    },
+    "storage": {
+      "where": "Nơi lưu file .md",
+      "types": {
+        "LOCAL": {
+          "title": "Chỉ Local",
+          "description": "File nằm trên máy."
+        },
+        "GIT": {
+          "title": "Git repository",
+          "description": "GitHub, GitLab, Bitbucket, Gitea hoặc Git URL."
+        },
+        "DRIVE": {
+          "title": "Google Drive",
+          "description": "Thư mục Drive + bản sao local."
+        }
+      },
+      "path": {
+        "LOCAL": "Thư mục làm việc",
+        "GIT": "Clone vào",
+        "DRIVE": "Thư mục làm việc local"
+      },
+      "pathHint": "Đường dẫn tuyệt đối, ghi được và chưa thuộc project khác.",
+      "specsDir": "Thư mục spec"
+    },
+    "git": {
+      "provider": "Provider",
+      "host": "Host",
+      "hostHintDefault": "Bỏ trống = {host}. Nhập host khi dùng bản self-hosted.",
+      "hostHint": "Host của server Git (vd git.company.vn).",
+      "connectVia": "Kết nối qua",
+      "connectViaHint": "Connector quản lý ở Settings › Integrations. Thứ tự ưu tiên: CLI → MCP → Token → SSH.",
+      "loadingConnectors": "Đang tải connector…",
+      "sshTitle": "SSH key / Repo URL",
+      "sshDescription": "Dùng ssh-agent của máy: chỉ clone/pull/push, không liệt kê repo và không tạo PR.",
+      "needsLogin": "Connector cần đăng nhập lại. Chạy lệnh đăng nhập trong terminal rồi bấm Kiểm tra ở Settings › Integrations.",
+      "useDetected": "Dùng {command}",
+      "addConnector": "Thêm connector",
+      "repo": "Repository",
+      "loadingRepos": "Đang tải danh sách repo…",
+      "repoHint": "Lấy từ {source}. Gõ owner/repo nếu không thấy trong danh sách.",
+      "private": "private",
+      "public": "public",
+      "defaultBranch": "mặc định",
+      "remote": "Repo URL",
+      "remoteHint": "https://, ssh:// hoặc git@host:owner/repo.git",
+      "branch": "Branch",
+      "subdir": "Thư mục spec trong repo",
+      "subdirHint": "Dấu . là gốc repo.",
+      "publishMode": "Cách đẩy thay đổi sau khi Approve",
+      "push": "Commit & push thẳng",
+      "pushDescription": "Lên branch đã chọn. Nhanh, hợp repo cá nhân.",
+      "pr": "Tạo {name}",
+      "prDescription": "Tạo branch theo mẫu rồi mở PR/MR; gộp các lần Approve trong một phiên.",
+      "prDisabled": "Cần connector CLI, MCP hoặc Token của provider.",
+      "pullRequest": "Pull Request",
+      "mergeRequest": "Merge Request",
+      "prBranchTemplate": "Mẫu tên branch",
+      "prBranchTemplateHint": "Biến: '{date}', '{filename}'.",
+      "commitMessage": "Mẫu commit message",
+      "commitMessageHint": "Biến: '{action}', '{filename}'.",
+      "autoCommit": {
+        "label": "Tự commit sau khi Approve",
+        "hint": "Mỗi lần Approve tạo một commit."
+      },
+      "autoPush": {
+        "label": "Tự push / tạo PR sau khi commit",
+        "hint": "Tắt thì bấm Push trên Header khi sẵn sàng."
+      },
+      "pullOnOpen": {
+        "label": "Pull khi mở Workspace",
+        "hint": "git pull --ff-only mỗi lần mở."
+      }
+    },
+    "google": {
+      "checking": "Đang kiểm tra đăng nhập Google…",
+      "connected": "Đã đăng nhập Google · OAuth đã cấp quyền Drive.",
+      "waiting": "Đang chờ đăng nhập…",
+      "signIn": "Sign In With Google",
+      "notConnected": "Chưa đăng nhập Google.",
+      "notConfigured": "Máy chủ chưa cấu hình Google OAuth (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET)."
+    },
+    "drive": {
+      "folder": "Drive Folder ID / URL",
+      "folderHint": "Dán URL thư mục Drive hoặc ID, app tự tách ID.",
+      "auth": "Tài khoản Google",
+      "authHint": "Dùng chung với NotebookLM Drive Sync nếu cùng tài khoản.",
+      "pullOnOpen": {
+        "label": "Tải về khi mở",
+        "hint": "Lấy bản mới nhất từ Drive mỗi lần mở Workspace."
+      },
+      "pushOnApprove": {
+        "label": "Tải lên sau khi Approve",
+        "hint": "Ghi file đã duyệt lên Drive."
+      }
+    },
+    "notebook": {
+      "skip": "Bỏ qua, kết nối sau",
+      "notebookId": "Notebook ID",
+      "notebookIdHint": "Dán URL notebook hoặc ID, app tự tách ID.",
+      "strategy": "Sync Strategy",
+      "strategies": {
+        "DRIVE_SYNC": {
+          "title": "Google Drive Sync",
+          "description": "Ghi spec thành Google Doc rồi refresh source. Ổn định, khuyên dùng."
+        },
+        "RPC": {
+          "title": "Direct Cookie RPC",
+          "description": "Xoá source cũ rồi nạp lại qua RPC. Nhanh, nhưng cookie hết hạn sẽ lỗi."
+        }
+      },
+      "driveFolder": "Drive Folder ID",
+      "driveFolderHint": "Thư mục Drive chứa bản Google Doc của spec.",
+      "rpcHint": "Nhập cookie và token SNlM0e ở Settings › NotebookLM Sync sau khi tạo project.",
+      "mapping": "Ánh xạ: mỗi file spec ↔ một source cùng tên trong notebook.",
+      "autoSyncOnApprove": {
+        "label": "Tự động sync lên NBL sau khi Approve Diff"
+      },
+      "confirmBeforeSync": {
+        "label": "Hiện hộp thoại xác nhận trước khi sync"
+      },
+      "checkLater": "Kết nối notebook được kiểm tra ngay sau khi tạo project."
+    },
+    "review": {
+      "name": "Tên",
+      "description": "Mô tả",
+      "path": "Thư mục làm việc",
+      "storage": "Nơi lưu",
+      "repo": "Repository",
+      "subdir": "Thư mục spec",
+      "publish": "Đẩy thay đổi",
+      "publishPush": "Commit & push thẳng",
+      "publishPr": "Branch + Pull/Merge Request",
+      "driveFolder": "Thư mục Drive",
+      "notebook": "NotebookLM",
+      "notebookLater": "Kết nối sau",
+      "hint": "Bấm Create Project để tạo thư mục / clone repo / tải Drive, ghi .spec-studio/config.json và thêm vào danh sách Projects."
+    },
+    "run": {
+      "title": "Tiến trình",
+      "create": {
+        "LOCAL": "Tạo thư mục & ghi cấu hình",
+        "GIT": "Clone repository & ghi cấu hình",
+        "DRIVE": "Tải thư mục Drive & ghi cấu hình"
+      },
+      "createDescription": ".spec-studio/config.json · thêm vào danh sách Projects",
+      "check": "Kiểm tra kết nối",
+      "checkDescription": "Thư mục, Git remote, quyền Drive, notebook",
+      "target": {
+        "FOLDER": "Thư mục",
+        "GIT_REMOTE": "Git remote",
+        "DRIVE": "Drive",
+        "NOTEBOOK": "Notebook"
+      },
+      "checkStatus": {
+        "OK": "OK",
+        "ERROR": "Lỗi",
+        "SKIPPED": "Bỏ qua"
+      },
+      "open": "Mở Workspace",
+      "openAnyway": "Open Anyway",
+      "created": "Đã tạo project {name}"
+    }
+  }
+}

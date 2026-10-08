@@ -1,0 +1,145 @@
+{
+  "common": {
+    "appName": "Spec Studio",
+    "actions": {
+      "close": "Close",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "retry": "Retry",
+      "settings": "Settings",
+      "rename": "Rename",
+      "forceSync": "Force Sync",
+      "deleteSpec": "Delete spec",
+      "more": "More actions",
+      "openFolder": "Open Folder",
+      "editConfig": "Edit Config",
+      "removeFromList": "Remove From List",
+      "locate": "Locate",
+      "test": "Test",
+      "edit": "Edit",
+      "delete": "Delete",
+      "send": "Send",
+      "stop": "Stop",
+      "newProject": "New Project",
+      "toggleSidebar": "Toggle sidebar",
+      "openUrl": "Open link"
+    },
+    "status": {
+      "SYNCED": "Synced",
+      "UNSAVED": "Unsaved",
+      "SYNCING": "Syncing…",
+      "ERROR": "Error"
+    },
+    "combobox": {
+      "placeholder": "Select…",
+      "search": "Search…",
+      "searchOrType": "Search or type a value…",
+      "count": "{shown}/{total}",
+      "empty": "No results",
+      "useCustom": "Use “{value}”",
+      "selectedCount": "{count} selected",
+      "clear": "Clear",
+      "selectAll": "Select all",
+      "selectResults": "Select results",
+      "remove": "Remove {label}"
+    },
+    "publish": {
+      "target": {
+        "LOCAL": "Write local file",
+        "GIT": "Git · Push",
+        "DRIVE": "Google Drive",
+        "NOTEBOOK": "NotebookLM"
+      },
+      "targetShort": {
+        "LOCAL": "Local",
+        "GIT": "Git",
+        "DRIVE": "Drive",
+        "NOTEBOOK": "NBL"
+      },
+      "step": {
+        "PENDING": "Pending",
+        "RUNNING": "Running",
+        "DONE": "Done",
+        "ERROR": "Failed",
+        "SKIPPED": "Skipped"
+      },
+      "chip": "{target}: {status}"
+    },
+    "storage": {
+      "LOCAL": "Local",
+      "GIT": "Git",
+      "DRIVE": "Drive"
+    },
+    "workspace": {
+      "open": "Open {name}",
+      "menu": "Actions for {name}",
+      "folderMissing": "Folder not found",
+      "notebook": "NotebookLM · {name}",
+      "notebookNone": "NotebookLM · Not connected",
+      "specCount": "{count, plural, one {# spec} other {# specs}}",
+      "neverOpened": "Never opened",
+      "newProjectHint": "Local · Git · Google Drive",
+      "status": {
+        "SYNCED": "Synced",
+        "UNSAVED": "Unpushed changes",
+        "SYNCING": "Syncing…",
+        "ERROR": "Error"
+      }
+    },
+    "spec": {
+      "menu": "Actions for {name}",
+      "addToContext": "Attach {name} to context"
+    },
+    "mode": {
+      "label": "Agent mode",
+      "API": "API Key",
+      "CLI": "CLI Agent"
+    },
+    "connector": {
+      "type": {
+        "CLI": "CLI",
+        "MCP": "MCP",
+        "TOKEN": "Token",
+        "SSH": "SSH"
+      },
+      "provider": {
+        "GITHUB": "GitHub",
+        "GITLAB": "GitLab",
+        "BITBUCKET": "Bitbucket",
+        "GITEA": "Gitea / Forgejo",
+        "GENERIC": "Plain Git"
+      },
+      "state": {
+        "CONNECTED": "Connected",
+        "NEEDS_LOGIN": "Needs re-login",
+        "NOT_FOUND": "CLI not found",
+        "ERROR": "Connection error",
+        "UNCHECKED": "Not checked"
+      },
+      "menu": "Actions for {name}"
+    },
+    "chat": {
+      "agent": "Agent",
+      "log": "stdout",
+      "running": "Running"
+    },
+    "composer": {
+      "label": "Request for the Agent",
+      "placeholder": "Describe the change you want in the spec…",
+      "hint": "to send"
+    },
+    "theme": {
+      "toggle": "Toggle light/dark theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "secret": {
+      "show": "Show",
+      "hide": "Hide",
+      "setPlaceholder": "Saved · type to replace"
+    }
+  }
+}

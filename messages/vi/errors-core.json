@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "INTERNAL": { "UNEXPECTED": "Có lỗi không mong muốn. Mã tra cứu: {traceId}." },
+    "VALIDATION": { "FAILED": "Một số trường chưa hợp lệ." },
+    "FIELD": {
+      "REQUIRED": "Bắt buộc nhập.",
+      "INVALID_FORMAT": "Sai định dạng.",
+      "TOO_SHORT": "Tối thiểu {min} ký tự.",
+      "TOO_LONG": "Tối đa {max} ký tự.",
+      "INVALID_VALUE": "Giá trị không hợp lệ."
+    },
+    "REQUEST": { "MALFORMED_JSON": "Dữ liệu gửi lên không đúng định dạng JSON." },
+    "RESOURCE": {
+      "NOT_FOUND": "Không tìm thấy dữ liệu.",
+      "CONFLICT": "Dữ liệu đã thay đổi hoặc đang được xử lý. Thử lại sau."
+    }
+  }
+}

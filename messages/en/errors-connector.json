@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "CONNECTOR": {
+      "NOT_FOUND": "Connector not found.",
+      "NOT_SUPPORTED": "{type} connectors do not support this operation.",
+      "CLI_NOT_FOUND": "CLI \"{command}\" was not found on this machine.",
+      "NEEDS_LOGIN": "The connector needs to log in again or update its token.",
+      "TOKEN_MISSING": "No token set for this connector.",
+      "PROVIDER_ERROR": "The Git provider returned an error.",
+      "REPO_NOT_FOUND": "Repository not found or access denied.",
+      "MCP_UNREACHABLE": "Cannot connect to the MCP server.",
+      "MCP_TOOL_MISSING": "The MCP server has no tool {tool}.",
+      "INVALID_COMMAND": "Invalid command.",
+      "INVALID_URL": "Invalid URL (http:// or https:// only).",
+      "INVALID_SECRET_KEY": "Invalid secret variable/header name."
+    }
+  }
+}

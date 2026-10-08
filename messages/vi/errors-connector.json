@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "CONNECTOR": {
+      "NOT_FOUND": "Không tìm thấy connector.",
+      "NOT_SUPPORTED": "Connector loại {type} không hỗ trợ thao tác này.",
+      "CLI_NOT_FOUND": "Không tìm thấy CLI \"{command}\" trên máy.",
+      "NEEDS_LOGIN": "Connector cần đăng nhập lại hoặc cập nhật token.",
+      "TOKEN_MISSING": "Chưa nhập token cho connector.",
+      "PROVIDER_ERROR": "Git provider trả lỗi.",
+      "REPO_NOT_FOUND": "Không tìm thấy repository hoặc không có quyền truy cập.",
+      "MCP_UNREACHABLE": "Không kết nối được MCP server.",
+      "MCP_TOOL_MISSING": "MCP server không có tool {tool}.",
+      "INVALID_COMMAND": "Lệnh không hợp lệ.",
+      "INVALID_URL": "URL không hợp lệ (chỉ http:// hoặc https://).",
+      "INVALID_SECRET_KEY": "Tên biến/header bí mật không hợp lệ."
+    }
+  }
+}

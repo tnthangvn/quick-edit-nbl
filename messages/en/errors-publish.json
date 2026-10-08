@@ -1,0 +1,8 @@
+{
+  "errors": {
+    "PUBLISH": {
+      "TARGET_NOT_CONFIGURED": "Target {target} is not configured for this Workspace.",
+      "PREREQUISITE_FAILED": "Skipped because writing the local file failed."
+    }
+  }
+}

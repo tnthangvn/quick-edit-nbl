@@ -1,0 +1,78 @@
+{
+  "projects": {
+    "title": "Projects",
+    "description": "Mỗi project là một thư mục spec trên máy, lưu Local, Git hoặc Google Drive.",
+    "count": "{count, plural, =0 {Chưa có project nào} other {# project · Local, Git hoặc Google Drive}}",
+    "actions": {
+      "importExisting": "Mở thư mục có sẵn",
+      "newProject": "New Project"
+    },
+    "toolbar": {
+      "searchLabel": "Tìm project",
+      "searchPlaceholder": "Tìm theo tên hoặc đường dẫn…",
+      "filterLabel": "Lọc theo nơi lưu trữ",
+      "filter": {
+        "ALL": "Tất cả",
+        "LOCAL": "Local",
+        "GIT": "Git",
+        "DRIVE": "Drive"
+      },
+      "sortLabel": "Sắp xếp",
+      "sortPrefix": "Sắp xếp:",
+      "sort": {
+        "RECENT": "Mở gần nhất",
+        "NAME": "Tên"
+      }
+    },
+    "list": {
+      "loading": "Đang tải danh sách project…",
+      "errorTitle": "Không tải được danh sách project",
+      "retry": "Thử lại",
+      "emptyTitle": "Tạo project đầu tiên",
+      "emptyDescription": "Chọn nơi lưu file .md (máy, Git hoặc Google Drive) và notebook NotebookLM cần đồng bộ.",
+      "importExisting": "Mở thư mục có sẵn",
+      "newProject": "New Project",
+      "noMatch": "Không có project nào khớp “{q}”",
+      "noMatchFilter": "Không có project nào với bộ lọc này",
+      "noMatchHint": "Thử từ khoá khác hoặc bỏ bộ lọc nơi lưu.",
+      "openFailed": "Không mở được project"
+    },
+    "edit": {
+      "renameTitle": "Đổi tên project",
+      "renameDescription": "Tên hiện trên màn Projects và Workspace Switcher.",
+      "locateTitle": "Tìm lại thư mục",
+      "locateDescription": "Không còn thấy thư mục {path}. Nhập đường dẫn mới (phải có .spec-studio/config.json).",
+      "name": "Tên project",
+      "description": "Mô tả",
+      "path": "Thư mục làm việc",
+      "pathHint": "Đường dẫn tuyệt đối trên máy.",
+      "renamed": "Đã đổi tên thành {name}",
+      "located": "Đã tìm lại thư mục của {name}"
+    },
+    "remove": {
+      "title": "Gỡ khỏi danh sách?",
+      "description": "Gỡ {name} khỏi màn Projects. File trong thư mục vẫn giữ nguyên.",
+      "confirm": "Remove",
+      "removed": "Đã gỡ {name} khỏi danh sách"
+    },
+    "folder": {
+      "title": "Thư mục của {name}",
+      "description": "Sao chép đường dẫn để mở bằng trình quản lý file hoặc terminal.",
+      "path": "Thư mục làm việc",
+      "specsDir": "Specs Dir",
+      "copy": "Copy Path",
+      "copied": "Đã sao chép",
+      "copyFailed": "Trình duyệt không cho sao chép"
+    },
+    "import": {
+      "title": "Mở thư mục có sẵn",
+      "description": "Thêm thư mục đã có .spec-studio/config.json vào danh sách Projects.",
+      "path": "Thư mục",
+      "pathHint": "Đường dẫn tuyệt đối tới thư mục chứa .spec-studio/config.json.",
+      "name": "Tên khác (tuỳ chọn)",
+      "nameHint": "Chỉ cần khi tên trong config.json đã trùng với project khác.",
+      "submit": "Open Folder",
+      "imported": "Đã thêm {name} vào danh sách"
+    }
+  }
+}

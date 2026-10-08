@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "SPEC": {
+      "NOT_FOUND": "Spec file {file} not found.",
+      "ALREADY_EXISTS": "Spec file {file} already exists.",
+      "INVALID_NAME": "Invalid file name: only .md files, no special characters or hidden folders.",
+      "PATH_OUTSIDE_WORKSPACE": "The path is outside the Workspace specs folder.",
+      "SPECS_DIR_NOT_FOUND": "The Workspace specs folder was not found."
+    }
+  }
+}

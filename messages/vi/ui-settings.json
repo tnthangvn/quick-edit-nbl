@@ -1,0 +1,223 @@
+{
+  "settings": {
+    "title": "Settings",
+    "description": "Cấu hình Agent và connector dùng chung cho mọi project.",
+    "descriptionWorkspace": "Cấu hình chung và của project {name}.",
+    "tabs": {
+      "API": "Direct API",
+      "CLI": "CLI Agent Runner",
+      "NOTEBOOK": "NotebookLM Sync",
+      "WORKSPACE": "Workspace & Storage",
+      "INTEGRATIONS": "Integrations"
+    },
+    "loading": "Đang tải cấu hình…",
+    "loadFailed": "Không tải được cấu hình",
+    "configMissingTitle": "Không đọc được cấu hình của project",
+    "globalPath": "~/.spec-studio · cấu hình chung",
+    "saved": "Đã lưu cấu hình",
+    "saveFailed": {
+      "settings": "Không lưu được cấu hình Agent",
+      "config": "Không lưu được cấu hình project",
+      "secret": "Không lưu được cookie / token NotebookLM"
+    },
+    "api": {
+      "provider": "Provider",
+      "providers": {
+        "GOOGLE": "Google Gemini",
+        "ANTHROPIC": "Anthropic",
+        "OPENAI": "OpenAI",
+        "DEEPSEEK": "DeepSeek",
+        "OLLAMA": "Ollama / Local BaseURL"
+      },
+      "apiKey": "API Key",
+      "apiKeyPlaceholder": "Dán API key…",
+      "apiKeyHint": "Chỉ lưu local (keychain / secrets.json), không gửi đi đâu khác.",
+      "apiKeyHintOllama": "Ollama chạy local thường không cần API key.",
+      "removeKey": "Remove Key",
+      "keyWillBeRemoved": "Key đã lưu sẽ bị xoá khi bấm Save.",
+      "test": "Test",
+      "testing": "Đang kiểm tra…",
+      "testOk": "OK",
+      "testFailed": "Kết nối không thành công. Kiểm tra API key, model và Base URL.",
+      "testResult": "Kết nối thành công · {ms} ms",
+      "model": "Model ID",
+      "modelHint": "Chọn sẵn hoặc gõ tên model tuỳ chỉnh.",
+      "temperature": "Temperature",
+      "baseUrl": "Base URL",
+      "baseUrlHint": "Bỏ trống = endpoint mặc định của provider.",
+      "baseUrlHintOllama": "Địa chỉ Ollama hoặc server tương thích OpenAI.",
+      "systemPrompt": "System Prompt Preset",
+      "systemPromptHint": "Persona và quy tắc viết spec cho Agent."
+    },
+    "cli": {
+      "activeCli": "Active CLI",
+      "activeCliHint": "Tiến trình luôn chạy với cwd = thư mục làm việc của project.",
+      "detectAgain": "Dò lại CLI",
+      "kinds": {
+        "CLAUDE_CODE": "Anthropic",
+        "CODEX": "OpenAI · ChatGPT",
+        "ANTIGRAVITY": "Google · agy",
+        "AIDER": "Git-aware",
+        "CUSTOM": "Shell script"
+      },
+      "detect": {
+        "found": "Tìm thấy",
+        "notFound": "Không tìm thấy",
+        "loggedOut": "Chưa đăng nhập",
+        "custom": "Lệnh tuỳ chỉnh"
+      },
+      "binaryPath": "Binary Path",
+      "binaryPathHint": "Đường dẫn thực thi hoặc lệnh trong PATH.",
+      "detectedAt": "Tìm thấy tại",
+      "useDetected": "Use This Path",
+      "args": "Default Arguments",
+      "argsHint": "Mỗi dòng một argument. '{prompt}' = yêu cầu kèm danh sách spec, '{spec}' = file đang mở.",
+      "outputFormat": "Output Format",
+      "outputFormatHint": "Runner đọc stdout theo định dạng này để hiện log và đề xuất sửa file.",
+      "formats": {
+        "STREAM_JSON": "stream-json",
+        "JSONL": "jsonl",
+        "TEXT": "text"
+      },
+      "workspacePath": "Workspace Path",
+      "workspacePathHint": "Thư mục gốc chứa các file .md (đổi ở tab Workspace & Storage).",
+      "workspacePathNone": "Mở Settings từ một project để xem thư mục làm việc.",
+      "streamStdout": "Stream Stdout",
+      "streamStdoutHint": "Đẩy log tiến trình vào khung chat."
+    },
+    "notebook": {
+      "notebookId": "Notebook ID",
+      "notebookIdHint": "Dán URL notebook hoặc ID, app tự tách ID.",
+      "check": "Check",
+      "checkOk": "Đã kết nối “{title}” · {count, plural, other {# source}}",
+      "checkFailed": "Không truy cập được notebook.",
+      "strategy": "Sync Strategy",
+      "strategies": {
+        "DRIVE_SYNC": {
+          "title": "Google Drive Sync",
+          "description": "Ghi spec thành Google Doc rồi refresh source. Ổn định, khuyên dùng."
+        },
+        "RPC": {
+          "title": "Direct Cookie RPC",
+          "description": "Xoá source cũ rồi nạp lại qua RPC. Nhanh, nhưng cookie hết hạn sẽ lỗi."
+        }
+      },
+      "driveFolder": "Drive Folder ID",
+      "driveFolderHint": "Thư mục Drive chứa bản Google Doc của spec.",
+      "cookie": "Cookie (SID, HSID, SSID)",
+      "cookieHint": "Chỉ lưu local. Cookie thường hết hạn sau vài tuần.",
+      "token": "SNlM0e Token",
+      "tokenHint": "Chỉ lưu local, dùng cho RPC endpoint.",
+      "autoSyncOnApprove": {
+        "label": "Tự động sync lên NBL sau khi Approve Diff",
+        "hint": "Chạy ngay sau khi ghi file."
+      },
+      "confirmBeforeSync": {
+        "label": "Hiện hộp thoại xác nhận trước khi sync",
+        "hint": "Hỏi lại trước mỗi lần đẩy lên NotebookLM."
+      }
+    },
+    "workspace": {
+      "name": "Tên Workspace",
+      "specsDir": "Specs Dir",
+      "path": "Thư mục làm việc local",
+      "pathHint": "Chỉ đọc. Thư mục đã di chuyển thì dùng Tìm lại ở màn Projects.",
+      "copyPath": "Sao chép đường dẫn",
+      "copied": "Đã sao chép",
+      "storageType": "Loại lưu trữ",
+      "storageTypeHint": "Đổi loại sẽ chạy lại bước kiểm tra như Wizard.",
+      "dangerTitle": "Gỡ Workspace khỏi danh sách",
+      "dangerDescription": "Chỉ gỡ khỏi màn Projects, không xoá file.",
+      "remove": "Remove"
+    },
+    "integrations": {
+      "connectorsTitle": "Git connectors",
+      "connectorsDescription": "Dùng lại cho mọi project: CLI, MCP server, Personal Access Token hoặc SSH key.",
+      "addConnector": "Add Connector",
+      "loading": "Đang tải connector…",
+      "loadFailed": "Không tải được connector",
+      "emptyTitle": "Chưa có connector",
+      "emptyDescription": "Thêm connector hoặc dùng CLI tự dò bên dưới để chọn repo từ danh sách.",
+      "checkOk": "Connector đã kết nối",
+      "checkNeedsLogin": "Connector cần đăng nhập lại",
+      "runLogin": "Chạy {command} trong terminal rồi kiểm tra lại.",
+      "checkStatus": {
+        "CONNECTED": "Connector đã kết nối",
+        "NEEDS_LOGIN": "Connector cần đăng nhập lại",
+        "CLI_NOT_FOUND": "Không tìm thấy CLI trên máy",
+        "ERROR": "Connector báo lỗi khi kiểm tra"
+      },
+      "checkFailed": "Kiểm tra connector thất bại",
+      "removed": "Đã xoá connector {name}",
+      "removeTitle": "Xoá connector?",
+      "removeDescription": "Xoá {name} và secret của nó. Project đang dùng connector này cần chọn connector khác.",
+      "tools": "{count, plural, =0 {Tools · chưa bật cho Agent} other {Tools · # bật cho Agent}}",
+      "toolsLoading": "Đang lấy danh sách tool…",
+      "toolsEmpty": "MCP server không có tool nào.",
+      "detectTitle": "Tự dò CLI",
+      "detectDescription": "Quét gh, glab, tea trên máy: phiên bản và tài khoản đăng nhập.",
+      "detectAgain": "Dò lại",
+      "detecting": "Đang dò CLI…",
+      "cliMissing": "Không tìm thấy trên máy",
+      "cliLoggedOut": "Chưa đăng nhập · chạy {command}",
+      "alreadyAdded": "Đã thêm",
+      "add": "Add",
+      "addAnyway": "Add Anyway",
+      "added": "Đã thêm connector {name}"
+    },
+    "connectorForm": {
+      "createTitle": "Thêm connector",
+      "editTitle": "Sửa {name}",
+      "description": "Cách app xác thực với Git provider để liệt kê repo, branch và tạo PR/MR.",
+      "type": "Loại connector",
+      "types": {
+        "CLI": {
+          "title": "CLI có sẵn",
+          "description": "gh, glab, tea… Không lưu token vào app."
+        },
+        "MCP": {
+          "title": "MCP server",
+          "description": "stdio (command) hoặc HTTP (url)."
+        },
+        "TOKEN": {
+          "title": "Personal Access Token",
+          "description": "Lưu trong keychain / secrets.json."
+        },
+        "SSH": {
+          "title": "SSH key",
+          "description": "Chỉ clone/pull/push."
+        }
+      },
+      "name": "Tên",
+      "namePlaceholder": "GitHub cá nhân",
+      "provider": "Provider",
+      "host": "Host",
+      "hostHint": "Bỏ trống = host mặc định của provider.",
+      "cliCommand": "Lệnh CLI",
+      "cliCommandHint": "Bỏ trống = theo provider (gh, glab, tea).",
+      "mcpCommand": "Command",
+      "mcpCommandHint": "Lệnh chạy MCP server (stdio).",
+      "transport": "Transport",
+      "transports": {
+        "STDIO": "stdio",
+        "HTTP": "HTTP"
+      },
+      "url": "URL",
+      "headers": "Headers",
+      "headersHint": "Mỗi dòng một header: Tên: giá trị.",
+      "args": "Arguments",
+      "argsHint": "Mỗi dòng một argument.",
+      "env": "Env",
+      "envHint": "Mỗi dòng KEY=VALUE (không bí mật).",
+      "secrets": "Secret env / header",
+      "secretsHint": "Chỉ ghi, lưu trong secret store. Mỗi dòng KEY=VALUE.",
+      "secretsHintSet": "Đã lưu: {keys}. Nhập lại để thay; bỏ trống để giữ nguyên.",
+      "token": "Token",
+      "tokenHint": "Chỉ ghi. Cấp tối thiểu quyền repo (đọc/ghi) và tạo PR.",
+      "sshHint": "Dùng ssh-agent / key có sẵn của máy. Repo URL nhập ở từng project.",
+      "create": "Add Connector",
+      "created": "Đã thêm connector {name}",
+      "updated": "Đã lưu connector {name}"
+    }
+  }
+}

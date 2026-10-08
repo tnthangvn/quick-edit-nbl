@@ -1,0 +1,19 @@
+{
+  "errors": {
+    "STORAGE": {
+      "NOT_SUPPORTED": "Loại lưu trữ của Workspace không hỗ trợ thao tác này.",
+      "CONFIG_MISSING": "Workspace chưa cấu hình nơi lưu trữ (.spec-studio/config.json).",
+      "PULL_CONFLICT": "Không pull được vì xung đột hoặc lịch sử đã tách nhánh. Xử lý thủ công rồi thử lại.",
+      "PUSH_REJECTED": "Push bị từ chối.",
+      "GIT_AUTH_FAILED": "Xác thực Git thất bại. Kiểm tra lại connector.",
+      "GIT_COMMAND_FAILED": "Lệnh git {command} thất bại.",
+      "CLONE_FAILED": "Clone repository thất bại.",
+      "GOOGLE_NOT_CONFIGURED": "Chưa cấu hình Google OAuth (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).",
+      "GOOGLE_AUTH_REQUIRED": "Cần đăng nhập Google để dùng Drive.",
+      "GOOGLE_OAUTH_STATE_INVALID": "Phiên đăng nhập Google đã hết hạn hoặc không hợp lệ. Thử lại.",
+      "GOOGLE_OAUTH_FAILED": "Đăng nhập Google thất bại.",
+      "DRIVE_NOT_FOUND": "Không tìm thấy thư mục hoặc file trên Drive (hoặc không có quyền).",
+      "DRIVE_REQUEST_FAILED": "Gọi Google Drive thất bại."
+    }
+  }
+}

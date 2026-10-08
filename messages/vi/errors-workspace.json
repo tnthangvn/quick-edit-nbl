@@ -1,0 +1,29 @@
+{
+  "errors": {
+    "WORKSPACE": {
+      "NOT_FOUND": "Không tìm thấy Workspace.",
+      "NAME_TAKEN": "Tên project \"{name}\" đã được dùng.",
+      "PATH_IN_USE": "Thư mục này đã thuộc một Workspace khác.",
+      "ALREADY_REGISTERED": "Workspace này đã có trong danh sách (ở thư mục {path}).",
+      "CONFIG_EXISTS": "Thư mục đã có .spec-studio/config.json. Dùng \"Mở thư mục có sẵn\".",
+      "CONFIG_NOT_FOUND": "Không tìm thấy .spec-studio/config.json trong thư mục.",
+      "CONFIG_INVALID": "File .spec-studio/config.json không hợp lệ.",
+      "FOLDER_NOT_FOUND": "Không tìm thấy thư mục.",
+      "FOLDER_MISSING": "Không tìm thấy thư mục của Workspace. Dùng \"Tìm lại\" hoặc gỡ khỏi danh sách.",
+      "FOLDER_NOT_WRITABLE": "Không ghi được vào thư mục.",
+      "FOLDER_NOT_EMPTY": "Thư mục clone phải trống hoặc chưa tồn tại.",
+      "INVALID_PATH": "Đường dẫn phải là đường dẫn tuyệt đối hợp lệ.",
+      "INVALID_SPECS_DIR": "Specs Dir phải là thư mục con bên trong Workspace.",
+      "INVALID_GIT_REMOTE": "Repo URL không hợp lệ (dùng https://, ssh:// hoặc git@host:owner/repo).",
+      "INVALID_BRANCH": "Tên branch không hợp lệ.",
+      "INVALID_REPO": "Repo phải có dạng owner/repo.",
+      "CLONE_FAILED": "Clone repository thất bại.",
+      "DRIVE_DOWNLOAD_FAILED": "Tải thư mục Drive thất bại.",
+      "GIT_REMOTE_UNREACHABLE": "Không kết nối được Git remote.",
+      "GIT_BRANCH_NOT_FOUND": "Không tìm thấy branch {branch} trên remote.",
+      "DRIVE_NOT_CONFIGURED": "Chưa cấu hình Google OAuth cho Drive.",
+      "DRIVE_ACCESS_DENIED": "Không có quyền đọc/ghi thư mục Drive.",
+      "NOTEBOOK_UNREACHABLE": "Không truy cập được notebook."
+    }
+  }
+}

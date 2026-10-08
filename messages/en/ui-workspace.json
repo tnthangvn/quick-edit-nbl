@@ -1,0 +1,12 @@
+{
+  "workspaceSwitcher": {
+    "trigger": "Switch workspace: {name}",
+    "allProjects": "All projects…",
+    "projects": "Projects",
+    "recent": "Recent",
+    "loading": "Loading…",
+    "loadFailed": "Couldn't load the list. Click to retry",
+    "empty": "No projects yet",
+    "openFailed": "Couldn't open the project"
+  }
+}

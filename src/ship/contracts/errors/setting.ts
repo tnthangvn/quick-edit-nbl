@@ -1,0 +1,7 @@
+/** Mã lỗi của domain SETTING. Chỉ container Setting được sửa file. Dạng "SETTING.REASON". */
+export const SETTING_ERROR_CODES = [
+  "SETTING.CLI_PROFILE_NOT_FOUND",
+  "SETTING.CLI_PROFILE_DUPLICATE",
+  "SETTING.WORKSPACE_ID_MISMATCH",
+  "SETTING.SECRET_NOT_SET",
+] as const;

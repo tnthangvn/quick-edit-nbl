@@ -1,0 +1,199 @@
+{
+  "wizard": {
+    "title": "New Project",
+    "description": "Create a new spec workspace: where .md files live and the target NotebookLM notebook.",
+    "stepsLabel": "Steps",
+    "stepOf": "Step {current}/{total}",
+    "back": "Back",
+    "next": "Next",
+    "create": "Create Project",
+    "creating": "Creating…",
+    "steps": {
+      "info": {
+        "title": "Details",
+        "description": "Project name"
+      },
+      "storage": {
+        "title": "File storage",
+        "description": "Local · Git · Drive"
+      },
+      "notebook": {
+        "title": "NotebookLM",
+        "description": "Target notebook"
+      },
+      "review": {
+        "title": "Review & Create",
+        "description": "Configuration summary"
+      }
+    },
+    "info": {
+      "name": "Project name",
+      "nameHint": "Shown on the Projects screen and in the Workspace Switcher. Must be unique.",
+      "namePlaceholder": "Spec Studio Design",
+      "description": "Description (optional)",
+      "descriptionPlaceholder": "Specs for the AI-assisted .md workbench synced to NotebookLM"
+    },
+    "storage": {
+      "where": "Where .md files live",
+      "types": {
+        "LOCAL": {
+          "title": "Local only",
+          "description": "Files stay on this machine."
+        },
+        "GIT": {
+          "title": "Git repository",
+          "description": "GitHub, GitLab, Bitbucket, Gitea or a Git URL."
+        },
+        "DRIVE": {
+          "title": "Google Drive",
+          "description": "A Drive folder + a local copy."
+        }
+      },
+      "path": {
+        "LOCAL": "Working folder",
+        "GIT": "Clone into",
+        "DRIVE": "Local working folder"
+      },
+      "pathHint": "Absolute path, writable and not used by another project.",
+      "specsDir": "Specs folder"
+    },
+    "git": {
+      "provider": "Provider",
+      "host": "Host",
+      "hostHintDefault": "Leave empty for {host}. Set a host for self-hosted servers.",
+      "hostHint": "Git server host (e.g. git.company.vn).",
+      "connectVia": "Connect via",
+      "connectViaHint": "Connectors are managed in Settings › Integrations. Priority: CLI → MCP → Token → SSH.",
+      "loadingConnectors": "Loading connectors…",
+      "sshTitle": "SSH key / Repo URL",
+      "sshDescription": "Uses this machine's ssh-agent: clone/pull/push only, no repo listing and no PRs.",
+      "needsLogin": "This connector needs to sign in again. Run the login command in a terminal, then Check it in Settings › Integrations.",
+      "useDetected": "Use {command}",
+      "addConnector": "Add connector",
+      "repo": "Repository",
+      "loadingRepos": "Loading repositories…",
+      "repoHint": "Listed from {source}. Type owner/repo if it isn't in the list.",
+      "private": "private",
+      "public": "public",
+      "defaultBranch": "default",
+      "remote": "Repo URL",
+      "remoteHint": "https://, ssh:// or git@host:owner/repo.git",
+      "branch": "Branch",
+      "subdir": "Spec folder in repo",
+      "subdirHint": "A dot means the repo root.",
+      "publishMode": "How changes are pushed after Approve",
+      "push": "Commit & push directly",
+      "pushDescription": "To the selected branch. Fast, good for personal repos.",
+      "pr": "Create {name}",
+      "prDescription": "Create a branch from the template and open a PR/MR; approvals in one session share it.",
+      "prDisabled": "Requires a CLI, MCP or Token connector for the provider.",
+      "pullRequest": "Pull Request",
+      "mergeRequest": "Merge Request",
+      "prBranchTemplate": "Branch name template",
+      "prBranchTemplateHint": "Variables: '{date}', '{filename}'.",
+      "commitMessage": "Commit message template",
+      "commitMessageHint": "Variables: '{action}', '{filename}'.",
+      "autoCommit": {
+        "label": "Commit after Approve",
+        "hint": "Each Approve creates a commit."
+      },
+      "autoPush": {
+        "label": "Push / open PR after commit",
+        "hint": "When off, use Push in the header when ready."
+      },
+      "pullOnOpen": {
+        "label": "Pull when opening the workspace",
+        "hint": "Runs git pull --ff-only on open."
+      }
+    },
+    "google": {
+      "checking": "Checking Google sign-in…",
+      "connected": "Signed in to Google · Drive access granted.",
+      "waiting": "Waiting for sign-in…",
+      "signIn": "Sign In With Google",
+      "notConnected": "Not signed in to Google.",
+      "notConfigured": "The server has no Google OAuth client (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET)."
+    },
+    "drive": {
+      "folder": "Drive Folder ID / URL",
+      "folderHint": "Paste the Drive folder URL or ID; the ID is extracted automatically.",
+      "auth": "Google account",
+      "authHint": "Shared with NotebookLM Drive Sync when it is the same account.",
+      "pullOnOpen": {
+        "label": "Download on open",
+        "hint": "Fetch the latest files from Drive each time the workspace opens."
+      },
+      "pushOnApprove": {
+        "label": "Upload after Approve",
+        "hint": "Write approved files back to Drive."
+      }
+    },
+    "notebook": {
+      "skip": "Skip, connect later",
+      "notebookId": "Notebook ID",
+      "notebookIdHint": "Paste the notebook URL or ID; the ID is extracted automatically.",
+      "strategy": "Sync Strategy",
+      "strategies": {
+        "DRIVE_SYNC": {
+          "title": "Google Drive Sync",
+          "description": "Write specs as Google Docs, then refresh the source. Stable, recommended."
+        },
+        "RPC": {
+          "title": "Direct Cookie RPC",
+          "description": "Delete the old source and re-upload over RPC. Fast, but fails when cookies expire."
+        }
+      },
+      "driveFolder": "Drive Folder ID",
+      "driveFolderHint": "Drive folder holding the Google Doc copies of the specs.",
+      "rpcHint": "Enter the cookie and SNlM0e token in Settings › NotebookLM Sync after creating the project.",
+      "mapping": "Mapping: each spec file ↔ one source with the same name in the notebook.",
+      "autoSyncOnApprove": {
+        "label": "Sync to NBL automatically after Approve Diff"
+      },
+      "confirmBeforeSync": {
+        "label": "Ask for confirmation before syncing"
+      },
+      "checkLater": "The notebook connection is checked right after the project is created."
+    },
+    "review": {
+      "name": "Name",
+      "description": "Description",
+      "path": "Working folder",
+      "storage": "Storage",
+      "repo": "Repository",
+      "subdir": "Spec folder",
+      "publish": "Push changes",
+      "publishPush": "Commit & push directly",
+      "publishPr": "Branch + Pull/Merge Request",
+      "driveFolder": "Drive folder",
+      "notebook": "NotebookLM",
+      "notebookLater": "Connect later",
+      "hint": "Create Project creates the folder / clones the repo / downloads Drive, writes .spec-studio/config.json and adds it to Projects."
+    },
+    "run": {
+      "title": "Progress",
+      "create": {
+        "LOCAL": "Create folder & write config",
+        "GIT": "Clone repository & write config",
+        "DRIVE": "Download Drive folder & write config"
+      },
+      "createDescription": ".spec-studio/config.json · add to the Projects list",
+      "check": "Check connections",
+      "checkDescription": "Folder, Git remote, Drive access, notebook",
+      "target": {
+        "FOLDER": "Folder",
+        "GIT_REMOTE": "Git remote",
+        "DRIVE": "Drive",
+        "NOTEBOOK": "Notebook"
+      },
+      "checkStatus": {
+        "OK": "OK",
+        "ERROR": "Error",
+        "SKIPPED": "Skipped"
+      },
+      "open": "Open workspace",
+      "openAnyway": "Open Anyway",
+      "created": "Created project {name}"
+    }
+  }
+}

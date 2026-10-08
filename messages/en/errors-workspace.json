@@ -1,0 +1,29 @@
+{
+  "errors": {
+    "WORKSPACE": {
+      "NOT_FOUND": "Workspace not found.",
+      "NAME_TAKEN": "Project name \"{name}\" is already in use.",
+      "PATH_IN_USE": "This folder already belongs to another Workspace.",
+      "ALREADY_REGISTERED": "This Workspace is already in the list (at {path}).",
+      "CONFIG_EXISTS": "The folder already has .spec-studio/config.json. Use \"Open existing folder\".",
+      "CONFIG_NOT_FOUND": ".spec-studio/config.json not found in the folder.",
+      "CONFIG_INVALID": ".spec-studio/config.json is invalid.",
+      "FOLDER_NOT_FOUND": "Folder not found.",
+      "FOLDER_MISSING": "The Workspace folder is missing. Locate it again or remove it from the list.",
+      "FOLDER_NOT_WRITABLE": "The folder is not writable.",
+      "FOLDER_NOT_EMPTY": "The clone folder must be empty or not exist yet.",
+      "INVALID_PATH": "Path must be a valid absolute path.",
+      "INVALID_SPECS_DIR": "Specs Dir must be a subfolder inside the Workspace.",
+      "INVALID_GIT_REMOTE": "Invalid repo URL (use https://, ssh:// or git@host:owner/repo).",
+      "INVALID_BRANCH": "Invalid branch name.",
+      "INVALID_REPO": "Repo must look like owner/repo.",
+      "CLONE_FAILED": "Cloning the repository failed.",
+      "DRIVE_DOWNLOAD_FAILED": "Downloading the Drive folder failed.",
+      "GIT_REMOTE_UNREACHABLE": "Cannot reach the Git remote.",
+      "GIT_BRANCH_NOT_FOUND": "Branch {branch} not found on the remote.",
+      "DRIVE_NOT_CONFIGURED": "Google OAuth for Drive is not configured.",
+      "DRIVE_ACCESS_DENIED": "No read/write access to the Drive folder.",
+      "NOTEBOOK_UNREACHABLE": "Cannot access the notebook."
+    }
+  }
+}

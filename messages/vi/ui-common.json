@@ -1,0 +1,145 @@
+{
+  "common": {
+    "appName": "Spec Studio",
+    "actions": {
+      "close": "Đóng",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Đang lưu…",
+      "saved": "Đã lưu",
+      "retry": "Thử lại",
+      "settings": "Settings",
+      "rename": "Rename",
+      "forceSync": "Force Sync",
+      "deleteSpec": "Delete spec",
+      "more": "Thao tác khác",
+      "openFolder": "Mở thư mục",
+      "editConfig": "Sửa cấu hình",
+      "removeFromList": "Gỡ khỏi danh sách",
+      "locate": "Tìm lại",
+      "test": "Kiểm tra",
+      "edit": "Sửa",
+      "delete": "Xoá",
+      "send": "Send",
+      "stop": "Dừng",
+      "newProject": "New Project",
+      "toggleSidebar": "Bật/tắt sidebar",
+      "openUrl": "Mở liên kết"
+    },
+    "status": {
+      "SYNCED": "Synced",
+      "UNSAVED": "Unsaved",
+      "SYNCING": "Syncing…",
+      "ERROR": "Error"
+    },
+    "combobox": {
+      "placeholder": "Chọn…",
+      "search": "Tìm…",
+      "searchOrType": "Tìm hoặc nhập giá trị…",
+      "count": "{shown}/{total}",
+      "empty": "Không có kết quả",
+      "useCustom": "Dùng “{value}”",
+      "selectedCount": "{count} đã chọn",
+      "clear": "Bỏ chọn",
+      "selectAll": "Chọn tất cả",
+      "selectResults": "Chọn kết quả",
+      "remove": "Bỏ {label}"
+    },
+    "publish": {
+      "target": {
+        "LOCAL": "Ghi file local",
+        "GIT": "Git · Push",
+        "DRIVE": "Google Drive",
+        "NOTEBOOK": "NotebookLM"
+      },
+      "targetShort": {
+        "LOCAL": "Local",
+        "GIT": "Git",
+        "DRIVE": "Drive",
+        "NOTEBOOK": "NBL"
+      },
+      "step": {
+        "PENDING": "Chờ",
+        "RUNNING": "Đang chạy",
+        "DONE": "Xong",
+        "ERROR": "Lỗi",
+        "SKIPPED": "Bỏ qua"
+      },
+      "chip": "{target}: {status}"
+    },
+    "storage": {
+      "LOCAL": "Local",
+      "GIT": "Git",
+      "DRIVE": "Drive"
+    },
+    "workspace": {
+      "open": "Mở {name}",
+      "menu": "Thao tác với {name}",
+      "folderMissing": "Không tìm thấy thư mục",
+      "notebook": "NotebookLM · {name}",
+      "notebookNone": "NotebookLM · Chưa kết nối",
+      "specCount": "{count, plural, other {# spec}}",
+      "neverOpened": "Chưa mở",
+      "newProjectHint": "Local · Git · Google Drive",
+      "status": {
+        "SYNCED": "Synced",
+        "UNSAVED": "Có thay đổi chưa push",
+        "SYNCING": "Đang đồng bộ…",
+        "ERROR": "Lỗi"
+      }
+    },
+    "spec": {
+      "menu": "Thao tác với {name}",
+      "addToContext": "Đính kèm {name} vào context"
+    },
+    "mode": {
+      "label": "Chế độ Agent",
+      "API": "API Key",
+      "CLI": "CLI Agent"
+    },
+    "connector": {
+      "type": {
+        "CLI": "CLI",
+        "MCP": "MCP",
+        "TOKEN": "Token",
+        "SSH": "SSH"
+      },
+      "provider": {
+        "GITHUB": "GitHub",
+        "GITLAB": "GitLab",
+        "BITBUCKET": "Bitbucket",
+        "GITEA": "Gitea / Forgejo",
+        "GENERIC": "Git thường"
+      },
+      "state": {
+        "CONNECTED": "Đã kết nối",
+        "NEEDS_LOGIN": "Cần đăng nhập lại",
+        "NOT_FOUND": "Không tìm thấy CLI",
+        "ERROR": "Lỗi kết nối",
+        "UNCHECKED": "Chưa kiểm tra"
+      },
+      "menu": "Thao tác với {name}"
+    },
+    "chat": {
+      "agent": "Agent",
+      "log": "stdout",
+      "running": "Đang chạy"
+    },
+    "composer": {
+      "label": "Yêu cầu cho Agent",
+      "placeholder": "Mô tả thay đổi bạn muốn cho spec…",
+      "hint": "để gửi"
+    },
+    "theme": {
+      "toggle": "Đổi giao diện sáng/tối",
+      "light": "Sáng",
+      "dark": "Tối",
+      "system": "Theo hệ thống"
+    },
+    "secret": {
+      "show": "Hiện",
+      "hide": "Ẩn",
+      "setPlaceholder": "Đã lưu · nhập để thay"
+    }
+  }
+}

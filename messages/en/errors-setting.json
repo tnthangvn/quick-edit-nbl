@@ -1,0 +1,10 @@
+{
+  "errors": {
+    "SETTING": {
+      "CLI_PROFILE_NOT_FOUND": "The selected CLI profile does not exist.",
+      "CLI_PROFILE_DUPLICATE": "CLI profile IDs must be unique.",
+      "WORKSPACE_ID_MISMATCH": "This configuration does not belong to this Workspace.",
+      "SECRET_NOT_SET": "Credentials not set ({kind})."
+    }
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "workbench": {
+    "toast": {
+      "saveFailed": "Could not save {file}",
+      "openFailed": "Could not open the workspace",
+      "settingsFailed": "Could not save agent settings"
+    },
+    "storage": {
+      "label": "Storage status",
+      "pending": "{count, plural, =0 {In sync} one {# change} other {# changes}}",
+      "gitSummary": "Branch {branch} · {uncommitted} uncommitted · {ahead} to push · {behind} to pull",
+      "driveSummary": "{count, plural, =0 {Nothing waiting to upload} one {# file waiting to upload} other {# files waiting to upload}}",
+      "pull": "Pull",
+      "push": "Push",
+      "pulled": "{count, plural, =0 {Pulled, no changes} one {Pulled # file} other {Pulled # files}}",
+      "pushed": "{count, plural, one {Pushed # file} other {Pushed # files}}",
+      "nothingToPush": "Nothing to push",
+      "openPr": "Open PR #{number}",
+      "pullFailed": "Pull failed",
+      "pushFailed": "Push failed"
+    },
+    "sidebar": {
+      "label": "Spec list",
+      "title": "Specs",
+      "expand": "Open sidebar",
+      "count": "{count, plural, one {# spec} other {# specs}}",
+      "selectAll": "Use all specs as context",
+      "inContext": "{count} in context",
+      "newSpec": "New spec",
+      "loadFailed": "Could not load specs",
+      "retry": "Retry",
+      "emptyTitle": "No specs yet",
+      "emptyDescription": "Create the first .md file in {dir}.",
+      "forceSyncFailed": "Could not force sync {file}"
+    },
+    "dialogs": {
+      "new": {
+        "title": "New spec",
+        "description": "Create a Markdown file in the workspace spec folder.",
+        "fileLabel": "File name",
+        "fileHint": "Relative path, e.g. overview.md or ui/header.md.",
+        "submit": "Create",
+        "created": "Created {file}"
+      },
+      "rename": {
+        "title": "Rename spec",
+        "description": "Rename {file} in the local spec folder.",
+        "fileLabel": "New name",
+        "renamed": "Renamed {from} to {to}"
+      },
+      "delete": {
+        "title": "Delete {file}?",
+        "description": "The file is removed from the local spec folder. Its NotebookLM source stays until the next sync.",
+        "deleted": "Deleted {file}",
+        "failed": "Could not delete {file}"
+      }
+    },
+    "editor": {
+      "label": "Workspace",
+      "loading": "Loading editor…",
+      "monacoFailed": "Could not load Monaco Editor",
+      "noSpecsTitle": "Start with your first spec",
+      "noSpecsDescription": "This workspace has no .md files yet. Create a spec, then edit it with the Agent.",
+      "newSpec": "New spec",
+      "noSelectionTitle": "Pick a spec",
+      "noSelectionDescription": "Click a file on the left to open it; tick its checkbox to attach it to the Agent context.",
+      "pendingProposals": "{count, plural, one {# proposal to review} other {# proposals to review}}",
+      "loadFailed": "Could not open {file}",
+      "editorLabel": "Content of {file}",
+      "markdown": "Markdown",
+      "draftHint": "Draft kept on this device · not written yet",
+      "approveSave": "Approve & Save",
+      "saving": "Saving…",
+      "saved": "Saved"
+    },
+    "diff": {
+      "label": "Review agent changes",
+      "toolbar": "Review changes",
+      "title": "Agent proposes changes to <code>{file}</code>",
+      "titleNew": "Agent proposes creating <code>{file}</code>",
+      "stats": "{added} lines added, {removed} lines removed",
+      "queue": "{index}/{total}",
+      "original": "Original",
+      "proposed": "Proposed",
+      "editorLabel": "Diff of {file}",
+      "reject": "Reject",
+      "approveSave": "Approve & Save",
+      "saving": "Saving…",
+      "rejected": "Discarded the proposal for {file}"
+    },
+    "sync": {
+      "label": "Sync activity",
+      "running": "Syncing <code>{file}</code>",
+      "done": "Synced <code>{file}</code>",
+      "withErrors": "Synced {done}/{total} targets · {errors} failed",
+      "progress": "{done}/{total} targets",
+      "waiting": "Waiting for the pipeline to start…",
+      "gitPullRequest": "Git · Pull Request",
+      "collapse": "Collapse",
+      "expand": "Expand",
+      "close": "Close",
+      "retryFailed": "Could not retry this target"
+    },
+    "toolbar": {
+      "model": "Model",
+      "modelPlaceholder": "Pick a model",
+      "profile": "CLI profile",
+      "profilePlaceholder": "Pick a CLI profile",
+      "context": "{count, plural, one {# spec in context} other {# specs in context}}",
+      "settings": "Agent settings"
+    },
+    "chat": {
+      "hint": "Tick the related specs on the left, then describe the change you want.",
+      "thinking": "Agent is working",
+      "cliTitle": "{profile} · stdout",
+      "cliStarting": "Starting…",
+      "cliStatus": {
+        "RUNNING": "Running",
+        "DONE": "Done · exit {code}",
+        "FAILED": "Failed · exit {code}",
+        "STOPPED": "Stopped"
+      },
+      "tool": {
+        "running": "Running",
+        "drafting": "Drafting",
+        "done": "Done",
+        "error": "Error",
+        "noChanges": "No changes",
+        "pendingReview": "Awaiting review",
+        "reviewed": "Handled",
+        "openDiff": "Open Diff"
+      }
+    },
+    "composer": {
+      "placeholderApi": "Ask the Agent to edit specs…",
+      "placeholderCli": "Instructions for the CLI Agent…",
+      "noContext": "No spec selected as context",
+      "contextLabel": "{count, plural, one {# spec in context} other {# specs in context}}",
+      "cliStartFailed": "Could not start the CLI Agent",
+      "cliStopFailed": "Could not stop the CLI Agent"
+    }
+  }
+}

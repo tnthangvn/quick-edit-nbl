@@ -10,14 +10,128 @@
 
 ## 2. Kiến trúc Kỹ thuật (Tech Stack & Architecture)
 
-* **Framework:** **Next.js (App Router)** chạy full-stack trên môi trường Node.js local.
-  * **Frontend (Client):** React, Tailwind CSS, Lucide React, Radix UI / shadcn/ui.
-  * **Backend (Route Handlers):** Next.js API Routes (`app/api/*`) xử lý I/O với hệ thống file local (`node:fs/promises`) và tiến trình hệ điều hành (`node:child_process`).
-* **Editor & Diff View:** `@monaco-editor/react` (sử dụng component `<DiffEditor />` có sẵn để review code/spec).
-* **AI Orchestration:** **Vercel AI SDK** (`ai`, `@ai-sdk/react`, `@ai-sdk/google`, `@ai-sdk/anthropic`):
-  * Dùng hook `useChat` và streaming UI component.
-  * Hỗ trợ Tool / Function Calling native.
-* **CLI Runner:** `spawn` / `execa` thực thi các terminal tool có sẵn trên máy (Claude Code, Codex CLI của OpenAI/ChatGPT, Antigravity CLI của Google, Aider, custom scripts) và stream output trực tiếp về client qua Server-Sent Events (SSE).
+Quy tắc viết code chi tiết cho người và AI agent nằm ở `CLAUDE.md` (gốc repo, `AGENTS.md` / `GEMINI.md` là symlink). Mục này mô tả kiến trúc.
+
+### 2.1. Tổng quan
+
+* **Một app Next.js (App Router)** chạy full-stack trên Node.js local, làm cả FE và BE; không tách service backend riêng. Route handler chạy `runtime = "nodejs"`.
+* **FE** tổ chức theo **Atomic Design** (`src/ui`), **BE** tổ chức theo **Porto** (`src/ship`, `src/containers`). Thư mục `app/` chỉ khai báo route.
+* **Hợp đồng FE–BE là OpenAPI 3.1:** BE sinh `docs/api.json` từ schema zod, FE sinh toàn bộ client, type và enum từ file này.
+* Muốn đóng gói thành app desktop về sau: bọc bằng Electron hoặc Tauri, giữ nguyên code FE/BE.
+
+| Lớp | Công nghệ |
+| --- | --- |
+| UI | React, Tailwind CSS v4, shadcn/ui (Radix), `lucide-react`, `next-themes`, font Geist / Geist Mono (`next/font`) |
+| Editor & Diff | `@monaco-editor/react` (`Editor`, `DiffEditor`) + theme `spec-studio-light/dark` |
+| State & dữ liệu FE | zustand (trạng thái giao diện), TanStack Query (dữ liệu server), `react-hook-form` + `zod` (form) |
+| i18n | `next-intl` (không đặt locale trên URL; `vi` mặc định, `en`) |
+| Validate & OpenAPI | `zod` v4 + `zod-openapi` (BE), Orval (sinh client FE), `@redocly/cli` (lint spec) |
+| AI (Direct API) | Vercel AI SDK: `ai`, `@ai-sdk/react` (`useChat`), `@ai-sdk/google`, `@ai-sdk/anthropic`, `@ai-sdk/openai`, provider Ollama; tool calling native |
+| CLI Runner | `execa` chạy Claude Code, Codex CLI, Antigravity CLI (`agy`), Aider, script tuỳ chỉnh; stream về client qua SSE |
+| Data layer | Repository chạy trên driver chọn bằng `DATA_DRIVER`: `JSON` (mặc định, file trong `~/.spec-studio/data`) hoặc `POSTGRES` (Kysely + `pg`) |
+| Git / Drive / MCP | `simple-git` + CLI `gh` / `glab` / `tea`; `googleapis` (Drive v3); `@modelcontextprotocol/sdk` |
+| Secret | Keychain hệ điều hành (`@napi-rs/keyring`), dự phòng `~/.spec-studio/secrets.json` (quyền 600) |
+| Theo dõi file | `chokidar` (phát hiện file bị sửa từ ngoài app) |
+| Test | Vitest |
+
+### 2.2. Môi trường & công cụ
+
+* **Node.js 24 LTS** (khai trong `.nvmrc`), **pnpm** qua corepack (`packageManager` trong `package.json`, `engine-strict=true`).
+* **Máy mới chỉ cần một lệnh:** `./setup.sh`. Script cài nvm, Node, pnpm, dependencies, tạo `~/.spec-studio` (quyền 700) và `.env.local`, chạy migration, sinh API, kiểm tra CLI tuỳ chọn.
+* **Lệnh hằng ngày qua `Makefile`** (`make help`): `dev`, `build`, `migrate`, `migration`, `seed`, `db-reset`, `api`, `api-check`, `lint`, `typecheck`, `test`, `check`...
+
+### 2.3. Cấu trúc thư mục
+
+```
+app/                     # route Next.js; app/api/**/route.ts chỉ re-export handler của container
+src/
+├── ui/                  # FE — Atomic Design
+│   ├── primitives/      # shadcn/Radix sinh ra, không sửa tay
+│   ├── atoms/           # Button, IconButton, Input, Checkbox, Switch, Kbd, Icon, StatusBadge...
+│   ├── molecules/       # Field, Select, Tabs, ModeSwitch, SpecListItem, ChatMessage, Toast, ContextMenu...
+│   ├── organisms/       # AppHeader, SpecSidebar, EditorPane, DiffView, Composer, SyncActivityPanel, SettingsDialog...
+│   └── templates/       # ProjectsTemplate, WorkbenchTemplate
+├── client/              # FE — stores (zustand), sse, api/generated (Orval: hook, type, enum)
+├── ship/                # BE — Porto Ship layer
+│   ├── parents/         # base class: Action, SubAction, Task, Controller, Request, Transformer, RepositoryBase, AppException
+│   ├── contracts/       # schema, enum, event contract dùng chung (ErrorCode, ErrorResponse...)
+│   ├── adapters/        # fs, process, git, drive, mcp, keyring, database, logger, sse
+│   └── engine/          # defineRoute, DI, EventBus, chuyển lỗi thành response
+└── containers/          # BE — Porto Containers layer
+    ├── Studio/          # Section: Workspace, Spec, Setting, Connector, Storage, Notebook, Publish
+    └── Agent/           # Section: Chat, CliRunner
+messages/                # vi.json, en.json
+docs/api.json            # OpenAPI 3.1 do BE sinh ra
+scripts/                 # build-openapi.ts...
+```
+
+### 2.4. Frontend — Atomic Design
+
+* Tầng phụ thuộc một chiều: page (`app/`) → template → organism → molecule → atom → primitive.
+* Atom và molecule chỉ nhận props. Organism là tầng duy nhất dùng hook dữ liệu trong `src/client`. Template chỉ lo layout.
+* Component bám `design-system/design/components/*.md`; màu, spacing, radius, motion chỉ lấy từ token trong `globals.css`.
+* FE chỉ gọi API qua code Orval sinh ra; không tự khai type/enum trùng với schema API, không import code trong `src/ship` hay `src/containers`.
+
+### 2.5. Backend — Porto
+
+* **Ship layer** chứa hạ tầng dùng chung và giữ mỏng: base class, contract, adapter cho thư viện ngoài, engine.
+* **Containers layer** chia theo nghiệp vụ. Mỗi container có cùng cấu trúc: `Actions/`, `Tasks/`, `Models/`, `Enums/`, `Events/`, `Exceptions/`, `Data/{Repositories,Migrations,Seeders}/`, `UI/API/{Routes,Controllers,Requests,Transformers}/`, `Tests/`.
+
+| Section | Container | Trách nhiệm |
+| --- | --- | --- |
+| Studio | Workspace | Registry, tạo / mở / kiểm tra Workspace (3.0, 6.3) |
+| Studio | Spec | Đọc / ghi / đổi tên / xoá file `.md`, chặn path traversal |
+| Studio | Setting | Cấu hình app và Workspace, secret |
+| Studio | Connector | CLI `gh`/`glab`/`tea`, MCP, Token, SSH (3.0.2) |
+| Studio | Storage | Pull / publish cho Local, Git, Drive |
+| Studio | Notebook | Đồng bộ NotebookLM (`drive_sync` / `rpc`) |
+| Studio | Publish | Pipeline sau Approve (6.4), hàng đợi theo file |
+| Agent | Chat | Direct API, tools 5.2 |
+| Agent | CliRunner | Chạy CLI agent trong sandbox, parse output, đẩy đề xuất sang Diff Review |
+
+* **Luồng gọi:** Route → Controller → Action → (SubAction) → Task → Repository / Adapter.
+  * Controller chỉ validate Request, gọi một Action, trả kết quả qua Transformer.
+  * Action là một use case (`run()`), không gọi Action khác. Task làm một việc (`run()`), chỉ được gọi từ Action/SubAction, không gọi Task khác.
+  * Trong cùng Section, Action được gọi Task của container khác (vd Publish gọi Task của Storage và Notebook). Khác Section đi qua contract trong `ship/contracts` hoặc event (vd Agent đọc spec qua `SpecReader`, đề xuất sửa bằng `SpecProposedEvent`).
+* **CLI agent không ghi thẳng vào spec:** CliRunner chạy CLI trong bản sao tạm (git worktree hoặc copy `specsDir`), so sánh với bản gốc rồi đẩy kết quả sang DiffEditor; chỉ Approve mới ghi vào file thật (đúng luồng 6.1).
+
+### 2.6. Data layer
+
+* **Chọn nguồn dữ liệu bằng cấu hình**, code nghiệp vụ không đổi:
+
+| `DATA_DRIVER` | Lưu ở | Dùng khi |
+| --- | --- | --- |
+| `JSON` (mặc định) | Mỗi model một file `DATA_DIR/<model>.json` (mặc định `~/.spec-studio/data`) | App local một người dùng, không cần cài gì thêm |
+| `POSTGRES` | Bảng trong database `DATABASE_URL` | Nhiều người dùng, cần truy vấn/lịch sử lớn, chạy trên server |
+
+* **Kiến trúc:** Task → Repository → `RepositoryBase` → `DataDriver` (interface trong `ship/contracts`) → `JsonDataDriver` hoặc `PostgresDataDriver` (trong `ship/adapters/data`). Engine tạo driver một lần lúc khởi động theo env.
+* Mọi repository kế thừa `RepositoryBase<"tên_model">` với `protected model = "tên_model"`. Các hàm `protected` chạy được trên cả hai driver: `findById`, `findOne`, `findMany`, `where`, `join`, `paginate`, `count`, `exists`, `insert`, `multipleInsert`, `upsert`, `update`, `updateById`, `delete` (bắt buộc có điều kiện), `withTransaction`. Repository con chỉ public hàm nghiệp vụ.
+* Điều kiện lọc là object dùng chung cho mọi driver (`=`, `IN`, `IS NULL`, `ne/gt/gte/lt/lte/like`); không viết SQL trực tiếp trong repository.
+* Model khai bằng zod: validate khi ghi file JSON, sinh kiểu cho Kysely. ID (UUID v7) và `created_at` / `updated_at` do app sinh để dữ liệu hai driver giống nhau.
+* **JSON:** ghi file tạm rồi rename (không hỏng file khi tắt ngang), khoá theo model trong tiến trình, không cần migration. **POSTGRES:** migration theo từng container (`make migration`), chạy `make migrate`; môi trường dev có `docker-compose.yml` (`make db-up`).
+* Seeder viết qua repository nên chạy được trên cả hai driver.
+* Secret không lưu qua repository hay `config.json`.
+
+### 2.7. Hợp đồng API (OpenAPI)
+
+* Mỗi endpoint khai một lần bằng `defineRoute({ operationId, method, path, tags, request, responses, controller })`. Từ đó engine vừa tạo handler (validate request, xử lý lỗi), vừa sinh tài liệu.
+* Response khai rõ theo status: thành công (200/201/204) và lỗi có thể xảy ra (403, 404, 409...). Engine tự thêm `500` cho mọi route và `422` cho route có input. Môi trường dev/test validate cả response thành công.
+* **Enum:** mọi field có tập giá trị cố định (`status`, `type`, `mode`, `strategy`, `provider`...) khai bằng `z.enum([...]).meta({ id })`, giá trị viết HOA (`ACTIVE`, `INACTIVE`). Enum có tên vào `components/schemas`, FE sinh ra một enum dùng chung; cột DB dùng cùng enum (`CHECK ... IN (...)`).
+* **Quy trình:** `make api` = sinh `docs/api.json` → lint bằng Redocly → Orval sinh `src/client/api/generated/`. Commit cả hai; CI chạy `make api-check` để chặn spec lệch code.
+* Endpoint SSE (tiến trình sync, log CLI) khai `text/event-stream` với schema event; FE tự viết wrapper `EventSource` nhưng dùng type sinh ra.
+
+### 2.8. Lỗi & đa ngôn ngữ
+
+* BE **không trả câu thông báo**. Lỗi có dạng:
+
+```json
+{ "error": { "code": "SPEC.NOT_FOUND", "params": { "file": "sidebar.md" }, "traceId": "a1b2c3" } }
+{ "error": { "code": "VALIDATION.FAILED", "fields": { "name": { "code": "FIELD.REQUIRED" } } } }
+```
+
+* Mã lỗi dạng `DOMAIN.REASON`, khai trong enum `ErrorCode`; mỗi lỗi nghiệp vụ là một class `AppException` có `code` và HTTP status. Lỗi không lường trước trả `INTERNAL.UNEXPECTED` + `traceId`, chi tiết chỉ ghi log.
+* FE dịch theo `code` bằng `next-intl` (`messages/vi.json`, `messages/en.json`, khoá `errors.<DOMAIN>.<REASON>`); thông báo thành công cũng do FE dịch. Test bắt buộc mọi `ErrorCode` có bản dịch ở mọi locale.
+* Lỗi trong pipeline sync và log CLI dùng cùng định dạng `{ code, params }`; stderr gốc (git, CLI) nếu cần hiện thì đặt trong `params.detail` và hiển thị nguyên văn.
 
 ---
 
@@ -328,7 +442,10 @@ Registry chỉ là danh bạ để hiển thị màn hình Projects; nguồn s�
 * `GET /api/connectors` · `POST /api/connectors` · `POST /api/connectors/[id]/check` · `GET /api/connectors/detect` (dò CLI trên máy) · `GET /api/connectors/[id]/repos?q=` · `GET /api/connectors/[id]/branches?repo=`.
 * `POST /api/workspaces/[id]/check` — kiểm tra thư mục, Git remote, quyền Drive, Notebook ID; trả kết quả từng mục.
 * `POST /api/workspaces/[id]/pull` · `POST /api/workspaces/[id]/push` — đồng bộ với nơi lưu trữ (Git: `pull --ff-only` / `add` + `commit` + `push`; Drive: tải về / tải lên).
-* Mọi route file I/O hiện có (`/api/specs/*`) nhận thêm `workspaceId` và chỉ được đọc/ghi bên trong `workspacePath` của Workspace đó (chặn path traversal).
+* Route spec lồng dưới Workspace và chỉ được đọc/ghi bên trong `workspacePath` của Workspace đó (chặn path traversal): `GET · POST /api/workspaces/[id]/specs` · `GET · PUT (Approve) · PATCH (Rename) · DELETE /api/workspaces/[id]/specs/[file]`.
+* `POST /api/workspaces/[id]/sync/[file]` (Force Sync, Thử lại từng đích) · `GET /api/workspaces/[id]/events` (SSE: tiến trình pipeline 3.3.1, file thay đổi).
+* `GET · PUT /api/settings` · `POST /api/chat` (Direct API, stream) · `POST /api/agent/run` (CLI, SSE) · `DELETE /api/agent/[runId]` · `GET /api/agent/detect`.
+* Mọi route khai bằng `defineRoute` (mục 2.7); danh sách đầy đủ, schema request/response và mã lỗi xem `docs/api.json`.
 
 ## 6\. Luồng Xử lý Dữ liệu Chính (Workflows)
 
@@ -405,6 +522,14 @@ Nếu storage và NotebookLM Drive Sync cùng dùng một thư mục Drive, bư�
 
 ## 7. Kế hoạch Triển khai (Checklist)
 
+-   [ ] **Phase −1: Nền tảng**
+    
+    -   `package.json` (Node 24, pnpm), `setup.sh`, `Makefile`, `.nvmrc`, ESLint (chặn import sai tầng Atomic / Porto, chặn FE import BE), Prettier, Vitest.
+    -   Ship layer: base class, `defineRoute`, `AppException` + xử lý lỗi, `RepositoryBase` + `DataDriver` (`JsonDataDriver`, `PostgresDataDriver`) + migrator cho POSTGRES, EventBus, logger.
+    -   Pipeline OpenAPI: `scripts/build-openapi.ts` → `docs/api.json` → Redocly → Orval; `make api-check` trong CI.
+    -   `next-intl` + `messages/vi.json`, `en.json` + test phủ `ErrorCode`.
+    -   Container mẫu `Spec` đầy đủ các tầng; các atom đầu tiên theo design system.
+
 -   [ ] **Phase 0: Workspace Manager**
     
     -   Registry `~/.spec-studio/workspaces.json`, `settings.json`, `secrets.json`.
@@ -415,7 +540,7 @@ Nếu storage và NotebookLM Drive Sync cùng dùng một thư mục Drive, bư�
 
 -   [ ] **Phase 1: Next.js Foundation & File I/O**
     
-    -   Khởi tạo project `create-next-app` (App Router, Tailwind CSS).
+    -   Khởi tạo project bằng `pnpm create next-app` (App Router, TypeScript, Tailwind CSS v4), cài shadcn/ui, chép `globals.css` và `monaco-theme.ts` từ design system.
     -   Viết API Route Handler đọc/ghi/xóa file `.md` từ thư mục local.
     -   Xây dựng layout theo wireframe: Sidebar, Workspace, Chatbox[cite: 1].
     -   Tích hợp `@monaco-editor/react` (cả Editor và DiffEditor).

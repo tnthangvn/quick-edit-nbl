@@ -1,0 +1,223 @@
+{
+  "settings": {
+    "title": "Settings",
+    "description": "Agent and connector settings shared by all projects.",
+    "descriptionWorkspace": "Shared settings and the settings of {name}.",
+    "tabs": {
+      "API": "Direct API",
+      "CLI": "CLI Agent Runner",
+      "NOTEBOOK": "NotebookLM Sync",
+      "WORKSPACE": "Workspace & Storage",
+      "INTEGRATIONS": "Integrations"
+    },
+    "loading": "Loading settings…",
+    "loadFailed": "Couldn't load settings",
+    "configMissingTitle": "Couldn't read the project configuration",
+    "globalPath": "~/.spec-studio · shared settings",
+    "saved": "Settings saved",
+    "saveFailed": {
+      "settings": "Couldn't save Agent settings",
+      "config": "Couldn't save project settings",
+      "secret": "Couldn't save the NotebookLM cookie / token"
+    },
+    "api": {
+      "provider": "Provider",
+      "providers": {
+        "GOOGLE": "Google Gemini",
+        "ANTHROPIC": "Anthropic",
+        "OPENAI": "OpenAI",
+        "DEEPSEEK": "DeepSeek",
+        "OLLAMA": "Ollama / Local BaseURL"
+      },
+      "apiKey": "API Key",
+      "apiKeyPlaceholder": "Paste API key…",
+      "apiKeyHint": "Stored locally only (keychain / secrets.json), never sent anywhere else.",
+      "apiKeyHintOllama": "A local Ollama usually doesn't need an API key.",
+      "removeKey": "Remove Key",
+      "keyWillBeRemoved": "The saved key will be removed when you Save.",
+      "test": "Test",
+      "testing": "Testing…",
+      "testOk": "OK",
+      "testFailed": "Connection failed. Check the API key, model and Base URL.",
+      "testResult": "Connected · {ms} ms",
+      "model": "Model ID",
+      "modelHint": "Pick one or type a custom model name.",
+      "temperature": "Temperature",
+      "baseUrl": "Base URL",
+      "baseUrlHint": "Leave empty for the provider's default endpoint.",
+      "baseUrlHintOllama": "Address of Ollama or an OpenAI-compatible server.",
+      "systemPrompt": "System Prompt Preset",
+      "systemPromptHint": "Persona and spec-writing rules for the Agent."
+    },
+    "cli": {
+      "activeCli": "Active CLI",
+      "activeCliHint": "The process always runs with cwd = the project's working folder.",
+      "detectAgain": "Detect CLIs again",
+      "kinds": {
+        "CLAUDE_CODE": "Anthropic",
+        "CODEX": "OpenAI · ChatGPT",
+        "ANTIGRAVITY": "Google · agy",
+        "AIDER": "Git-aware",
+        "CUSTOM": "Shell script"
+      },
+      "detect": {
+        "found": "Found",
+        "notFound": "Not found",
+        "loggedOut": "Not signed in",
+        "custom": "Custom command"
+      },
+      "binaryPath": "Binary Path",
+      "binaryPathHint": "Executable path or a command on PATH.",
+      "detectedAt": "Found at",
+      "useDetected": "Use This Path",
+      "args": "Default Arguments",
+      "argsHint": "One argument per line. '{prompt}' = the request plus spec list, '{spec}' = the open file.",
+      "outputFormat": "Output Format",
+      "outputFormatHint": "The runner parses stdout in this format to show logs and file edit proposals.",
+      "formats": {
+        "STREAM_JSON": "stream-json",
+        "JSONL": "jsonl",
+        "TEXT": "text"
+      },
+      "workspacePath": "Workspace Path",
+      "workspacePathHint": "Root folder of the .md files (change it in Workspace & Storage).",
+      "workspacePathNone": "Open Settings from a project to see its working folder.",
+      "streamStdout": "Stream Stdout",
+      "streamStdoutHint": "Stream process logs into the chat."
+    },
+    "notebook": {
+      "notebookId": "Notebook ID",
+      "notebookIdHint": "Paste the notebook URL or ID; the ID is extracted automatically.",
+      "check": "Check",
+      "checkOk": "Connected to “{title}” · {count, plural, one {# source} other {# sources}}",
+      "checkFailed": "Couldn't access the notebook.",
+      "strategy": "Sync Strategy",
+      "strategies": {
+        "DRIVE_SYNC": {
+          "title": "Google Drive Sync",
+          "description": "Write specs as Google Docs, then refresh the source. Stable, recommended."
+        },
+        "RPC": {
+          "title": "Direct Cookie RPC",
+          "description": "Delete the old source and re-upload over RPC. Fast, but fails when cookies expire."
+        }
+      },
+      "driveFolder": "Drive Folder ID",
+      "driveFolderHint": "Drive folder holding the Google Doc copies of the specs.",
+      "cookie": "Cookie (SID, HSID, SSID)",
+      "cookieHint": "Stored locally only. Cookies usually expire after a few weeks.",
+      "token": "SNlM0e Token",
+      "tokenHint": "Stored locally only, used for the RPC endpoint.",
+      "autoSyncOnApprove": {
+        "label": "Sync to NBL automatically after Approve Diff",
+        "hint": "Runs right after the file is written."
+      },
+      "confirmBeforeSync": {
+        "label": "Ask for confirmation before syncing",
+        "hint": "Asks before every push to NotebookLM."
+      }
+    },
+    "workspace": {
+      "name": "Workspace Name",
+      "specsDir": "Specs Dir",
+      "path": "Local working folder",
+      "pathHint": "Read-only. If the folder moved, use Locate on the Projects screen.",
+      "copyPath": "Copy path",
+      "copied": "Copied",
+      "storageType": "Storage type",
+      "storageTypeHint": "Changing the type re-runs the same checks as the Wizard.",
+      "dangerTitle": "Remove workspace from list",
+      "dangerDescription": "Only removes it from Projects; no files are deleted.",
+      "remove": "Remove"
+    },
+    "integrations": {
+      "connectorsTitle": "Git connectors",
+      "connectorsDescription": "Reused by every project: CLI, MCP server, Personal Access Token or SSH key.",
+      "addConnector": "Add Connector",
+      "loading": "Loading connectors…",
+      "loadFailed": "Couldn't load connectors",
+      "emptyTitle": "No connectors yet",
+      "emptyDescription": "Add a connector or use a detected CLI below to pick repositories from a list.",
+      "checkOk": "Connector is connected",
+      "checkNeedsLogin": "Connector needs to sign in again",
+      "runLogin": "Run {command} in a terminal, then check again.",
+      "checkStatus": {
+        "CONNECTED": "Connector is connected",
+        "NEEDS_LOGIN": "Connector needs to sign in again",
+        "CLI_NOT_FOUND": "CLI not found on this machine",
+        "ERROR": "The connector reported an error"
+      },
+      "checkFailed": "Connector check failed",
+      "removed": "Deleted connector {name}",
+      "removeTitle": "Delete connector?",
+      "removeDescription": "Delete {name} and its secrets. Projects using it must pick another connector.",
+      "tools": "{count, plural, =0 {Tools · none enabled for the Agent} other {Tools · # enabled for the Agent}}",
+      "toolsLoading": "Loading tools…",
+      "toolsEmpty": "This MCP server has no tools.",
+      "detectTitle": "Detected CLIs",
+      "detectDescription": "Scans gh, glab and tea on this machine: version and signed-in account.",
+      "detectAgain": "Detect again",
+      "detecting": "Detecting CLIs…",
+      "cliMissing": "Not found on this machine",
+      "cliLoggedOut": "Not signed in · run {command}",
+      "alreadyAdded": "Added",
+      "add": "Add",
+      "addAnyway": "Add Anyway",
+      "added": "Added connector {name}"
+    },
+    "connectorForm": {
+      "createTitle": "Add connector",
+      "editTitle": "Edit {name}",
+      "description": "How the app authenticates with the Git provider to list repos and branches and to open PRs/MRs.",
+      "type": "Connector type",
+      "types": {
+        "CLI": {
+          "title": "Installed CLI",
+          "description": "gh, glab, tea… No token is stored in the app."
+        },
+        "MCP": {
+          "title": "MCP server",
+          "description": "stdio (command) or HTTP (url)."
+        },
+        "TOKEN": {
+          "title": "Personal Access Token",
+          "description": "Stored in the keychain / secrets.json."
+        },
+        "SSH": {
+          "title": "SSH key",
+          "description": "Clone/pull/push only."
+        }
+      },
+      "name": "Name",
+      "namePlaceholder": "Personal GitHub",
+      "provider": "Provider",
+      "host": "Host",
+      "hostHint": "Leave empty for the provider's default host.",
+      "cliCommand": "CLI command",
+      "cliCommandHint": "Leave empty to use the provider's CLI (gh, glab, tea).",
+      "mcpCommand": "Command",
+      "mcpCommandHint": "Command that starts the MCP server (stdio).",
+      "transport": "Transport",
+      "transports": {
+        "STDIO": "stdio",
+        "HTTP": "HTTP"
+      },
+      "url": "URL",
+      "headers": "Headers",
+      "headersHint": "One header per line: Name: value.",
+      "args": "Arguments",
+      "argsHint": "One argument per line.",
+      "env": "Env",
+      "envHint": "One KEY=VALUE per line (non-secret).",
+      "secrets": "Secret env / headers",
+      "secretsHint": "Write-only, kept in the secret store. One KEY=VALUE per line.",
+      "secretsHintSet": "Saved: {keys}. Re-enter to replace; leave empty to keep.",
+      "token": "Token",
+      "tokenHint": "Write-only. Grant the minimum repo read/write and PR scopes.",
+      "sshHint": "Uses this machine's ssh-agent / keys. The repo URL is entered per project.",
+      "create": "Add Connector",
+      "created": "Added connector {name}",
+      "updated": "Saved connector {name}"
+    }
+  }
+}
