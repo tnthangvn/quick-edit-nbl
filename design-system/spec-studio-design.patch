@@ -1,0 +1,3246 @@
+From 0443070c8d5fbb06edcd3de6f2ec5d9d40d96852 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 8 Oct 2026 04:58:20 +0000
+Subject: [PATCH] Add Spec Studio spec and design system
+
+- docs/spec.md: technical specification
+- design/: tokens (light | dark, blue + gray), globals.css for Tailwind v4 + shadcn,
+  Monaco themes, component guidelines, reference bundle, Lucide icons
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01L1gAuoEaqYW45z4sq4kGdd
+---
+ README.md                           |  19 +
+ design/README.md                    |  90 ++++
+ design/components/AppHeader.md      |   5 +
+ design/components/Button.md         |  18 +
+ design/components/ChatMessage.md    |   8 +
+ design/components/ChatToolbar.md    |   5 +
+ design/components/Checkbox.md       |  11 +
+ design/components/Composer.md       |   5 +
+ design/components/ContextMenu.md    |   5 +
+ design/components/DiffReviewBar.md  |   5 +
+ design/components/DiffView.md       |   5 +
+ design/components/EditorPane.md     |   5 +
+ design/components/Field.md          |   5 +
+ design/components/Icon.md           |   5 +
+ design/components/IconButton.md     |   5 +
+ design/components/Input.md          |   5 +
+ design/components/Kbd.md            |   5 +
+ design/components/ModeSwitch.md     |   5 +
+ design/components/Select.md         |  14 +
+ design/components/SettingsDialog.md |   5 +
+ design/components/SpecListItem.md   |   9 +
+ design/components/SpecSidebar.md    |   5 +
+ design/components/StatusBadge.md    |   7 +
+ design/components/Switch.md         |   5 +
+ design/components/Tabs.md           |   5 +
+ design/components/Toast.md          |  13 +
+ design/components/Workbench.md      |   5 +
+ design/globals.css                  | 178 ++++++++
+ design/icons/README.md              |  25 ++
+ design/icons/bot.svg                |  20 +
+ design/icons/check.svg              |  15 +
+ design/icons/chevron-down.svg       |  15 +
+ design/icons/circle-alert.svg       |  17 +
+ design/icons/cloud-upload.svg       |  17 +
+ design/icons/ellipsis.svg           |  17 +
+ design/icons/file-text.svg          |  19 +
+ design/icons/git-compare.svg        |  18 +
+ design/icons/info.svg               |  17 +
+ design/icons/key-round.svg          |  16 +
+ design/icons/loader-circle.svg      |  15 +
+ design/icons/panel-left.svg         |  16 +
+ design/icons/pencil.svg             |  16 +
+ design/icons/plus.svg               |  16 +
+ design/icons/refresh-cw.svg         |  18 +
+ design/icons/search.svg             |  16 +
+ design/icons/send-horizontal.svg    |  16 +
+ design/icons/settings.svg           |  16 +
+ design/icons/terminal.svg           |  16 +
+ design/icons/trash-2.svg            |  19 +
+ design/icons/triangle-alert.svg     |  17 +
+ design/icons/x.svg                  |  16 +
+ design/monaco-theme.ts              |  74 ++++
+ design/reference/bundle.css         | 322 ++++++++++++++
+ design/reference/bundle.js          | 630 ++++++++++++++++++++++++++++
+ design/reference/index.d.ts         | 110 +++++
+ design/tokens.json                  | 601 ++++++++++++++++++++++++++
+ docs/spec.md                        | 184 ++++++++
+ 57 files changed, 2771 insertions(+)
+ create mode 100644 README.md
+ create mode 100644 design/README.md
+ create mode 100644 design/components/AppHeader.md
+ create mode 100644 design/components/Button.md
+ create mode 100644 design/components/ChatMessage.md
+ create mode 100644 design/components/ChatToolbar.md
+ create mode 100644 design/components/Checkbox.md
+ create mode 100644 design/components/Composer.md
+ create mode 100644 design/components/ContextMenu.md
+ create mode 100644 design/components/DiffReviewBar.md
+ create mode 100644 design/components/DiffView.md
+ create mode 100644 design/components/EditorPane.md
+ create mode 100644 design/components/Field.md
+ create mode 100644 design/components/Icon.md
+ create mode 100644 design/components/IconButton.md
+ create mode 100644 design/components/Input.md
+ create mode 100644 design/components/Kbd.md
+ create mode 100644 design/components/ModeSwitch.md
+ create mode 100644 design/components/Select.md
+ create mode 100644 design/components/SettingsDialog.md
+ create mode 100644 design/components/SpecListItem.md
+ create mode 100644 design/components/SpecSidebar.md
+ create mode 100644 design/components/StatusBadge.md
+ create mode 100644 design/components/Switch.md
+ create mode 100644 design/components/Tabs.md
+ create mode 100644 design/components/Toast.md
+ create mode 100644 design/components/Workbench.md
+ create mode 100644 design/globals.css
+ create mode 100644 design/icons/README.md
+ create mode 100644 design/icons/bot.svg
+ create mode 100644 design/icons/check.svg
+ create mode 100644 design/icons/chevron-down.svg
+ create mode 100644 design/icons/circle-alert.svg
+ create mode 100644 design/icons/cloud-upload.svg
+ create mode 100644 design/icons/ellipsis.svg
+ create mode 100644 design/icons/file-text.svg
+ create mode 100644 design/icons/git-compare.svg
+ create mode 100644 design/icons/info.svg
+ create mode 100644 design/icons/key-round.svg
+ create mode 100644 design/icons/loader-circle.svg
+ create mode 100644 design/icons/panel-left.svg
+ create mode 100644 design/icons/pencil.svg
+ create mode 100644 design/icons/plus.svg
+ create mode 100644 design/icons/refresh-cw.svg
+ create mode 100644 design/icons/search.svg
+ create mode 100644 design/icons/send-horizontal.svg
+ create mode 100644 design/icons/settings.svg
+ create mode 100644 design/icons/terminal.svg
+ create mode 100644 design/icons/trash-2.svg
+ create mode 100644 design/icons/triangle-alert.svg
+ create mode 100644 design/icons/x.svg
+ create mode 100644 design/monaco-theme.ts
+ create mode 100644 design/reference/bundle.css
+ create mode 100644 design/reference/bundle.js
+ create mode 100644 design/reference/index.d.ts
+ create mode 100644 design/tokens.json
+ create mode 100644 docs/spec.md
+
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..7b66f98
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,19 @@
++# Spec Studio (quick-edit-nbl)
++
++Workbench chạy local (Next.js) để quản lý và sửa các file spec `.md` cùng AI Agent (Direct API hoặc CLI như Claude Code / Aider), duyệt thay đổi bằng Diff Editor, rồi đồng bộ lên Google NotebookLM.
++
++- Đặc tả kỹ thuật: [`docs/spec.md`](docs/spec.md)
++- Design system: [`design/README.md`](design/README.md)
++
++## Design system
++
++| File | Dùng để |
++| --- | --- |
++| `design/tokens.json` | Nguồn gốc mọi token (màu light/dark, chữ, spacing, radius, shadow, size) |
++| `design/globals.css` | Chép vào `app/globals.css` (Tailwind v4 + shadcn/ui): biến `--color-*`, dark mode bằng class `.dark`, motion, utility `press` / `icon-*` |
++| `design/monaco-theme.ts` | Theme `spec-studio-light` / `spec-studio-dark` cho `@monaco-editor/react` (Editor + DiffEditor) |
++| `design/components/*.md` | Quy tắc dùng từng component (Sidebar, DiffView, Select, Toast…) |
++| `design/reference/` | Bản dựng tham chiếu của component (React UMD, không build) — để đối chiếu giao diện, không import vào app |
++| `design/icons/` | Bộ icon Lucide đang dùng (ISC) |
++
++Bộ màu: **blue** (`--color-primary`) + **gray**; đỏ chỉ cho lỗi/xoá, amber chỉ cho toast cảnh báo.
+diff --git a/design/README.md b/design/README.md
+new file mode 100644
+index 0000000..42c1116
+--- /dev/null
++++ b/design/README.md
+@@ -0,0 +1,90 @@
++Spec Studio là workbench chạy local để sửa spec Markdown cùng AI Agent rồi đồng bộ lên NotebookLM. Giao diện như một IDE gọn gàng, chỉ dùng hai màu: **gray** cho mọi bề mặt, chữ và viền; **blue** (`color-primary`) cho thứ cần chú ý: hành động chính, file đang mở, thay đổi chưa lưu, chế độ đang bật. Đỏ chỉ xuất hiện khi có lỗi hoặc xoá; amber chỉ trong thông báo cảnh báo.
++
++## Nội dung và giọng văn
++
++- **Nhãn hành động giữ tiếng Anh như trong spec/wireframe**: `Approve & Save`, `Reject`, `Send`, `Force Sync`, `Delete spec`, `Settings`, `Synced`, `Unsaved`, `Syncing…`, `Error`. Nhãn field trong Settings cũng giữ tiếng Anh (`Provider`, `Binary Path`, `Notebook ID`).
++- **Mô tả, gợi ý, thông báo, trả lời của Agent viết bằng tiếng Việt**, câu ngắn, xưng "bạn": "Chọn một hoặc nhiều spec để đính kèm vào context.", "Lưu trong .spec-studio/config.json trên máy, không gửi đi đâu khác."
++- Nhãn nút là động từ, Title Case, tối đa 3 từ. Không dùng dấu chấm than, không emoji.
++- Tên file, đường dẫn, model ID, tên tool, phím tắt luôn đặt trong `font-mono`: `sidebar.md`, `gemini-1.5-pro`, `propose_spec_update`.
++- Số liệu diff viết `+3 −2` (dấu trừ là ký tự `−`).
++
++## Màu
++
++Hai theme `light` và `dark`, mỗi token là một biến `--color-*` (theo đúng quy ước `@theme` của Tailwind v4 và tên biến của shadcn/ui), nên class `bg-background`, `text-muted-foreground`, `border-input`, `ring-ring` dùng được ngay.
++
++- **Gray, bề mặt**: `color-background` (gray-50) cho nền app; `color-card` (trắng) cho editor, chatbox, ô nhập; `color-popover` cho menu, dialog; `color-sidebar` (gray-100) cho Sidebar và Header; `color-muted` cho tab bar, toolbar, bong bóng chat của user.
++- **Gray, chữ**: `color-foreground` (gray-900) trên mọi bề mặt; `color-muted-foreground` (gray-600) cho metadata, placeholder, icon nghỉ. Cả hai đạt ≥4.5:1 trên mọi bề mặt ở cả hai theme.
++- **Gray, tương tác**: `color-secondary` cho Reject/Test; `color-accent` chỉ là nền hover.
++- **Blue** (`color-primary`, #1d5fd6 light / #5b9df8 dark): màu thương hiệu duy nhất. Nút chính (Approve & Save, Send, Save; chữ `color-primary-foreground`), checkbox đã chọn, Switch bật, vạch file đang chọn, gạch tab đang mở, chấm Unsaved, spinner Syncing, dòng thêm trong diff, heading Markdown trong editor. Nền nhạt là `color-primary-soft` (badge, avatar Agent, nút `tonal`). Mỗi vùng chỉ một nút blue đặc.
++- **Đỏ** (`color-destructive`): ngoài blue/gray, chỉ cho Delete spec, trạng thái Error và dòng bị xoá trong diff.
++- **Feedback (toast, banner, inline alert)**: mỗi loại có bộ ba chữ/icon – nền – viền.
++  - `info` = blue (`color-info` → `color-primary`, `color-info-soft`, `color-info-border`): kết quả bình thường, tiến trình.
++  - `warning` = amber (`color-warning`, `color-warning-soft`, `color-warning-border`): cần để ý nhưng chưa hỏng. Amber chỉ xuất hiện ở đây, không dùng cho nút hay trạng thái spec.
++  - `error` = đỏ (`color-error` → `color-destructive`, `color-error-soft`, `color-error-border`): thao tác thất bại.
++  - Tiêu đề và icon mang màu của loại; mô tả dùng `color-muted-foreground`. Mọi cặp chữ/nền đạt ≥4.5:1 ở cả hai theme.
++- **Trạng thái sync**: Synced = gray (`color-muted-foreground`, dấu ✓: yên, không cần nhìn), Unsaved = blue (chấm), Syncing = blue (spinner), Error = đỏ (vòng cảnh báo). Mỗi trạng thái có icon riêng; blue và đỏ phân biệt được cả với người mù màu đỏ–lục.
++- **Viền**: `color-border` cho đường chia mảnh (trang trí). `color-input` cho viền control (ô nhập, select, checkbox, switch tắt), đạt ≥3:1.
++- **Focus**: viền 2px liền `color-ring` (alias của `color-primary`), offset 1px, cho mọi control. Đạt ≥3:1 trên mọi bề mặt.
++
++## Chữ
++
++- `font-sans` = **Geist**, `font-mono` = **Geist Mono**, khớp `next/font/google` mặc định của `create-next-app`. Không có file font, tải từ Google Fonts.
++- Thang chữ: `display` 40/44 (chỉ màn trống), `title` 18/24 (tiêu đề Dialog), `heading` 14/20 semibold, `body` 14/20, `label` 13/18 medium (tên file, nhãn nút, nhãn field), `caption` 12/16, `overline` 11/16 viết HOA giãn chữ (tiêu đề nhóm Sidebar).
++- Code: `editor` 13/20 cho Monaco, `log` 12/18 cho stdout của CLI, `kbd` 11/16.
++- Giao diện dày đặc: chữ thân mặc định là 13–14px, không dùng cỡ lớn hơn 18px trong app.
++
++## Khoảng cách, bo góc, bóng
++
++- Lưới 4px: `space-1` 4 → `space-12` 48; `space-1.5` (6px) là khe icon–chữ trong nút.
++- Kích thước cố định: `size-header` 48, `size-sidebar` 264 (thu gọn `size-sidebar-collapsed` 48), `size-row` 32 cho item Sidebar/menu, `size-control` 32 / `size-control-sm` 28, `size-icon` 16.
++- Bo góc: `radius-sm` 4 (checkbox, badge), `radius-md` 6 (nút, ô nhập, item), `radius-lg` 8 (card, popover, chatbox, editor), `radius-xl` 12 (dialog), `radius-full` (switch, segmented, chấm).
++- Phân lớp bằng viền là chính. Bóng chỉ dùng cho thứ nổi trên nội dung: `shadow-popover` (menu), `shadow-dialog` (Settings), `shadow-float` (thanh Approve/Reject).
++
++## Bố cục
++
++Grid hai cột `size-sidebar` + 1fr, hai hàng `size-header` + 1fr. Workspace chiếm phần trên của cột phải (Editor hoặc DiffEditor). Bên dưới là log chat, rồi Quick Setting Toolbar, rồi Composer. Khi Agent gọi `propose_spec_update`, Workspace tự chuyển sang DiffView; Approve hoặc Reject đưa về Editor.
++
++## Chuyển động
++
++Ngắn, ease-out, không nảy. Chuyển động chỉ để xác nhận thao tác, không để trang trí.
++
++- **Thời lượng**: `--duration-fast` 100ms (nhấn, hover item), `--duration-base` 150ms (màu nền, switch, dropdown, menu), `--duration-slow` 220ms (icon, toast, dialog). **Easing**: `--ease-out` = `cubic-bezier(0.2, 0, 0, 1)`; `--ease-in-out` cho thứ chạy hai chiều.
++- **Nút**: hover đổi màu 150ms; nhấn lún `scale(.97)`; icon diễn động từ khi hover (Send tiến, Refresh quay, Upload nhấc, X xoay); trạng thái `loading` → `success` thay cho toast khi kết quả nằm ngay tại nút (xem Button).
++- **Xuất hiện**: dropdown và menu hiện bằng mờ + trượt 4px + `scale(.98)`; toast trượt vào 16px từ phải; Settings Dialog như dropdown nhưng 220ms. Không animate khi biến mất, ẩn ngay.
++- **Control**: checkbox hiện dấu ✓ bằng scale-in; switch trượt núm 150ms.
++- **Spinner** `loader-circle` cho mọi trạng thái đang chạy.
++- `prefers-reduced-motion`: mọi transition/animation rút còn 1ms, bỏ hiệu ứng lún; spinner vẫn quay chậm (1.6s/vòng) để báo đang chạy.
++- Không dùng: shine, ripple, nảy lò xo, gradient chuyển động, parallax, animation lặp vô hạn ngoài spinner.
++
++## Iconography
++
++- **Lucide** (`lucide-react` trong app), stroke 2, 16px mặc định, 14px trong toolbar/tab, 12px trong badge. Màu theo chữ (`currentColor`), nghỉ là `color-muted-foreground`, đang bật là `color-primary`.
++- Bộ icon dùng trong app nằm ở nhóm asset **Icons** (bản sao SVG từ lucide-static 0.460.0, giấy phép ISC).
++- Dự án chưa có logo. Header đặt dấu `§` (chữ Geist Mono) trên ô `color-primary` (blue) cạnh chữ "Spec Studio". Đây là chữ, không phải logo; thay khi có logo thật.
++- Không dùng emoji trong giao diện.
++
++## Monaco Editor
++
++Đăng ký một theme cho mỗi theme màu, đọc giá trị từ token:
++
++| Monaco key | Token |
++| --- | --- |
++| `editor.background` | `color-editor` |
++| `editor.foreground` | `color-foreground` |
++| `editorLineNumber.foreground` | `color-editor-gutter` |
++| `editorLineNumber.activeForeground` | `color-foreground` |
++| `editor.lineHighlightBackground` | `color-editor-line` |
++| `editor.selectionBackground` | `color-editor-selection` |
++| `editorCursor.foreground` | `color-primary` |
++| `diffEditor.insertedLineBackground` | `color-diff-added` |
++| `diffEditor.insertedTextBackground` | `color-diff-added-text` |
++| `diffEditor.removedLineBackground` | `color-diff-removed` |
++| `diffEditor.removedTextBackground` | `color-diff-removed-text` |
++| token `keyword.md` / heading | `color-primary`, bold |
++| token `variable.md` / inline code | `color-muted-foreground` |
++
++Font `font-mono`, `fontSize: 13`, `lineHeight: 20`, `renderSideBySide: true` cho DiffEditor. Base theme: `vs` cho light, `vs-dark` cho dark.
++
++## Dùng trong code
++
++Trong `app/globals.css` (Tailwind v4): `@import "tailwindcss";`, khai báo giá trị light của các token màu ngay trong `@theme { --color-background: #fbfaf7; … }` (Tailwind sinh class `bg-background`… từ đó), rồi ghi đè giá trị dark trong `.dark { --color-background: #141413; … }` (hoặc `[data-theme="dark"]`). Spacing, radius, size, font khai báo một lần trong `@theme`. Component trong app là shadcn/ui (Radix) mặc class Tailwind theo các token này; bundle ở đây là bản tham chiếu trực quan, cùng tên và cùng trạng thái.
+diff --git a/design/components/AppHeader.md b/design/components/AppHeader.md
+new file mode 100644
+index 0000000..a0aab72
+--- /dev/null
++++ b/design/components/AppHeader.md
+@@ -0,0 +1,5 @@
++# AppHeader
++
++Thanh trên cùng: dấu § + tên app bên trái, đường dẫn workspace, icon Settings bên phải.
++
++Cao `size-header` (48px), nền `color-sidebar`. Dấu § trên ô `color-primary` (blue) là chữ, không phải logo — dự án chưa có logo. `children` chèn trước nút Settings.
+diff --git a/design/components/Button.md b/design/components/Button.md
+new file mode 100644
+index 0000000..ed5d7cf
+--- /dev/null
++++ b/design/components/Button.md
+@@ -0,0 +1,18 @@
++# Button
++
++Nút bấm cho mọi hành động có nhãn chữ.
++
++- `primary` (`color-primary`, blue): mỗi vùng chỉ một nút — Approve & Save, Send, Save trong Settings.
++- `secondary`: Reject, Test Connection. `ghost`: Cancel. `outline`: hành động phụ trên nền card.
++- `tonal` (chữ `color-primary` trên `color-primary-soft`): hành động blue thứ cấp, ví dụ Force Sync lên NotebookLM.
++- `destructive`: Delete spec, luôn đi sau hộp xác nhận.
++- `size="sm"` (`size-control-sm`) trong thanh Quick Setting, Diff bar, Composer.
++- Truyền `loading` khi đang ghi file / sync: nút tự khoá, hiện spinner, đổi nhãn ("Đang lưu…"). Xong thì bật `success` khoảng 1.5 giây (icon ✓ hiện ra bằng scale-in, nhãn "Đã lưu") rồi trả về trạng thái thường. Đặt `minWidth` để nút không co giãn khi đổi nhãn.
++
++**Chuyển động** (tự tắt khi hệ điều hành bật giảm chuyển động):
++- Hover: nền, viền, chữ đổi màu trong `--duration-base` (150ms), `--ease-out`. Nút `primary` và `destructive` hover tối hơn ở light, sáng hơn ở dark.
++- Nhấn: lún `scale(.97)` trong `--duration-fast` (100ms). IconButton lún `scale(.92)`.
++- Icon diễn đúng động từ khi hover, `--duration-slow` (220ms): `send-horizontal` tiến 2px, `refresh-cw` quay 180°, `cloud-upload` nhấc 2px, `x` và `plus` xoay 90°, `check` phóng nhẹ, `trash-2` nghiêng, `settings` xoay 60°.
++- Không dùng: ánh sáng quét ngang (shine), nảy lò xo, viền gradient phát sáng, ripple. Chúng làm chậm và gây rối trong công cụ dùng cả ngày.
++
++Người dùng cung cấp: `children` (nhãn ngắn, động từ, Title Case tiếng Anh như wireframe), `icon` Lucide, `onClick`.
+diff --git a/design/components/ChatMessage.md b/design/components/ChatMessage.md
+new file mode 100644
+index 0000000..2ae44a9
+--- /dev/null
++++ b/design/components/ChatMessage.md
+@@ -0,0 +1,8 @@
++# ChatMessage
++
++Một mục trong luồng chat.
++
++- `user`: bong bóng `color-muted`, căn phải.
++- `assistant`: avatar `bot` trên `color-primary-soft`, chữ thường.
++- `tool`: một dòng `font-mono` tên tool + `StatusBadge` (ví dụ `propose_spec_update` → "Chờ duyệt").
++- `log`: khối stdout của CLI Agent, `font-mono` 12/18, nền `color-editor`, `streaming` hiện spinner.
+diff --git a/design/components/ChatToolbar.md b/design/components/ChatToolbar.md
+new file mode 100644
+index 0000000..e6d6eaf
+--- /dev/null
++++ b/design/components/ChatToolbar.md
+@@ -0,0 +1,5 @@
++# ChatToolbar
++
++Quick Setting Toolbar nằm ngay trên Chatbox: ModeSwitch, chọn model / CLI profile, số spec trong context, icon Settings.
++
++Khi đổi mode, đổi luôn danh sách `options` (model khi `api`, CLI profile khi `cli`). Icon Settings mở đúng tab tương ứng.
+diff --git a/design/components/Checkbox.md b/design/components/Checkbox.md
+new file mode 100644
+index 0000000..364b49b
+--- /dev/null
++++ b/design/components/Checkbox.md
+@@ -0,0 +1,11 @@
++# Checkbox
++
++Ô chọn 16px để đính kèm spec vào context của Agent, chọn tất cả, hoặc bật tuỳ chọn có nhãn.
++
++- Trạng thái: chưa chọn (viền `color-input` 1.5px trên `color-card`), đã chọn (nền `color-primary`, dấu ✓ `color-primary-foreground`), chọn một phần (`indeterminate`, gạch ngang; dùng cho ô "chọn tất cả" khi chỉ một số spec được chọn), khoá (`disabled`, mờ 45%).
++- Hover: viền chuyển `color-primary` kèm quầng `color-primary-soft` 3px. Nhấn: lún `scale(.9)`. Focus bàn phím: viền 2px `color-ring` cách 2px.
++- Dấu ✓ được vẽ bằng nét riêng cân trong ô 16px (không dùng icon thu nhỏ) và chạy nét trong `--duration-slow` khi tick; tắt khi giảm chuyển động.
++- Trong `SpecListItem`, ô chưa chọn mờ đi cho danh sách đỡ rối, rõ lại khi rê chuột hoặc focus vào dòng; ô đã chọn luôn rõ.
++- Truyền `children` để có nhãn bấm được ở bên phải; không có nhãn thì bắt buộc `label` (thành `aria-label`). Click checkbox không kích hoạt việc mở file.
++
++Người dùng cung cấp: `checked`, `onChange(checked)`, `indeterminate?`, `disabled?`, `label` hoặc `children`. Trong app: shadcn `Checkbox` (Radix) với cùng token; dùng `data-[state=checked]` và `data-[state=indeterminate]`.
+diff --git a/design/components/Composer.md b/design/components/Composer.md
+new file mode 100644
+index 0000000..099698c
+--- /dev/null
++++ b/design/components/Composer.md
+@@ -0,0 +1,5 @@
++# Composer
++
++Chatbox: textarea tự co giãn (tối đa 200px), gợi ý phím tắt, nút Send.
++
++`⌘/Ctrl + Enter` gửi. Khi `busy` (đang stream) nút Send thành `Dừng` → `onStop`. Focus vẽ viền `color-ring` quanh cả khung.
+diff --git a/design/components/ContextMenu.md b/design/components/ContextMenu.md
+new file mode 100644
+index 0000000..74c9ed7
+--- /dev/null
++++ b/design/components/ContextMenu.md
+@@ -0,0 +1,5 @@
++# ContextMenu
++
++Menu 3 chấm của một spec: Rename, Force Sync lên NotebookLM, Delete spec.
++
++Mặc định dùng 3 mục trên; truyền `items` để thay. Mục phá huỷ đặt cuối, sau `divider`, `tone: 'destructive'`. Định vị (popover) do người dùng lo — trong app dùng Radix `DropdownMenu` và áp class `ss-menu`/token tương ứng.
+diff --git a/design/components/DiffReviewBar.md b/design/components/DiffReviewBar.md
+new file mode 100644
+index 0000000..d06ca34
+--- /dev/null
++++ b/design/components/DiffReviewBar.md
+@@ -0,0 +1,5 @@
++# DiffReviewBar
++
++Thanh nổi trên DiffEditor: tên file, số dòng +/−, Reject, Approve & Save.
++
++`autoSync` đổi nhãn thành Approve & Sync. `saving` khoá nút trong lúc ghi file. Luôn hiện khi Agent gọi `propose_spec_update`.
+diff --git a/design/components/DiffView.md b/design/components/DiffView.md
+new file mode 100644
+index 0000000..2768cf5
+--- /dev/null
++++ b/design/components/DiffView.md
+@@ -0,0 +1,5 @@
++# DiffView
++
++Mô phỏng Monaco `<DiffEditor />` hai cột Original | Proposed, kèm `DiffReviewBar`.
++
++Dòng thêm: nền `color-diff-added` + dấu `+`; dòng xoá: `color-diff-removed` + dấu `−`; đoạn chữ thay đổi trong dòng: `color-diff-added-text` / `color-diff-removed-text`. Thêm = blue, xoá = đỏ (cặp blue/đỏ phân biệt được cả với người mù màu đỏ–lục), và luôn có dấu +/−. Trong app dùng `DiffEditor` thật với theme Monaco ở README chính.
+diff --git a/design/components/EditorPane.md b/design/components/EditorPane.md
+new file mode 100644
+index 0000000..1197fe2
+--- /dev/null
++++ b/design/components/EditorPane.md
+@@ -0,0 +1,5 @@
++# EditorPane
++
++Khung editor: tab bar tên file + trạng thái, thân là Monaco.
++
++Preview chỉ MÔ PHỎNG Monaco bằng chính các token. Trong app, đặt `<Editor />` của `@monaco-editor/react` vào thân và đăng ký theme từ token (xem README chính, mục Monaco). Tab đang mở có vạch trên `color-primary`, chấm Unsaved khi chưa autosave.
+diff --git a/design/components/Field.md b/design/components/Field.md
+new file mode 100644
+index 0000000..1124d65
+--- /dev/null
++++ b/design/components/Field.md
+@@ -0,0 +1,5 @@
++# Field
++
++Bọc nhãn + gợi ý + lỗi + control trong Settings.
++
++`inline` cho các toggle (nhãn trái, Switch phải). Gợi ý ngắn một câu, `color-muted-foreground`. Lỗi có icon `circle-alert` + chữ `color-destructive`.
+diff --git a/design/components/Icon.md b/design/components/Icon.md
+new file mode 100644
+index 0000000..b0ea11b
+--- /dev/null
++++ b/design/components/Icon.md
+@@ -0,0 +1,5 @@
++# Icon
++
++Icon Lucide (stroke 2, 24×24 viewBox) vẽ inline, đổi màu theo `currentColor`.
++
++Kích thước mặc định `size-icon` (16px); 14px trong toolbar và tab, 12px trong badge. `spin` cho `loader-circle`. Trong app Next.js dùng thẳng `lucide-react` (`<Settings size={16} />`), cùng tên icon.
+diff --git a/design/components/IconButton.md b/design/components/IconButton.md
+new file mode 100644
+index 0000000..d027ae0
+--- /dev/null
++++ b/design/components/IconButton.md
+@@ -0,0 +1,5 @@
++# IconButton
++
++Nút chỉ có icon, luôn có `label` (thành `aria-label` và tooltip).
++
++Dùng cho: thu gọn sidebar (`panel-left`), Settings (`settings`), menu 3 chấm (`ellipsis`), tạo spec (`plus`). `active` tô `color-primary-soft` khi đang bật. Không dùng cho hành động phá huỷ.
+diff --git a/design/components/Input.md b/design/components/Input.md
+new file mode 100644
+index 0000000..bc73a7c
+--- /dev/null
++++ b/design/components/Input.md
+@@ -0,0 +1,5 @@
++# Input
++
++Ô nhập một dòng.
++
++`mono` cho API key, đường dẫn, ID, arguments. `type="password"` cho API key và cookie. `invalid` đổi viền sang `color-destructive`, luôn đi kèm `Field` có `error`.
+diff --git a/design/components/Kbd.md b/design/components/Kbd.md
+new file mode 100644
+index 0000000..b9c98bc
+--- /dev/null
++++ b/design/components/Kbd.md
+@@ -0,0 +1,5 @@
++# Kbd
++
++Hiển thị phím tắt bằng `font-mono` 11px.
++
++Mỗi phím một `Kbd`: `⌘` + `Enter` trên macOS, `Ctrl` + `Enter` trên Windows/Linux.
+diff --git a/design/components/ModeSwitch.md b/design/components/ModeSwitch.md
+new file mode 100644
+index 0000000..68090d5
+--- /dev/null
++++ b/design/components/ModeSwitch.md
+@@ -0,0 +1,5 @@
++# ModeSwitch
++
++Segmented control chuyển `API Key` ↔ `CLI Agent`.
++
++Chỉ hai giá trị `api` | `cli`. Lựa chọn đang bật: nền `color-card`, icon `color-primary`.
+diff --git a/design/components/Select.md b/design/components/Select.md
+new file mode 100644
+index 0000000..5771f5f
+--- /dev/null
++++ b/design/components/Select.md
+@@ -0,0 +1,14 @@
++# Select
++
++Dropdown tự dựng (không dùng `<select>` gốc): nút kích hoạt + popover danh sách; tự có ô tìm kiếm khi danh sách dài.
++
++- **Ít item (< 8)**: chỉ danh sách, ví dụ Provider, CLI profile.
++- **Nhiều item (≥ `searchThreshold`, mặc định 8)**: ô tìm kiếm ở đầu popover, lọc theo `label`, `value`, `hint`, có đếm `kết quả/tổng`. Ép bật/tắt bằng `searchable`.
++- **`allowCustom`**: luôn có ô tìm; khi chữ gõ vào không khớp item nào, dòng cuối là "Dùng “…”" để chọn giá trị tự nhập. Dùng cho Model ID (spec: "chọn model hoặc tự nhập custom model name").
++- **`multiple`**: chọn nhiều. `value` là mảng. Mục đã chọn hiện thành tag `color-primary` trên `color-primary-soft` trên nút (tối đa `maxTags`, mặc định 2, phần dư gộp thành `+n`, rê chuột để xem đủ); bấm × trên tag để bỏ. Trong danh sách mỗi dòng có `Checkbox`; tick không đóng dropdown. Chân dropdown: số đã chọn, **Bỏ chọn**, **Chọn tất cả** (khi đang tìm thì thành **Chọn kết quả**, chỉ áp dụng cho các dòng đang hiện). `Backspace` khi ô tìm trống bỏ tag cuối. Ví dụ: chọn tools cho Agent, chọn nhiều spec để Force Sync.
++- **Nhóm**: item có `group` sẽ hiện tiêu đề nhóm (ví dụ theo provider); `hint` hiện ở bên phải bằng chữ phụ.
++- Bàn phím: `↓`/`Enter`/`Space` mở, `↑`/`↓` di chuyển, `Enter` chọn, `Esc` đóng; click ra ngoài cũng đóng.
++- Item đang chọn có dấu ✓ màu `color-primary`; item đang trỏ có nền `color-accent`. Popover dùng `color-popover`, `radius-lg`, `shadow-popover`, cao tối đa 280px rồi cuộn.
++- `mono` cho model ID / CLI profile; `size="sm"` (`size-control-sm`) trong Quick Setting Toolbar; `width` để cố định độ rộng; `align="end"` khi đặt sát mép phải; `side="top"` mở lên trên (dùng trong Quick Setting Toolbar vì nằm sát Chatbox).
++
++Người dùng cung cấp: `options` (chuỗi hoặc `{ value, label, group?, hint? }`), `value` hoặc `defaultValue` (mảng khi `multiple`), `onChange(value)`. Trong app: shadcn `Popover` + `Command` (cmdk) cho bản có tìm kiếm và bản chọn nhiều, `Select` của Radix cho bản ngắn, giữ đúng các token trên.
+diff --git a/design/components/SettingsDialog.md b/design/components/SettingsDialog.md
+new file mode 100644
+index 0000000..700ad29
+--- /dev/null
++++ b/design/components/SettingsDialog.md
+@@ -0,0 +1,5 @@
++# SettingsDialog
++
++Modal cấu hình 3 tab: Direct API, CLI Agent Runner, NotebookLM Sync.
++
++Rộng 560px, bo `radius-xl`, `shadow-dialog`. Footer luôn hiện đường dẫn `.spec-studio/config.json` + Cancel / Save. Field nhạy cảm (API key, cookie) dùng `type="password"` và ghi chú "chỉ lưu local". Trong app dùng Radix `Dialog` + `Tabs`.
+diff --git a/design/components/SpecListItem.md b/design/components/SpecListItem.md
+new file mode 100644
+index 0000000..ce79207
+--- /dev/null
++++ b/design/components/SpecListItem.md
+@@ -0,0 +1,9 @@
++# SpecListItem
++
++Một dòng file spec trong Sidebar: checkbox → icon file → tên → trạng thái → menu 3 chấm.
++
++- Click dòng = mở file trên editor (`selected` → nền `color-sidebar-accent` + vạch `color-primary` bên trái).
++- Checkbox = thêm vào context, độc lập với `selected`.
++- Menu 3 chấm chỉ hiện khi hover / đang chọn / focus; mở `ContextMenu`.
++
++Người dùng cung cấp: `name`, `status`, `checked`, `selected` và các callback `onSelect`, `onCheck`, `onMenu`.
+diff --git a/design/components/SpecSidebar.md b/design/components/SpecSidebar.md
+new file mode 100644
+index 0000000..f9de84a
+--- /dev/null
++++ b/design/components/SpecSidebar.md
+@@ -0,0 +1,5 @@
++# SpecSidebar
++
++Sidebar trái: tiêu đề SPECS, số spec trong context, nút tạo mới, nút thu gọn, danh sách `SpecListItem`.
++
++Rộng `size-sidebar` (264px), thu gọn còn `size-sidebar-collapsed` (48px). Nền `color-sidebar`, viền phải `color-border`. Người dùng giữ state `specs`, `selected`, `collapsed`.
+diff --git a/design/components/StatusBadge.md b/design/components/StatusBadge.md
+new file mode 100644
+index 0000000..eba756b
+--- /dev/null
++++ b/design/components/StatusBadge.md
+@@ -0,0 +1,7 @@
++# StatusBadge
++
++Trạng thái đồng bộ của một spec với NotebookLM: `synced`, `unsaved`, `syncing`, `error`.
++
++- Mỗi trạng thái có icon hoặc chấm riêng, không chỉ dựa vào màu: synced = dấu ✓ gray (`color-muted-foreground` trên `color-muted`, trạng thái yên, không cần chú ý), unsaved = chấm đặc blue (`color-primary`), syncing = spinner blue (`color-primary` trên `color-primary-soft`), error = vòng cảnh báo đỏ (`color-destructive`).
++- `compact` trong Sidebar (chỉ icon, nhãn nằm ở `aria-label`), dạng đầy đủ trong tab editor và log chat.
++- `label` để đổi chữ (ví dụ "Chờ duyệt").
+diff --git a/design/components/Switch.md b/design/components/Switch.md
+new file mode 100644
+index 0000000..3f664da
+--- /dev/null
++++ b/design/components/Switch.md
+@@ -0,0 +1,5 @@
++# Switch
++
++Công tắc bật/tắt (Stream Stdout, Auto sync, Xác nhận trước khi sync).
++
++Bật = `color-primary`. Luôn có `label`.
+diff --git a/design/components/Tabs.md b/design/components/Tabs.md
+new file mode 100644
+index 0000000..b96ea54
+--- /dev/null
++++ b/design/components/Tabs.md
+@@ -0,0 +1,5 @@
++# Tabs
++
++Tab gạch chân cho 3 tab Settings, hoặc `variant="pill"` cho lựa chọn ngắn (Sync Strategy).
++
++Tab đang chọn: chữ `color-foreground`, gạch 2px `color-primary`.
+diff --git a/design/components/Toast.md b/design/components/Toast.md
+new file mode 100644
+index 0000000..baa3277
+--- /dev/null
++++ b/design/components/Toast.md
+@@ -0,0 +1,13 @@
++# Toast
++
++Thông báo nổi ngắn ở góc dưới phải, ba loại: `info`, `warning`, `error`.
++
++- **info** (`color-info` = blue, trên `color-info-soft`, viền `color-info-border`): kết quả bình thường hoặc tiến trình: "Đã lưu sidebar.md", "Đang đồng bộ lên NotebookLM…" (`loading` đổi icon thành spinner). Tự ẩn sau 4 giây.
++- **warning** (`color-warning` = amber, trên `color-warning-soft`, viền `color-warning-border`): cần để ý nhưng chưa hỏng: thay đổi chưa lưu, cookie sắp hết hạn, file lớn. Tự ẩn sau 6 giây; có `action` thì giữ tới khi người dùng xử lý.
++- **error** (`color-error` = alias `color-destructive`, trên `color-error-soft`, viền `color-error-border`): thao tác thất bại: sync lỗi, không ghi được file, API key sai. Không tự ẩn; luôn có `action` (Thử lại / Mở Settings) khi có cách xử lý.
++- Tiêu đề và icon mang màu của loại; mô tả dùng `color-muted-foreground`. Mỗi loại có icon riêng (`info`, `triangle-alert`, `circle-alert`), không chỉ khác màu.
++- Tiêu đề ngắn, tiếng Việt, không chấm cuối; mô tả một câu nói rõ nguyên nhân và cách xử lý. Tên file, mã lỗi trong `<code>`.
++- Tối đa 3 toast cùng lúc, xếp chồng với khe `space-2`; rộng 360px, `radius-lg`, `shadow-popover`.
++- Màu `warning` chỉ dùng trong toast, banner và inline alert, không dùng cho nút hay trạng thái spec.
++
++Người dùng cung cấp: `variant`, `title`, `description?`, `action?: { label, onClick }`, `loading?`, `onClose` (truyền `false` để ẩn nút đóng). Trong app: `sonner` (shadcn `Toaster`) với `toast.info / toast.warning / toast.error`, gán `classNames` theo các token trên.
+diff --git a/design/components/Workbench.md b/design/components/Workbench.md
+new file mode 100644
+index 0000000..4ae8f18
+--- /dev/null
++++ b/design/components/Workbench.md
+@@ -0,0 +1,5 @@
++# Workbench
++
++Toàn bộ màn hình theo wireframe: Header, Sidebar, Workspace (Editor hoặc Diff), Chat log, Quick Setting Toolbar, Composer.
++
++Grid: cột `size-sidebar` + 1fr, hàng `size-header` + 1fr. Workspace chuyển sang DiffView khi có đề xuất; Approve/Reject đưa về EditorPane. Dùng làm bản tham chiếu bố cục, không phải component để tái dùng nguyên khối.
+diff --git a/design/globals.css b/design/globals.css
+new file mode 100644
+index 0000000..75b2112
+--- /dev/null
++++ b/design/globals.css
+@@ -0,0 +1,178 @@
++/* Spec Studio — generated from the design system tokens (light | dark, blue + gray).
++   Next.js + Tailwind CSS v4 + shadcn/ui. Đặt vào app/globals.css. */
++@import "tailwindcss";
++
++/* Dark mode bằng class .dark trên <html> (next-themes: attribute="class") */
++@custom-variant dark (&:where(.dark, .dark *));
++
++@theme {
++  /* Colors — light (mặc định) */
++  --color-background: #f9fafb;
++  --color-foreground: #111827;
++  --color-card: #ffffff;
++  --color-card-foreground: var(--color-foreground);
++  --color-popover: #ffffff;
++  --color-popover-foreground: var(--color-foreground);
++  --color-sidebar: #f3f4f6;
++  --color-sidebar-foreground: var(--color-foreground);
++  --color-sidebar-accent: #e5e7eb;
++  --color-muted: #f3f4f6;
++  --color-muted-foreground: #4b5563;
++  --color-accent: #eceef1;
++  --color-accent-foreground: var(--color-foreground);
++  --color-secondary: #eceef1;
++  --color-secondary-foreground: var(--color-foreground);
++  --color-border: #e5e7eb;
++  --color-input: #878d98;
++  --color-primary: #1d5fd6;
++  --color-primary-foreground: #ffffff;
++  --color-primary-soft: #e7effd;
++  --color-ring: var(--color-primary);
++  --color-destructive: #c0262d;
++  --color-destructive-foreground: #ffffff;
++  --color-destructive-soft: #fdeceb;
++  --color-info: var(--color-primary);
++  --color-info-soft: var(--color-primary-soft);
++  --color-info-border: #b7cdf7;
++  --color-warning: #8f5200;
++  --color-warning-soft: #fff6e5;
++  --color-warning-border: #f1cf8f;
++  --color-error: var(--color-destructive);
++  --color-error-soft: var(--color-destructive-soft);
++  --color-error-border: #f3bbb7;
++  --color-editor: #ffffff;
++  --color-editor-gutter: #6b7280;
++  --color-editor-line: #f6f7f9;
++  --color-editor-selection: #d6e4fc;
++  --color-diff-added: #e3edfd;
++  --color-diff-added-text: #bcd3fa;
++  --color-diff-removed: #fce8e7;
++  --color-diff-removed-text: #f6bdb9;
++
++  /* Fonts: nạp Geist + Geist Mono bằng next/font/google, gán variable --font-geist-sans / --font-geist-mono */
++  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
++  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
++
++  /* Spacing: lưới 4px (p-1 = 4px, p-1.5 = 6px, …) */
++  --spacing: 4px;
++
++  /* Radius */
++  --radius-sm: 4px;
++  --radius-md: 6px;
++  --radius-lg: 8px;
++  --radius-xl: 12px;
++  --radius-full: 9999px;
++
++  /* Shadows: giá trị đổi theo theme qua --shadow-*-value */
++  --shadow-popover: var(--shadow-popover-value);
++  --shadow-dialog: var(--shadow-dialog-value);
++  --shadow-float: var(--shadow-float-value);
++
++  /* Motion: ease-out ngắn, không nảy */
++  --ease-out: cubic-bezier(0.2, 0, 0, 1);
++  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
++  --animate-pop-in: pop-in 150ms var(--ease-out);
++  --animate-pop-up: pop-up 150ms var(--ease-out);
++  --animate-slide-in: slide-in 220ms var(--ease-out);
++  --animate-scale-in: scale-in 220ms var(--ease-out);
++  @keyframes pop-in { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
++  @keyframes pop-up { from { opacity: 0; transform: translateY(4px) scale(.98); } to { opacity: 1; transform: none; } }
++  @keyframes slide-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
++  @keyframes scale-in { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
++
++  /* Layout sizes: dùng h-(--size-header), w-(--size-sidebar)… */
++  --size-header: 48px;
++  --size-sidebar: 264px;
++  --size-sidebar-collapsed: 48px;
++  --size-row: 32px;
++  --size-control: 32px;
++  --size-control-sm: 28px;
++  --size-icon: 16px;
++}
++
++:root {
++  /* Motion durations */
++  --duration-fast: 100ms;
++  --duration-base: 150ms;
++  --duration-slow: 220ms;
++
++  /* Shadow values — light */
++  --shadow-popover-value: 0 4px 16px rgba(17, 24, 39, 0.10), 0 1px 2px rgba(17, 24, 39, 0.06);
++  --shadow-dialog-value: 0 24px 64px rgba(17, 24, 39, 0.18), 0 2px 6px rgba(17, 24, 39, 0.08);
++  --shadow-float-value: 0 2px 8px rgba(17, 24, 39, 0.08);
++}
++
++.dark {
++  /* Colors — dark */
++  --color-background: #0f1113;
++  --color-foreground: #e5e7eb;
++  --color-card: #16181b;
++  --color-card-foreground: var(--color-foreground);
++  --color-popover: #1c1f23;
++  --color-popover-foreground: var(--color-foreground);
++  --color-sidebar: #131518;
++  --color-sidebar-foreground: var(--color-foreground);
++  --color-sidebar-accent: #24272c;
++  --color-muted: #1b1e22;
++  --color-muted-foreground: #9ca3af;
++  --color-accent: #25282d;
++  --color-accent-foreground: var(--color-foreground);
++  --color-secondary: #25282d;
++  --color-secondary-foreground: var(--color-foreground);
++  --color-border: #2a2d33;
++  --color-input: #70757e;
++  --color-primary: #5b9df8;
++  --color-primary-foreground: #0b1526;
++  --color-primary-soft: #162640;
++  --color-ring: var(--color-primary);
++  --color-destructive: #f2877f;
++  --color-destructive-foreground: #0f1113;
++  --color-destructive-soft: #3a1a1a;
++  --color-info: var(--color-primary);
++  --color-info-soft: var(--color-primary-soft);
++  --color-info-border: #2a4a80;
++  --color-warning: #f2b544;
++  --color-warning-soft: #2b2111;
++  --color-warning-border: #5e4618;
++  --color-error: var(--color-destructive);
++  --color-error-soft: var(--color-destructive-soft);
++  --color-error-border: #6b2b2b;
++  --color-editor: #131518;
++  --color-editor-gutter: #8b919c;
++  --color-editor-line: #1b1e22;
++  --color-editor-selection: #1f3a66;
++  --color-diff-added: #14294a;
++  --color-diff-added-text: #22447a;
++  --color-diff-removed: #36191a;
++  --color-diff-removed-text: #6a2a2a;
++  --shadow-popover-value: 0 4px 16px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04);
++  --shadow-dialog-value: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
++  --shadow-float-value: 0 2px 8px rgba(0, 0, 0, 0.4);
++  color-scheme: dark;
++}
++
++/* Nút: hover đổi màu 150ms, nhấn lún .97. Gắn class "press" vào Button của shadcn. */
++@utility press {
++  transition-property: background-color, border-color, color, box-shadow, transform;
++  transition-duration: var(--duration-base);
++  transition-timing-function: var(--ease-out);
++  &:active:not(:disabled) { transform: scale(.97); transition-duration: var(--duration-fast); }
++}
++
++/* Icon trong nút diễn động từ khi hover: thêm group vào nút, class tương ứng vào icon */
++@utility icon-nudge { transition: transform var(--duration-slow) var(--ease-out); :where(.group):hover:not(:disabled) & { transform: translateX(2px); } }
++@utility icon-spin-half { transition: transform var(--duration-slow) var(--ease-out); :where(.group):hover:not(:disabled) & { transform: rotate(180deg); } }
++@utility icon-lift { transition: transform var(--duration-slow) var(--ease-out); :where(.group):hover:not(:disabled) & { transform: translateY(-2px); } }
++@utility icon-turn { transition: transform var(--duration-slow) var(--ease-out); :where(.group):hover:not(:disabled) & { transform: rotate(90deg); } }
++
++@media (prefers-reduced-motion: reduce) {
++  *, ::before, ::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
++  .animate-spin { animation-duration: 1.6s !important; }
++  .press:active { transform: none !important; }
++}
++
++@layer base {
++  * { border-color: var(--color-border); }
++  body { background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); font-size: 14px; line-height: 20px; -webkit-font-smoothing: antialiased; }
++  :focus-visible { outline: 2px solid var(--color-ring); outline-offset: 1px; }
++}
+diff --git a/design/icons/README.md b/design/icons/README.md
+new file mode 100644
+index 0000000..1ec1328
+--- /dev/null
++++ b/design/icons/README.md
+@@ -0,0 +1,25 @@
++# Icons
++
++Bản sao SVG nguyên gốc từ Lucide (`lucide-static` 0.460.0, giấy phép ISC), đúng bộ icon giao diện Spec Studio đang dùng. Nét `currentColor`, stroke 2, khung 24×24. Khi xem bằng `<img>` nét hiển thị màu đen; trong app dùng `lucide-react` để icon nhận màu chữ (`color-muted-foreground` khi nghỉ, `color-primary` khi đang bật).
++
++| Icon | Dùng ở |
++| --- | --- |
++| `settings` | Header (mở Settings), Quick Setting Toolbar |
++| `panel-left` | Thu gọn / mở Sidebar |
++| `ellipsis` | Menu 3 chấm của spec |
++| `send-horizontal` | Nút Send |
++| `check` / `x` | Approve / Reject, trạng thái Synced, đóng Dialog |
++| `refresh-cw` | Test Connection |
++| `file-text` | File spec trong Sidebar, tab editor |
++| `terminal` / `key-round` | CLI Agent Mode / API Key Mode |
++| `loader-circle` | Syncing, đang chạy |
++| `circle-alert` | Error, lỗi field, toast error |
++| `info` | Toast info |
++| `triangle-alert` | Toast warning |
++| `trash-2` / `pencil` | Delete / Rename spec |
++| `plus` | Tạo spec mới |
++| `chevron-down` | Select |
++| `bot` | Tin nhắn của Agent |
++| `cloud-upload` | Force Sync, tab NotebookLM Sync |
++| `git-compare` | Diff review, tool `propose_spec_update` |
++| `search` | Tìm spec (dự phòng cho Sidebar) |
+diff --git a/design/icons/bot.svg b/design/icons/bot.svg
+new file mode 100644
+index 0000000..df2a838
+--- /dev/null
++++ b/design/icons/bot.svg
+@@ -0,0 +1,20 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-bot"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M12 8V4H8" />
++  <rect width="16" height="12" x="4" y="8" rx="2" />
++  <path d="M2 14h2" />
++  <path d="M20 14h2" />
++  <path d="M15 13v2" />
++  <path d="M9 13v2" />
++</svg>
+diff --git a/design/icons/check.svg b/design/icons/check.svg
+new file mode 100644
+index 0000000..9559502
+--- /dev/null
++++ b/design/icons/check.svg
+@@ -0,0 +1,15 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-check"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M20 6 9 17l-5-5" />
++</svg>
+diff --git a/design/icons/chevron-down.svg b/design/icons/chevron-down.svg
+new file mode 100644
+index 0000000..84e1f26
+--- /dev/null
++++ b/design/icons/chevron-down.svg
+@@ -0,0 +1,15 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-chevron-down"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="m6 9 6 6 6-6" />
++</svg>
+diff --git a/design/icons/circle-alert.svg b/design/icons/circle-alert.svg
+new file mode 100644
+index 0000000..b33950d
+--- /dev/null
++++ b/design/icons/circle-alert.svg
+@@ -0,0 +1,17 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-circle-alert"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <circle cx="12" cy="12" r="10" />
++  <line x1="12" x2="12" y1="8" y2="12" />
++  <line x1="12" x2="12.01" y1="16" y2="16" />
++</svg>
+diff --git a/design/icons/cloud-upload.svg b/design/icons/cloud-upload.svg
+new file mode 100644
+index 0000000..78e9af3
+--- /dev/null
++++ b/design/icons/cloud-upload.svg
+@@ -0,0 +1,17 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-cloud-upload"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M12 13v8" />
++  <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
++  <path d="m8 17 4-4 4 4" />
++</svg>
+diff --git a/design/icons/ellipsis.svg b/design/icons/ellipsis.svg
+new file mode 100644
+index 0000000..72e7577
+--- /dev/null
++++ b/design/icons/ellipsis.svg
+@@ -0,0 +1,17 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-ellipsis"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <circle cx="12" cy="12" r="1" />
++  <circle cx="19" cy="12" r="1" />
++  <circle cx="5" cy="12" r="1" />
++</svg>
+diff --git a/design/icons/file-text.svg b/design/icons/file-text.svg
+new file mode 100644
+index 0000000..870bfb7
+--- /dev/null
++++ b/design/icons/file-text.svg
+@@ -0,0 +1,19 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-file-text"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
++  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
++  <path d="M10 9H8" />
++  <path d="M16 13H8" />
++  <path d="M16 17H8" />
++</svg>
+diff --git a/design/icons/git-compare.svg b/design/icons/git-compare.svg
+new file mode 100644
+index 0000000..933736d
+--- /dev/null
++++ b/design/icons/git-compare.svg
+@@ -0,0 +1,18 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-git-compare"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <circle cx="18" cy="18" r="3" />
++  <circle cx="6" cy="6" r="3" />
++  <path d="M13 6h3a2 2 0 0 1 2 2v7" />
++  <path d="M11 18H8a2 2 0 0 1-2-2V9" />
++</svg>
+diff --git a/design/icons/info.svg b/design/icons/info.svg
+new file mode 100644
+index 0000000..df12f70
+--- /dev/null
++++ b/design/icons/info.svg
+@@ -0,0 +1,17 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-info"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <circle cx="12" cy="12" r="10" />
++  <path d="M12 16v-4" />
++  <path d="M12 8h.01" />
++</svg>
+diff --git a/design/icons/key-round.svg b/design/icons/key-round.svg
+new file mode 100644
+index 0000000..06d3e13
+--- /dev/null
++++ b/design/icons/key-round.svg
+@@ -0,0 +1,16 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-key-round"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" />
++  <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
++</svg>
+diff --git a/design/icons/loader-circle.svg b/design/icons/loader-circle.svg
+new file mode 100644
+index 0000000..cab0e66
+--- /dev/null
++++ b/design/icons/loader-circle.svg
+@@ -0,0 +1,15 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-loader-circle"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
++</svg>
+diff --git a/design/icons/panel-left.svg b/design/icons/panel-left.svg
+new file mode 100644
+index 0000000..1d75fe8
+--- /dev/null
++++ b/design/icons/panel-left.svg
+@@ -0,0 +1,16 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-panel-left"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <rect width="18" height="18" x="3" y="3" rx="2" />
++  <path d="M9 3v18" />
++</svg>
+diff --git a/design/icons/pencil.svg b/design/icons/pencil.svg
+new file mode 100644
+index 0000000..9cfbaac
+--- /dev/null
++++ b/design/icons/pencil.svg
+@@ -0,0 +1,16 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-pencil"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
++  <path d="m15 5 4 4" />
++</svg>
+diff --git a/design/icons/plus.svg b/design/icons/plus.svg
+new file mode 100644
+index 0000000..5ec5837
+--- /dev/null
++++ b/design/icons/plus.svg
+@@ -0,0 +1,16 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-plus"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M5 12h14" />
++  <path d="M12 5v14" />
++</svg>
+diff --git a/design/icons/refresh-cw.svg b/design/icons/refresh-cw.svg
+new file mode 100644
+index 0000000..cfeebc2
+--- /dev/null
++++ b/design/icons/refresh-cw.svg
+@@ -0,0 +1,18 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-refresh-cw"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
++  <path d="M21 3v5h-5" />
++  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
++  <path d="M8 16H3v5" />
++</svg>
+diff --git a/design/icons/search.svg b/design/icons/search.svg
+new file mode 100644
+index 0000000..d99a347
+--- /dev/null
++++ b/design/icons/search.svg
+@@ -0,0 +1,16 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-search"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <circle cx="11" cy="11" r="8" />
++  <path d="m21 21-4.3-4.3" />
++</svg>
+diff --git a/design/icons/send-horizontal.svg b/design/icons/send-horizontal.svg
+new file mode 100644
+index 0000000..e3bff36
+--- /dev/null
++++ b/design/icons/send-horizontal.svg
+@@ -0,0 +1,16 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-send-horizontal"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M3.714 3.048a.498.498 0 0 0-.683.627l2.843 7.627a2 2 0 0 1 0 1.396l-2.842 7.627a.498.498 0 0 0 .682.627l18-8.5a.5.5 0 0 0 0-.904z" />
++  <path d="M6 12h16" />
++</svg>
+diff --git a/design/icons/settings.svg b/design/icons/settings.svg
+new file mode 100644
+index 0000000..b1bf775
+--- /dev/null
++++ b/design/icons/settings.svg
+@@ -0,0 +1,16 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-settings"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
++  <circle cx="12" cy="12" r="3" />
++</svg>
+diff --git a/design/icons/terminal.svg b/design/icons/terminal.svg
+new file mode 100644
+index 0000000..9b7b881
+--- /dev/null
++++ b/design/icons/terminal.svg
+@@ -0,0 +1,16 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-terminal"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <polyline points="4 17 10 11 4 5" />
++  <line x1="12" x2="20" y1="19" y2="19" />
++</svg>
+diff --git a/design/icons/trash-2.svg b/design/icons/trash-2.svg
+new file mode 100644
+index 0000000..df96c4a
+--- /dev/null
++++ b/design/icons/trash-2.svg
+@@ -0,0 +1,19 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-trash-2"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M3 6h18" />
++  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
++  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
++  <line x1="10" x2="10" y1="11" y2="17" />
++  <line x1="14" x2="14" y1="11" y2="17" />
++</svg>
+diff --git a/design/icons/triangle-alert.svg b/design/icons/triangle-alert.svg
+new file mode 100644
+index 0000000..2e3c2bd
+--- /dev/null
++++ b/design/icons/triangle-alert.svg
+@@ -0,0 +1,17 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-triangle-alert"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
++  <path d="M12 9v4" />
++  <path d="M12 17h.01" />
++</svg>
+diff --git a/design/icons/x.svg b/design/icons/x.svg
+new file mode 100644
+index 0000000..7067a86
+--- /dev/null
++++ b/design/icons/x.svg
+@@ -0,0 +1,16 @@
++<!-- @license lucide-static v0.460.0 - ISC -->
++<svg
++  class="lucide lucide-x"
++  xmlns="http://www.w3.org/2000/svg"
++  width="24"
++  height="24"
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++>
++  <path d="M18 6 6 18" />
++  <path d="m6 6 12 12" />
++</svg>
+diff --git a/design/monaco-theme.ts b/design/monaco-theme.ts
+new file mode 100644
+index 0000000..ad416a1
+--- /dev/null
++++ b/design/monaco-theme.ts
+@@ -0,0 +1,74 @@
++// Spec Studio — Monaco themes generated from the design system tokens (blue + gray).
++// Dùng: <Editor beforeMount={registerSpecStudioThemes} theme={isDark ? "spec-studio-dark" : "spec-studio-light"} options={{ fontFamily: "var(--font-geist-mono)", fontSize: 13, lineHeight: 20 }} />
++import type { Monaco } from "@monaco-editor/react";
++
++export const specStudioLight = {
++  "base": "vs",
++  "inherit": true,
++  "rules": [
++    {
++      "token": "keyword.md",
++      "foreground": "1d5fd6",
++      "fontStyle": "bold"
++    },
++    {
++      "token": "variable.md",
++      "foreground": "4b5563"
++    },
++    {
++      "token": "string.link.md",
++      "foreground": "1d5fd6"
++    }
++  ],
++  "colors": {
++    "editor.background": "#ffffff",
++    "editor.foreground": "#111827",
++    "editorLineNumber.foreground": "#6b7280",
++    "editorLineNumber.activeForeground": "#111827",
++    "editor.lineHighlightBackground": "#f6f7f9",
++    "editor.selectionBackground": "#d6e4fc",
++    "editorCursor.foreground": "#1d5fd6",
++    "diffEditor.insertedLineBackground": "#e3edfd",
++    "diffEditor.insertedTextBackground": "#bcd3fa",
++    "diffEditor.removedLineBackground": "#fce8e7",
++    "diffEditor.removedTextBackground": "#f6bdb9"
++  }
++} as const;
++
++export const specStudioDark = {
++  "base": "vs-dark",
++  "inherit": true,
++  "rules": [
++    {
++      "token": "keyword.md",
++      "foreground": "5b9df8",
++      "fontStyle": "bold"
++    },
++    {
++      "token": "variable.md",
++      "foreground": "9ca3af"
++    },
++    {
++      "token": "string.link.md",
++      "foreground": "5b9df8"
++    }
++  ],
++  "colors": {
++    "editor.background": "#131518",
++    "editor.foreground": "#e5e7eb",
++    "editorLineNumber.foreground": "#8b919c",
++    "editorLineNumber.activeForeground": "#e5e7eb",
++    "editor.lineHighlightBackground": "#1b1e22",
++    "editor.selectionBackground": "#1f3a66",
++    "editorCursor.foreground": "#5b9df8",
++    "diffEditor.insertedLineBackground": "#14294a",
++    "diffEditor.insertedTextBackground": "#22447a",
++    "diffEditor.removedLineBackground": "#36191a",
++    "diffEditor.removedTextBackground": "#6a2a2a"
++  }
++} as const;
++
++export function registerSpecStudioThemes(monaco: Monaco) {
++  monaco.editor.defineTheme("spec-studio-light", specStudioLight as any);
++  monaco.editor.defineTheme("spec-studio-dark", specStudioDark as any);
++}
+diff --git a/design/reference/bundle.css b/design/reference/bundle.css
+new file mode 100644
+index 0000000..4c67795
+--- /dev/null
++++ b/design/reference/bundle.css
+@@ -0,0 +1,322 @@
++@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap");
++
++/* Spec Studio — component styles. Every value comes from tokens.css (--color-*, --space-*, --radius-*, --size-*, --shadow-*). */
++/* Motion — durations and easings (also in globals.css). Short, ease-out, no bounce. */
++:root { --duration-fast: 100ms; --duration-base: 150ms; --duration-slow: 220ms; --ease-out: cubic-bezier(0.2, 0, 0, 1); --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); }
++@keyframes ss-pop-in { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
++@keyframes ss-pop-up { from { opacity: 0; transform: translateY(4px) scale(.98); } to { opacity: 1; transform: none; } }
++@keyframes ss-slide-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
++@keyframes ss-scale-in { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
++.ss-pop { animation: ss-scale-in var(--duration-slow) var(--ease-out); }
++
++body { margin: 0; font-family: var(--font-sans); font-size: 14px; line-height: 20px; background: var(--color-background); color: var(--color-foreground); -webkit-font-smoothing: antialiased; }
++.ss-pad { padding: var(--space-4); }
++.ss-row { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
++.ss-stack { display: flex; flex-direction: column; gap: var(--space-3); }
++.ss-overline { font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-muted-foreground); }
++.ss-icon { flex: none; display: inline-block; width: var(--size-icon); height: var(--size-icon); }
++svg.ss-icon { width: auto; height: auto; }
++.ss-spin { animation: ss-spin 1s linear infinite; }
++@keyframes ss-spin { to { transform: rotate(360deg); } }
++@media (prefers-reduced-motion: reduce) {
++  [class*="ss-"], [class*="ss-"] * { transition-duration: 1ms !important; animation-duration: 1ms !important; }
++  .ss-spin { animation: ss-spin 1.6s linear infinite !important; }
++  .ss-btn:active:not(:disabled), .ss-iconbtn:active { transform: none !important; }
++}
++:where(.ss-btn, .ss-iconbtn, .ss-seg__opt, .ss-tab, .ss-menu__item, .ss-switch, .ss-spec, .ss-select__trigger, .ss-input):focus-visible { outline: 2px solid var(--color-ring); outline-offset: 1px; }
++
++/* Button */
++.ss-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1\.5); height: var(--size-control); padding: 0 var(--space-3); border: 1px solid transparent; border-radius: var(--radius-md); font: inherit; font-size: 13px; line-height: 18px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background-color var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out), transform var(--duration-fast) var(--ease-out); }
++.ss-btn:active:not(:disabled) { transform: scale(.97); }
++.ss-btn .ss-icon { transition: transform var(--duration-slow) var(--ease-out); }
++.ss-btn--sm { height: var(--size-control-sm); padding: 0 var(--space-2); }
++.ss-btn--primary { background: var(--color-primary); color: var(--color-primary-foreground); }
++.ss-btn--primary:hover:not(:disabled) { background: color-mix(in srgb, var(--color-primary) 88%, var(--color-foreground)); }
++.ss-btn--secondary { background: var(--color-secondary); color: var(--color-secondary-foreground); }
++.ss-btn--secondary:hover:not(:disabled) { background: var(--color-accent); border-color: var(--color-border); }
++.ss-btn--outline { background: var(--color-card); color: var(--color-foreground); border-color: var(--color-input); }
++.ss-btn--outline:hover:not(:disabled) { background: var(--color-accent); }
++.ss-btn--ghost { background: transparent; color: var(--color-foreground); }
++.ss-btn--ghost:hover:not(:disabled) { background: var(--color-accent); }
++.ss-btn--tonal { background: var(--color-primary-soft); color: var(--color-primary); }
++.ss-btn--tonal:hover:not(:disabled) { border-color: var(--color-primary); }
++.ss-btn--destructive { background: var(--color-destructive); color: var(--color-destructive-foreground); }
++.ss-btn--destructive:hover:not(:disabled) { background: color-mix(in srgb, var(--color-destructive) 88%, var(--color-foreground)); }
++/* icon micro-motion: the icon acts out the verb on hover */
++.ss-btn:hover:not(:disabled) [data-icon="send-horizontal"] { transform: translateX(2px); }
++.ss-btn:hover:not(:disabled) [data-icon="refresh-cw"] { transform: rotate(180deg); }
++.ss-btn:hover:not(:disabled) [data-icon="cloud-upload"] { transform: translateY(-2px); }
++.ss-btn:hover:not(:disabled) [data-icon="x"] { transform: rotate(90deg); }
++.ss-btn:hover:not(:disabled) [data-icon="check"] { transform: scale(1.15); }
++.ss-btn:hover:not(:disabled) [data-icon="trash-2"] { transform: rotate(-8deg); }
++.ss-btn.is-loading { cursor: progress; }
++.ss-btn.is-loading:disabled { opacity: .8; }
++.ss-btn.is-success { transition-duration: 1ms; }
++.ss-btn:disabled { opacity: .45; cursor: not-allowed; }
++
++/* IconButton */
++.ss-iconbtn { display: inline-grid; place-items: center; width: var(--size-control); height: var(--size-control); padding: 0; border: 0; border-radius: var(--radius-md); background: transparent; color: var(--color-muted-foreground); cursor: pointer; transition: background-color var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out), transform var(--duration-fast) var(--ease-out); }
++.ss-iconbtn:active { transform: scale(.92); }
++.ss-iconbtn .ss-icon { transition: transform var(--duration-slow) var(--ease-out); }
++.ss-iconbtn:hover [data-icon="settings"] { transform: rotate(60deg); }
++.ss-iconbtn:hover [data-icon="plus"], .ss-iconbtn:hover [data-icon="x"] { transform: rotate(90deg); }
++.ss-iconbtn--sm { width: var(--size-control-sm); height: var(--size-control-sm); }
++.ss-iconbtn:hover { background: var(--color-accent); color: var(--color-foreground); }
++.ss-iconbtn.is-active { background: var(--color-primary-soft); color: var(--color-primary); }
++
++/* Kbd */
++.ss-kbd { display: inline-block; min-width: 18px; padding: 0 var(--space-1); border: 1px solid var(--color-border); border-bottom-width: 2px; border-radius: var(--radius-sm); background: var(--color-card); font-family: var(--font-mono); font-size: 11px; line-height: 16px; font-weight: 500; color: var(--color-muted-foreground); text-align: center; }
++
++/* StatusBadge */
++.ss-status { display: inline-flex; align-items: center; gap: var(--space-1); height: 20px; padding: 0 var(--space-1\.5); border-radius: var(--radius-sm); font-size: 12px; line-height: 16px; font-weight: 500; white-space: nowrap; }
++.ss-status--synced { background: var(--color-muted); color: var(--color-muted-foreground); }
++.ss-status--unsaved { background: var(--color-primary-soft); color: var(--color-primary); }
++.ss-status--syncing { background: var(--color-primary-soft); color: var(--color-primary); }
++.ss-status--error { background: var(--color-destructive-soft); color: var(--color-destructive); }
++.ss-status--compact { width: 20px; padding: 0; justify-content: center; background: transparent; }
++.ss-dot { width: 8px; height: 8px; border-radius: var(--radius-full); background: currentColor; flex: none; }
++.ss-dot--primary { background: var(--color-primary); }
++
++/* Checkbox */
++.ss-check { position: relative; display: inline-flex; align-items: center; gap: var(--space-2); flex: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
++.ss-check input { position: absolute; left: 0; top: 50%; width: 16px; height: 16px; margin: -8px 0 0; opacity: 0; cursor: inherit; }
++.ss-check__box { position: relative; display: grid; place-items: center; width: 16px; height: 16px; flex: none; box-sizing: border-box; border: 1.5px solid var(--color-input); border-radius: var(--radius-sm); background: var(--color-card); color: var(--color-primary-foreground); transition: background-color var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out), transform var(--duration-fast) var(--ease-out); }
++.ss-check__box svg { position: absolute; inset: -1.5px; }
++.ss-check__mark { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset var(--duration-slow) var(--ease-out); }
++.ss-check:hover .ss-check__box { border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-soft); }
++.ss-check:active .ss-check__box { transform: scale(.9); }
++.ss-check[data-state="checked"] .ss-check__box, .ss-check[data-state="mixed"] .ss-check__box { background: var(--color-primary); border-color: var(--color-primary); }
++.ss-check[data-state="checked"] .ss-check__mark, .ss-check[data-state="mixed"] .ss-check__mark { stroke-dashoffset: 0; transition-delay: 40ms; }
++.ss-check input:focus-visible + .ss-check__box { outline: 2px solid var(--color-ring); outline-offset: 2px; }
++.ss-check.is-disabled { cursor: not-allowed; opacity: .45; }
++.ss-check.is-disabled .ss-check__box { box-shadow: none; }
++.ss-check__label { font-size: 13px; line-height: 18px; color: var(--color-foreground); }
++/* in the spec list: quiet until the row is hovered, focused or the box is ticked */
++.ss-spec .ss-check:not([data-state="checked"]) .ss-check__box { border-color: color-mix(in srgb, var(--color-input) 70%, transparent); background: transparent; }
++.ss-spec:hover .ss-check .ss-check__box, .ss-spec:focus-within .ss-check .ss-check__box { border-color: var(--color-input); }
++.ss-spec .ss-check:hover .ss-check__box { border-color: var(--color-primary); }
++
++/* SpecListItem */
++.ss-spec { display: flex; align-items: center; gap: var(--space-2); height: var(--size-row); padding: 0 var(--space-1) 0 var(--space-2); border-radius: var(--radius-md); color: var(--color-sidebar-foreground); font-size: 13px; line-height: 18px; font-weight: 500; cursor: pointer; position: relative; }
++.ss-spec, .ss-menu__item, .ss-dd__opt, .ss-tab, .ss-seg__opt, .ss-select__trigger { transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), border-color var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out); }
++.ss-spec:hover { background: var(--color-accent); }
++.ss-spec.is-selected { background: var(--color-sidebar-accent); }
++.ss-spec.is-selected::before { content: ""; position: absolute; left: -8px; top: 6px; bottom: 6px; width: 3px; border-radius: var(--radius-full); background: var(--color-primary); }
++.ss-spec__icon { color: var(--color-muted-foreground); }
++.ss-spec.is-selected .ss-spec__icon { color: var(--color-primary); }
++.ss-spec__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++.ss-spec__menu { opacity: 0; }
++.ss-spec:hover .ss-spec__menu, .ss-spec.is-selected .ss-spec__menu, .ss-spec__menu:focus-visible { opacity: 1; }
++
++/* ContextMenu */
++.ss-menu { display: inline-flex; flex-direction: column; min-width: 220px; padding: var(--space-1); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-popover); color: var(--color-popover-foreground); box-shadow: var(--shadow-popover); }
++.ss-menu { animation: ss-pop-in var(--duration-base) var(--ease-out); }
++.ss-menu__item { display: flex; align-items: center; gap: var(--space-2); height: var(--size-row); padding: 0 var(--space-2); border: 0; border-radius: var(--radius-md); background: transparent; color: inherit; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
++.ss-menu__item > span:nth-child(2) { flex: 1; }
++.ss-menu__item:hover { background: var(--color-accent); }
++.ss-menu__item .ss-icon { color: var(--color-muted-foreground); }
++.ss-menu__item.is-destructive, .ss-menu__item.is-destructive .ss-icon { color: var(--color-destructive); }
++.ss-menu__item.is-destructive:hover { background: var(--color-destructive-soft); }
++.ss-menu__kbd { font-family: var(--font-mono); font-size: 11px; color: var(--color-muted-foreground); }
++.ss-menu__sep { height: 1px; margin: var(--space-1) calc(-1 * var(--space-1)); background: var(--color-border); }
++
++/* SpecSidebar */
++.ss-sidebar { display: flex; flex-direction: column; width: var(--size-sidebar); height: 100%; box-sizing: border-box; background: var(--color-sidebar); border-right: 1px solid var(--color-border); }
++.ss-sidebar.is-collapsed { width: var(--size-sidebar-collapsed); align-items: center; gap: var(--space-1); padding-top: var(--space-2); }
++.ss-sidebar__head { display: flex; align-items: center; gap: var(--space-2); height: 40px; padding: 0 var(--space-1) 0 var(--space-5); }
++.ss-sidebar__count { font-size: 12px; line-height: 16px; color: var(--color-muted-foreground); }
++.ss-sidebar__list { flex: 1; overflow: auto; padding: 0 var(--space-2) var(--space-2) var(--space-3); display: flex; flex-direction: column; gap: 1px; }
++.ss-sidebar__foot { padding: var(--space-3) var(--space-4); border-top: 1px solid var(--color-border); font-size: 12px; color: var(--color-muted-foreground); }
++
++/* AppHeader */
++.ss-header { display: flex; align-items: center; gap: var(--space-2); height: var(--size-header); padding: 0 var(--space-2) 0 var(--space-4); box-sizing: border-box; background: var(--color-sidebar); border-bottom: 1px solid var(--color-border); }
++.ss-header__mark { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: var(--radius-sm); background: var(--color-primary); color: var(--color-primary-foreground); font-family: var(--font-mono); font-size: 14px; font-weight: 600; line-height: 1; }
++.ss-header__name { font-size: 14px; line-height: 20px; font-weight: 600; }
++.ss-header__path { margin-left: var(--space-2); font-family: var(--font-mono); font-size: 12px; line-height: 18px; color: var(--color-muted-foreground); }
++
++/* ModeSwitch (segmented) */
++.ss-seg { display: inline-flex; padding: 2px; gap: 2px; border-radius: var(--radius-full); background: var(--color-muted); border: 1px solid var(--color-border); }
++.ss-seg__opt { display: inline-flex; align-items: center; gap: var(--space-1\.5); height: 24px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-full); background: transparent; color: var(--color-muted-foreground); font: inherit; font-size: 12px; line-height: 16px; font-weight: 500; cursor: pointer; }
++.ss-seg__opt:hover { color: var(--color-foreground); }
++.ss-seg__opt.is-on { background: var(--color-card); color: var(--color-foreground); box-shadow: 0 0 0 1px var(--color-border); }
++.ss-seg__opt.is-on .ss-icon { color: var(--color-primary); }
++
++/* Select — custom dropdown, search when the list is long */
++.ss-select { position: relative; display: inline-flex; min-width: 160px; }
++.ss-select__trigger { display: flex; align-items: center; gap: var(--space-2); width: 100%; height: var(--size-control); padding: 0 var(--space-2) 0 var(--space-3); border: 1px solid var(--color-input); border-radius: var(--radius-md); background: var(--color-card); color: var(--color-foreground); font: inherit; font-size: 13px; line-height: 18px; text-align: left; cursor: pointer; }
++.ss-select__trigger:hover { background: var(--color-accent); }
++.ss-select__trigger:disabled { opacity: .45; cursor: not-allowed; }
++.ss-select__trigger .ss-icon { color: var(--color-muted-foreground); }
++.ss-select.is-open .ss-select__trigger { outline: 2px solid var(--color-ring); outline-offset: 1px; }
++.ss-select__value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++.ss-select__value.is-placeholder { color: var(--color-muted-foreground); }
++.ss-select--sm .ss-select__trigger { height: var(--size-control-sm); font-size: 12px; }
++.ss-select.is-mono .ss-select__trigger, .ss-select.is-mono .ss-dd__label, .ss-select.is-mono .ss-dd__search input { font-family: var(--font-mono); font-size: 12px; }
++.ss-dd { position: absolute; z-index: 50; top: calc(100% + 4px); left: 0; min-width: 100%; width: max-content; max-width: 360px; display: flex; flex-direction: column; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-popover); color: var(--color-popover-foreground); box-shadow: var(--shadow-popover); overflow: hidden; }
++.ss-dd { animation: ss-pop-in var(--duration-base) var(--ease-out); transform-origin: top left; }
++.ss-dd--end { left: auto; right: 0; }
++.ss-dd--top { animation-name: ss-pop-up; transform-origin: bottom left; top: auto; bottom: calc(100% + 4px); flex-direction: column-reverse; }
++.ss-dd--top .ss-dd__search { border-bottom: 0; border-top: 1px solid var(--color-border); }
++.ss-dd__search { display: flex; align-items: center; gap: var(--space-2); height: 36px; padding: 0 var(--space-3); border-bottom: 1px solid var(--color-border); color: var(--color-muted-foreground); }
++.ss-dd__search input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: var(--color-foreground); font: inherit; font-size: 13px; }
++.ss-dd__search input::placeholder { color: var(--color-muted-foreground); }
++.ss-dd__count { font-family: var(--font-mono); font-size: 11px; color: var(--color-muted-foreground); }
++.ss-dd__list { max-height: 280px; overflow: auto; padding: var(--space-1); outline: none; }
++.ss-dd__group { padding: var(--space-2) var(--space-2) var(--space-1); font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-muted-foreground); }
++.ss-dd__opt { display: flex; align-items: center; gap: var(--space-2); min-height: var(--size-row); padding: 0 var(--space-3) 0 var(--space-1); border-radius: var(--radius-md); font-size: 13px; line-height: 18px; cursor: pointer; }
++.ss-dd__opt.is-active { background: var(--color-accent); }
++.ss-dd__check { display: inline-grid; place-items: center; width: 16px; flex: none; color: var(--color-primary); }
++.ss-dd__label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
++.ss-dd__opt.is-selected .ss-dd__label { font-weight: 500; }
++.ss-dd__hint { font-size: 12px; color: var(--color-muted-foreground); }
++.ss-dd__opt--custom .ss-dd__check { color: var(--color-muted-foreground); }
++.ss-select.is-mono .ss-select__value.is-placeholder, .ss-select.is-mono .ss-dd__search input::placeholder { font-family: var(--font-sans); font-size: 13px; }
++.ss-select__tags { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-1); overflow: hidden; }
++.ss-select.is-multi .ss-select__trigger { padding-left: var(--space-1); }
++.ss-select.is-multi .ss-select__value.is-placeholder { padding-left: var(--space-2); }
++.ss-tag { display: inline-flex; align-items: center; gap: 2px; height: 22px; max-width: 140px; padding: 0 2px 0 var(--space-2); border-radius: var(--radius-sm); background: var(--color-primary-soft); color: var(--color-primary); font-size: 12px; line-height: 16px; font-weight: 500; flex: none; animation: ss-scale-in var(--duration-base) var(--ease-out); }
++.ss-select--sm .ss-tag { height: 20px; }
++.ss-tag__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++.ss-tag__x { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 3px; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out); }
++.ss-tag__x:hover { background: color-mix(in srgb, var(--color-primary) 18%, transparent); }
++.ss-tag--more { padding: 0 var(--space-2); background: var(--color-muted); color: var(--color-muted-foreground); animation: none; }
++.ss-dd__opt .ss-check { pointer-events: none; margin: 0 2px 0 var(--space-1); }
++.ss-dd__opt .ss-check .ss-check__box { box-shadow: none; }
++.ss-dd__foot { display: flex; align-items: center; gap: var(--space-1); height: 36px; padding: 0 var(--space-2) 0 var(--space-3); border-top: 1px solid var(--color-border); }
++.ss-dd__link { height: 26px; padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-primary); font: inherit; font-size: 12px; font-weight: 500; cursor: pointer; transition: background-color var(--duration-fast) var(--ease-out); }
++.ss-dd__link:hover:not(:disabled) { background: var(--color-primary-soft); }
++.ss-dd__link:disabled { color: var(--color-muted-foreground); opacity: .6; cursor: default; }
++.ss-dd__link:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 1px; }
++.ss-dd--top .ss-dd__foot { border-top: 0; border-bottom: 1px solid var(--color-border); }
++.ss-dd__empty { padding: var(--space-4) var(--space-3); font-size: 12px; text-align: center; color: var(--color-muted-foreground); }
++
++/* Input */
++.ss-input { box-sizing: border-box; height: var(--size-control); padding: 0 var(--space-3); border: 1px solid var(--color-input); border-radius: var(--radius-md); background: var(--color-card); color: var(--color-foreground); font: inherit; font-size: 13px; width: 100%; }
++.ss-input::placeholder { color: var(--color-muted-foreground); }
++.ss-input.is-mono { font-family: var(--font-mono); font-size: 12px; }
++.ss-input.is-invalid { border-color: var(--color-destructive); }
++.ss-textarea { height: auto; padding: var(--space-2) var(--space-3); resize: vertical; line-height: 20px; }
++
++/* Field */
++.ss-field { display: flex; flex-direction: column; gap: var(--space-1\.5); }
++.ss-field--inline { flex-direction: row; align-items: center; justify-content: space-between; gap: var(--space-4); }
++.ss-field__label { font-size: 13px; line-height: 18px; font-weight: 500; }
++.ss-field__hint { margin: 2px 0 0; font-size: 12px; line-height: 16px; color: var(--color-muted-foreground); }
++.ss-field__error { display: flex; align-items: center; gap: var(--space-1); margin: 2px 0 0; font-size: 12px; line-height: 16px; color: var(--color-destructive); }
++
++/* Switch */
++.ss-switch { position: relative; width: 36px; height: 20px; flex: none; padding: 0; border: 1px solid var(--color-input); border-radius: var(--radius-full); background: var(--color-muted); cursor: pointer; }
++.ss-switch { transition: background-color var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out); }
++.ss-switch__thumb { transition: left var(--duration-base) var(--ease-out), background-color var(--duration-base) var(--ease-out); }
++.ss-switch__thumb { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: var(--radius-full); background: var(--color-muted-foreground); }
++.ss-switch.is-on { background: var(--color-primary); border-color: var(--color-primary); }
++.ss-switch.is-on .ss-switch__thumb { left: 18px; background: var(--color-primary-foreground); }
++
++/* Tabs */
++.ss-tabs { display: flex; gap: var(--space-4); border-bottom: 1px solid var(--color-border); padding: 0 var(--space-6); }
++.ss-tab { display: inline-flex; align-items: center; gap: var(--space-1\.5); height: 40px; padding: 0; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: transparent; color: var(--color-muted-foreground); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
++.ss-tab:hover { color: var(--color-foreground); }
++.ss-tab.is-on { color: var(--color-foreground); border-bottom-color: var(--color-primary); }
++.ss-tabs--pill { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-muted); }
++.ss-tabs--pill .ss-tab { height: 26px; padding: 0 var(--space-3); border: 0; margin: 0; border-radius: var(--radius-sm); }
++.ss-tabs--pill .ss-tab.is-on { background: var(--color-card); box-shadow: 0 0 0 1px var(--color-border); }
++
++/* ChatToolbar */
++.ss-toolbar { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; }
++.ss-toolbar__ctx { display: inline-flex; align-items: center; gap: var(--space-1); font-size: 12px; line-height: 16px; color: var(--color-muted-foreground); }
++
++/* Composer */
++.ss-composer { border: 1px solid var(--color-input); border-radius: var(--radius-lg); background: var(--color-card); }
++.ss-composer:focus-within { outline: 2px solid var(--color-ring); outline-offset: -1px; }
++.ss-composer textarea { display: block; box-sizing: border-box; width: 100%; min-height: 44px; padding: var(--space-3) var(--space-3) var(--space-1); border: 0; background: transparent; color: var(--color-foreground); font: inherit; font-size: 14px; line-height: 20px; resize: none; outline: none; }
++.ss-composer textarea::placeholder { color: var(--color-muted-foreground); }
++.ss-composer__bar { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2) var(--space-2) var(--space-3); }
++.ss-composer__hint { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; color: var(--color-muted-foreground); }
++
++/* ChatMessage */
++.ss-msg { font-size: 14px; line-height: 20px; }
++.ss-msg--user { align-self: flex-end; max-width: 80%; padding: var(--space-2) var(--space-3); border-radius: var(--radius-lg); background: var(--color-muted); }
++.ss-msg--assistant { display: flex; gap: var(--space-2); align-items: flex-start; }
++.ss-msg__avatar { display: grid; place-items: center; width: 24px; height: 24px; flex: none; border-radius: var(--radius-md); background: var(--color-primary-soft); color: var(--color-primary); }
++.ss-msg__body { padding-top: 2px; }
++.ss-msg--tool { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1\.5) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-card); color: var(--color-muted-foreground); font-size: 12px; }
++.ss-msg--tool code { font-family: var(--font-mono); font-size: 12px; color: var(--color-foreground); }
++.ss-msg__toolnote { flex: 1; }
++.ss-msg--tool .ss-status { margin-left: auto; }
++.ss-msg--log { border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-editor); overflow: hidden; }
++.ss-msg__loghead { display: flex; align-items: center; gap: var(--space-1\.5); padding: var(--space-1) var(--space-3); border-bottom: 1px solid var(--color-border); background: var(--color-muted); font-family: var(--font-mono); font-size: 12px; line-height: 18px; color: var(--color-muted-foreground); }
++.ss-msg__log { margin: 0; padding: var(--space-2) var(--space-3); font-family: var(--font-mono); font-size: 12px; line-height: 18px; color: var(--color-foreground); white-space: pre-wrap; max-height: 180px; overflow: auto; }
++
++/* EditorPane — stand-in for Monaco, same tokens as the Monaco theme */
++.ss-editor, .ss-diff { display: flex; flex-direction: column; min-height: 0; background: var(--color-editor); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
++.ss-editor__tabbar { display: flex; align-items: center; gap: var(--space-2); height: 36px; padding: 0 var(--space-2) 0 0; background: var(--color-muted); border-bottom: 1px solid var(--color-border); }
++.ss-editor__tab { display: inline-flex; align-items: center; gap: var(--space-1\.5); height: 100%; padding: 0 var(--space-3); font-size: 13px; font-weight: 500; color: var(--color-muted-foreground); }
++.ss-editor__tab.is-on { background: var(--color-editor); color: var(--color-foreground); box-shadow: inset 0 2px 0 var(--color-primary); }
++.ss-editor__tab.is-on .ss-icon { color: var(--color-primary); }
++.ss-editor__body { flex: 1; overflow: auto; padding: var(--space-2) 0; font-family: var(--font-mono); font-size: 13px; line-height: 20px; }
++.ss-line, .ss-dline { display: flex; min-height: 20px; white-space: pre; }
++.ss-line.is-cursor { background: var(--color-editor-line); }
++.ss-line__no { width: 44px; flex: none; padding-right: var(--space-3); box-sizing: border-box; text-align: right; color: var(--color-editor-gutter); user-select: none; }
++.ss-line__text { flex: 1; min-width: 0; white-space: pre-wrap; padding-right: var(--space-3); }
++.tk-h { font-weight: 600; color: var(--color-primary); }
++.tk-li { color: var(--color-muted-foreground); }
++.tk-b { font-weight: 600; }
++.tk-code { color: var(--color-muted-foreground); }
++
++/* DiffReviewBar + DiffView */
++.ss-diffbar { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1\.5) var(--space-2) var(--space-1\.5) var(--space-3); background: var(--color-card); border-bottom: 1px solid var(--color-border); box-shadow: var(--shadow-float); font-size: 13px; position: relative; z-index: 1; }
++.ss-diffbar > .ss-icon { color: var(--color-primary); }
++.ss-diffbar__title code { font-family: var(--font-mono); font-size: 12px; }
++.ss-diffbar__stat { font-family: var(--font-mono); font-size: 12px; font-weight: 500; }
++.ss-diffbar__stat .is-add { color: var(--color-primary); }
++.ss-diffbar__stat .is-del { color: var(--color-destructive); }
++.ss-diff__heads { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--color-border); }
++.ss-diff__heads span { padding: var(--space-1) var(--space-3) var(--space-1) 44px; font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-muted-foreground); }
++.ss-diff__heads span + span { border-left: 1px solid var(--color-border); }
++.ss-diff__grid { display: grid; grid-template-columns: 1fr 1fr; padding: var(--space-2) 0; font-family: var(--font-mono); font-size: 13px; line-height: 20px; overflow: auto; }
++.ss-diff__grid > .ss-dline:nth-child(2n) { border-left: 1px solid var(--color-border); }
++.ss-dline__sign { width: 14px; flex: none; text-align: center; font-weight: 600; }
++.ss-dline.is-add { background: var(--color-diff-added); }
++.ss-dline.is-add .ss-dline__sign { color: var(--color-primary); }
++.ss-dline.is-del { background: var(--color-diff-removed); }
++.ss-dline.is-del .ss-dline__sign { color: var(--color-destructive); }
++.ss-dline.is-empty { background: repeating-linear-gradient(-45deg, transparent 0 5px, var(--color-border) 5px 6px); }
++.ss-dline.is-add mark { background: var(--color-diff-added-text); color: inherit; border-radius: 2px; }
++.ss-dline.is-del mark { background: var(--color-diff-removed-text); color: inherit; border-radius: 2px; }
++
++/* Toast */
++.ss-toast { display: flex; align-items: flex-start; gap: var(--space-3); width: 360px; max-width: 100%; box-sizing: border-box; padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4); border: 1px solid; border-radius: var(--radius-lg); box-shadow: var(--shadow-popover); color: var(--color-foreground); }
++.ss-toast { animation: ss-slide-in var(--duration-slow) var(--ease-out); }
++.ss-toast__icon { margin-top: 2px; }
++.ss-toast__text { flex: 1; min-width: 0; }
++.ss-toast__title { margin: 0; font-size: 13px; line-height: 20px; font-weight: 600; }
++.ss-toast__desc { margin: 2px 0 0; font-size: 13px; line-height: 18px; color: var(--color-muted-foreground); }
++.ss-toast__desc code { font-family: var(--font-mono); font-size: 12px; }
++.ss-toast__action { color: inherit; font-weight: 600; }
++.ss-toast__close { margin: -2px 0 0; }
++.ss-toast--info { background: var(--color-info-soft); border-color: var(--color-info-border); }
++.ss-toast--info .ss-toast__icon, .ss-toast--info .ss-toast__title, .ss-toast--info .ss-toast__action { color: var(--color-info); }
++.ss-toast--warning { background: var(--color-warning-soft); border-color: var(--color-warning-border); }
++.ss-toast--warning .ss-toast__icon, .ss-toast--warning .ss-toast__title, .ss-toast--warning .ss-toast__action { color: var(--color-warning); }
++.ss-toast--error { background: var(--color-error-soft); border-color: var(--color-error-border); }
++.ss-toast--error .ss-toast__icon, .ss-toast--error .ss-toast__title, .ss-toast--error .ss-toast__action { color: var(--color-error); }
++.ss-toast .ss-iconbtn:hover, .ss-toast .ss-btn--ghost:hover:not(:disabled) { background: color-mix(in srgb, currentColor 10%, transparent); }
++.ss-toaster { display: flex; flex-direction: column; gap: var(--space-2); }
++
++/* SettingsDialog */
++.ss-dialog { display: flex; flex-direction: column; width: 560px; max-width: 100%; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: var(--radius-xl); background: var(--color-popover); color: var(--color-popover-foreground); box-shadow: var(--shadow-dialog); overflow: hidden; }
++.ss-dialog { animation: ss-pop-in var(--duration-slow) var(--ease-out); }
++.ss-dialog__head { display: flex; align-items: center; padding: var(--space-4) var(--space-3) var(--space-2) var(--space-6); }
++.ss-dialog__title { margin: 0; font-size: 18px; line-height: 24px; font-weight: 600; letter-spacing: -.01em; }
++.ss-dialog__body { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-6); }
++.ss-dialog__foot { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4) var(--space-3) var(--space-6); border-top: 1px solid var(--color-border); background: var(--color-muted); }
++.ss-dialog__path { font-family: var(--font-mono); font-size: 12px; color: var(--color-muted-foreground); }
++
++/* Workbench layout */
++.ss-workbench { display: grid; grid-template-columns: var(--size-sidebar) 1fr; grid-template-rows: var(--size-header) 1fr; height: 100%; min-height: 560px; background: var(--color-background); }
++.ss-workbench.is-collapsed { grid-template-columns: var(--size-sidebar-collapsed) 1fr; }
++.ss-workbench > .ss-header { grid-column: 1 / -1; }
++.ss-workbench__main { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; min-height: 0; padding: var(--space-3) var(--space-4) var(--space-4); }
++.ss-workbench__main > .ss-editor, .ss-workbench__main > .ss-diff { flex: 1; }
++.ss-workbench__chat { display: flex; flex-direction: column; }
++.ss-workbench__log { display: flex; flex-direction: column; gap: var(--space-2); max-height: 180px; overflow: auto; padding-bottom: var(--space-1); }
+diff --git a/design/reference/bundle.js b/design/reference/bundle.js
+new file mode 100644
+index 0000000..78e350c
+--- /dev/null
++++ b/design/reference/bundle.js
+@@ -0,0 +1,630 @@
++/* @ds-bundle: {"format":4,"namespace":"SpecStudio","components":[{"name":"Icon"},{"name":"Button"},{"name":"IconButton"},{"name":"Kbd"},{"name":"StatusBadge"},{"name":"Checkbox"},{"name":"SpecListItem"},{"name":"ContextMenu"},{"name":"SpecSidebar"},{"name":"AppHeader"},{"name":"ModeSwitch"},{"name":"Select"},{"name":"Input"},{"name":"Field"},{"name":"Switch"},{"name":"Tabs"},{"name":"ChatToolbar"},{"name":"Composer"},{"name":"ChatMessage"},{"name":"EditorPane"},{"name":"DiffReviewBar"},{"name":"DiffView"},{"name":"Toast"},{"name":"SettingsDialog"},{"name":"Workbench"}]} */
++(function () {
++  "use strict";
++  var React = window.React;
++  var h = React.createElement;
++  var useState = React.useState;
++  var useRef = React.useRef;
++  var useEffect = React.useEffect;
++  var ICONS = {"settings": "<path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\"/> <circle cx=\"12\" cy=\"12\" r=\"3\"/>", "panel-left": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/> <path d=\"M9 3v18\"/>", "ellipsis": "<circle cx=\"12\" cy=\"12\" r=\"1\"/> <circle cx=\"19\" cy=\"12\" r=\"1\"/> <circle cx=\"5\" cy=\"12\" r=\"1\"/>", "send-horizontal": "<path d=\"M3.714 3.048a.498.498 0 0 0-.683.627l2.843 7.627a2 2 0 0 1 0 1.396l-2.842 7.627a.498.498 0 0 0 .682.627l18-8.5a.5.5 0 0 0 0-.904z\"/> <path d=\"M6 12h16\"/>", "check": "<path d=\"M20 6 9 17l-5-5\"/>", "x": "<path d=\"M18 6 6 18\"/> <path d=\"m6 6 12 12\"/>", "refresh-cw": "<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\"/> <path d=\"M21 3v5h-5\"/> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\"/> <path d=\"M8 16H3v5\"/>", "file-text": "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/> <path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/> <path d=\"M10 9H8\"/> <path d=\"M16 13H8\"/> <path d=\"M16 17H8\"/>", "terminal": "<polyline points=\"4 17 10 11 4 5\"/> <line x1=\"12\" x2=\"20\" y1=\"19\" y2=\"19\"/>", "key-round": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\"/> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\"/>", "loader-circle": "<path d=\"M21 12a9 9 0 1 1-6.219-8.56\"/>", "circle-alert": "<circle cx=\"12\" cy=\"12\" r=\"10\"/> <line x1=\"12\" x2=\"12\" y1=\"8\" y2=\"12\"/> <line x1=\"12\" x2=\"12.01\" y1=\"16\" y2=\"16\"/>", "trash-2": "<path d=\"M3 6h18\"/> <path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\"/> <path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\"/> <line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\"/> <line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\"/>", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\"/> <path d=\"m15 5 4 4\"/>", "plus": "<path d=\"M5 12h14\"/> <path d=\"M12 5v14\"/>", "chevron-down": "<path d=\"m6 9 6 6 6-6\"/>", "bot": "<path d=\"M12 8V4H8\"/> <rect width=\"16\" height=\"12\" x=\"4\" y=\"8\" rx=\"2\"/> <path d=\"M2 14h2\"/> <path d=\"M20 14h2\"/> <path d=\"M15 13v2\"/> <path d=\"M9 13v2\"/>", "cloud-upload": "<path d=\"M12 13v8\"/> <path d=\"M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242\"/> <path d=\"m8 17 4-4 4 4\"/>", "git-compare": "<circle cx=\"18\" cy=\"18\" r=\"3\"/> <circle cx=\"6\" cy=\"6\" r=\"3\"/> <path d=\"M13 6h3a2 2 0 0 1 2 2v7\"/> <path d=\"M11 18H8a2 2 0 0 1-2-2V9\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"8\"/> <path d=\"m21 21-4.3-4.3\"/>", "info": "<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M12 16v-4\"/> <path d=\"M12 8h.01\"/>", "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/> <path d=\"M12 9v4\"/> <path d=\"M12 17h.01\"/>"};
++
++  function cx() {
++    var out = [];
++    for (var i = 0; i < arguments.length; i++) if (arguments[i]) out.push(arguments[i]);
++    return out.join(" ");
++  }
++  function rest(props, keys) {
++    var o = {};
++    for (var k in props) if (keys.indexOf(k) < 0) o[k] = props[k];
++    return o;
++  }
++
++  /* ---------- Icon ---------- */
++  function Icon(p) {
++    var size = p.size || 16;
++    return h("svg", {
++      className: cx("ss-icon", p.spin && "ss-spin", p.className), "data-icon": p.name,
++      width: size, height: size, viewBox: "0 0 24 24", fill: "none",
++      stroke: "currentColor", strokeWidth: p.strokeWidth || 2,
++      strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true",
++      dangerouslySetInnerHTML: { __html: ICONS[p.name] || "" }
++    });
++  }
++
++  /* ---------- Button ---------- */
++  function Button(p) {
++    var variant = p.variant || "secondary";
++    var size = p.size || "md";
++    var o = rest(p, ["variant", "size", "icon", "iconRight", "className", "children", "loading", "success"]);
++    return h("button", Object.assign({ type: "button" }, o, {
++      className: cx("ss-btn", "ss-btn--" + variant, "ss-btn--" + size, p.loading && "is-loading", p.success && "is-success", p.className), "aria-busy": p.loading || undefined,
++      disabled: p.disabled || p.loading
++    }),
++      p.loading ? h(Icon, { name: "loader-circle", spin: true, key: "l" }) : p.success ? h(Icon, { name: "check", className: "ss-pop", key: "s" }) : (p.icon ? h(Icon, { name: p.icon, key: "i" }) : null),
++      p.children != null ? h("span", null, p.children) : null,
++      p.iconRight ? h(Icon, { name: p.iconRight }) : null
++    );
++  }
++
++  function IconButton(p) {
++    var o = rest(p, ["icon", "label", "active", "size", "className"]);
++    return h("button", Object.assign({ type: "button" }, o, {
++      className: cx("ss-iconbtn", p.size === "sm" && "ss-iconbtn--sm", p.active && "is-active", p.className),
++      "aria-label": p.label, title: p.label, "aria-pressed": p.active == null ? undefined : !!p.active
++    }), h(Icon, { name: p.icon }));
++  }
++
++  function Kbd(p) {
++    return h("kbd", { className: "ss-kbd" }, p.children);
++  }
++
++  /* ---------- StatusBadge ---------- */
++  var STATUS = {
++    synced: { label: "Synced", icon: "check" },
++    unsaved: { label: "Unsaved", icon: null },
++    syncing: { label: "Syncing…", icon: "loader-circle" },
++    error: { label: "Error", icon: "circle-alert" }
++  };
++  function StatusBadge(p) {
++    var s = STATUS[p.status] || STATUS.synced;
++    var label = p.label || s.label;
++    var glyph = s.icon ? h(Icon, { name: s.icon, size: 12, spin: p.status === "syncing", strokeWidth: 2.5 }) : h("span", { className: "ss-dot" });
++    if (p.compact) {
++      return h("span", { className: cx("ss-status ss-status--compact", "ss-status--" + p.status), title: label, role: "img", "aria-label": label }, glyph);
++    }
++    return h("span", { className: cx("ss-status", "ss-status--" + p.status) }, glyph, h("span", null, label));
++  }
++
++  /* ---------- Checkbox ---------- */
++  function Checkbox(p) {
++    var ref = useRef(null);
++    useEffect(function () { if (ref.current) ref.current.indeterminate = !!p.indeterminate && !p.checked; }, [p.indeterminate, p.checked]);
++    var state = p.checked ? "checked" : p.indeterminate ? "mixed" : "off";
++    return h("label", { className: cx("ss-check", p.disabled && "is-disabled", p.className), "data-state": state, onClick: function (e) { e.stopPropagation(); } },
++      h("input", { ref: ref, type: "checkbox", checked: !!p.checked, disabled: p.disabled, onChange: function (e) { p.onChange && p.onChange(e.target.checked); }, "aria-label": p.children ? undefined : p.label }),
++      h("span", { className: "ss-check__box", "aria-hidden": "true" },
++        h("svg", { viewBox: "0 0 16 16", width: 16, height: 16, fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" },
++          state === "mixed"
++            ? h("path", { className: "ss-check__mark", d: "M4.5 8h7", pathLength: 1 })
++            : h("path", { className: "ss-check__mark", d: "M4 8.25 6.75 11 12 5.5", pathLength: 1 }))),
++      p.children ? h("span", { className: "ss-check__label" }, p.children) : null);
++  }
++
++  /* ---------- SpecListItem ---------- */
++  function SpecListItem(p) {
++    return h("div", {
++      className: cx("ss-spec", p.selected && "is-selected", p.checked && "is-checked"),
++      role: "option", "aria-selected": !!p.selected, tabIndex: 0,
++      onClick: function () { p.onSelect && p.onSelect(p.name); },
++      onKeyDown: function (e) { if (e.key === "Enter") p.onSelect && p.onSelect(p.name); }
++    },
++      h(Checkbox, { checked: p.checked, onChange: function (v) { p.onCheck && p.onCheck(p.name, v); }, label: "Đính kèm " + p.name + " vào context" }),
++      h(Icon, { name: "file-text", className: "ss-spec__icon" }),
++      h("span", { className: "ss-spec__name" }, p.name),
++      h(StatusBadge, { status: p.status || "synced", compact: true }),
++      h(IconButton, { icon: "ellipsis", label: "Thao tác với " + p.name, size: "sm", className: "ss-spec__menu", onClick: function (e) { e.stopPropagation(); p.onMenu && p.onMenu(p.name, e); } })
++    );
++  }
++
++  /* ---------- ContextMenu ---------- */
++  var DEFAULT_MENU = [
++    { id: "rename", label: "Rename", icon: "pencil", shortcut: "F2" },
++    { id: "sync", label: "Force Sync lên NotebookLM", icon: "cloud-upload" },
++    { divider: true },
++    { id: "delete", label: "Delete spec", icon: "trash-2", tone: "destructive", shortcut: "⌫" }
++  ];
++  function ContextMenu(p) {
++    var items = p.items || DEFAULT_MENU;
++    return h("div", { className: cx("ss-menu", p.className), role: "menu", style: p.style },
++      items.map(function (it, i) {
++        if (it.divider) return h("div", { key: i, className: "ss-menu__sep", role: "separator" });
++        return h("button", {
++          key: it.id || i, type: "button", role: "menuitem",
++          className: cx("ss-menu__item", it.tone === "destructive" && "is-destructive"),
++          onClick: function () { p.onSelect && p.onSelect(it.id); }
++        }, it.icon ? h(Icon, { name: it.icon }) : h("span", { className: "ss-icon" }), h("span", null, it.label), it.shortcut ? h("span", { className: "ss-menu__kbd" }, it.shortcut) : null);
++      })
++    );
++  }
++
++  /* ---------- SpecSidebar ---------- */
++  function SpecSidebar(p) {
++    var specs = p.specs || [];
++    var checkedCount = specs.filter(function (s) { return s.checked; }).length;
++    if (p.collapsed) {
++      return h("aside", { className: "ss-sidebar is-collapsed" },
++        h(IconButton, { icon: "panel-left", label: "Mở sidebar", onClick: p.onToggle }),
++        h(IconButton, { icon: "file-text", label: specs.length + " spec" }));
++    }
++    return h("aside", { className: "ss-sidebar" },
++      h("div", { className: "ss-sidebar__head" },
++        p.onCheckAll ? h(Checkbox, { checked: specs.length > 0 && checkedCount === specs.length, indeterminate: checkedCount > 0 && checkedCount < specs.length, onChange: p.onCheckAll, label: "Chọn tất cả spec" }) : null,
++        h("span", { className: "ss-overline" }, "Specs"),
++        h("span", { className: "ss-sidebar__count" }, checkedCount ? checkedCount + " trong context" : specs.length + " file"),
++        h("span", { style: { flex: 1 } }),
++        h(IconButton, { icon: "plus", label: "Spec mới", size: "sm", onClick: p.onCreate }),
++        h(IconButton, { icon: "panel-left", label: "Thu gọn sidebar", size: "sm", onClick: p.onToggle })),
++      h("div", { className: "ss-sidebar__list", role: "listbox", "aria-label": "Danh sách spec" },
++        specs.map(function (s) {
++          return h(SpecListItem, Object.assign({ key: s.name }, s, {
++            selected: s.name === p.selected,
++            onSelect: p.onSelect, onCheck: p.onCheck, onMenu: p.onMenu
++          }));
++        })),
++      p.footer ? h("div", { className: "ss-sidebar__foot" }, p.footer) : null
++    );
++  }
++
++  /* ---------- AppHeader ---------- */
++  function AppHeader(p) {
++    return h("header", { className: "ss-header" },
++      p.onToggleSidebar ? h(IconButton, { icon: "panel-left", label: "Bật/tắt sidebar", onClick: p.onToggleSidebar }) : null,
++      h("span", { className: "ss-header__mark", "aria-hidden": "true" }, "§"),
++      h("span", { className: "ss-header__name" }, p.title || "Spec Studio"),
++      p.path ? h("span", { className: "ss-header__path" }, p.path) : null,
++      h("span", { style: { flex: 1 } }),
++      p.children,
++      h(IconButton, { icon: "settings", label: "Settings", onClick: p.onSettings })
++    );
++  }
++
++  /* ---------- ModeSwitch ---------- */
++  function ModeSwitch(p) {
++    var value = p.value || "api";
++    var opts = [{ id: "api", label: "API Key", icon: "key-round" }, { id: "cli", label: "CLI Agent", icon: "terminal" }];
++    return h("div", { className: "ss-seg", role: "radiogroup", "aria-label": "Chế độ Agent" },
++      opts.map(function (o) {
++        return h("button", {
++          key: o.id, type: "button", role: "radio", "aria-checked": value === o.id,
++          className: cx("ss-seg__opt", value === o.id && "is-on"),
++          onClick: function () { p.onChange && p.onChange(o.id); }
++        }, h(Icon, { name: o.icon, size: 14 }), o.label);
++      }));
++  }
++
++  /* ---------- Select ---------- */
++  var selectSeq = 0;
++  function normOpt(op) {
++    return typeof op === "string" ? { value: op, label: op } : op;
++  }
++  function Select(p) {
++    var options = (p.options || []).map(normOpt);
++    var threshold = p.searchThreshold || 8;
++    var searchable = p.searchable === true || (p.searchable !== false && options.length >= threshold) || !!p.allowCustom;
++    var multi = !!p.multiple;
++    var vSt = useState(p.defaultValue != null ? p.defaultValue : (multi ? [] : (options[0] && options[0].value)));
++    var value = p.value != null ? p.value : vSt[0];
++    var values = multi ? (value || []) : [];
++    function isSel(v) { return multi ? values.indexOf(v) >= 0 : v === value; }
++    function labelOf(v) { var o = options.filter(function (x) { return x.value === v; })[0]; return o ? o.label : v; }
++    var openSt = useState(!!p.defaultOpen); var open = openSt[0];
++    var qSt = useState(""); var q = qSt[0];
++    var actSt = useState(0); var act = actSt[0];
++    var rootRef = useRef(null), searchRef = useRef(null), listRef = useRef(null);
++    var idRef = useRef(null); if (!idRef.current) idRef.current = "ss-sel-" + (++selectSeq);
++    var id = idRef.current;
++
++    var ql = q.trim().toLowerCase();
++    var shown = ql ? options.filter(function (o) { return (o.label + " " + o.value + " " + (o.hint || "")).toLowerCase().indexOf(ql) >= 0; }) : options;
++    var custom = p.allowCustom && ql && !options.some(function (o) { return o.value.toLowerCase() === ql; });
++    var total = shown.length + (custom ? 1 : 0);
++    var current = options.filter(function (o) { return o.value === value; })[0];
++
++    function setOpen(v) { openSt[1](v); if (!v) { qSt[1](""); } }
++    function commit(v) { if (p.value == null) vSt[1](v); p.onChange && p.onChange(v); }
++    function choose(v) {
++      if (!multi) { commit(v); setOpen(false); return; }
++      commit(isSel(v) ? values.filter(function (x) { return x !== v; }) : values.concat([v]));
++      if (q) qSt[1]("");
++    }
++    function setAll(on) {
++      var vis = shown.map(function (o) { return o.value; });
++      commit(on ? values.concat(vis.filter(function (v) { return values.indexOf(v) < 0; })) : values.filter(function (v) { return vis.indexOf(v) < 0; }));
++    }
++    useEffect(function () {
++      if (!open) return;
++      var i = shown.findIndex(function (o) { return isSel(o.value); });
++      actSt[1](i >= 0 ? i : 0);
++      if (searchRef.current) searchRef.current.focus();
++      function out(e) { if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false); }
++      document.addEventListener("mousedown", out);
++      return function () { document.removeEventListener("mousedown", out); };
++    }, [open]);
++    useEffect(function () { actSt[1](0); }, [q]);
++    useEffect(function () {
++      var el = listRef.current && listRef.current.querySelector("[data-active='true']");
++      if (el && el.scrollIntoView) el.scrollIntoView({ block: "nearest" });
++    }, [act, open]);
++
++    function onKey(e) {
++      if (!open) {
++        if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen(true); }
++        return;
++      }
++      if (e.key === "Escape") { e.preventDefault(); setOpen(false); }
++      else if (e.key === "ArrowDown") { e.preventDefault(); actSt[1](Math.min(act + 1, total - 1)); }
++      else if (e.key === "ArrowUp") { e.preventDefault(); actSt[1](Math.max(act - 1, 0)); }
++      else if (e.key === "Backspace" && multi && !q && values.length) { commit(values.slice(0, -1)); }
++      else if (e.key === "Enter") {
++        e.preventDefault();
++        if (act < shown.length) choose(shown[act].value); else if (custom) choose(q.trim());
++      }
++    }
++
++    function renderTags() {
++      if (!values.length) return h("span", { className: "ss-select__value is-placeholder" }, p.placeholder || "Chọn…");
++      var max = p.maxTags != null ? p.maxTags : 2;
++      var vis = values.slice(0, max), more = values.length - vis.length;
++      return h("span", { className: "ss-select__tags" },
++        vis.map(function (v) {
++          return h("span", { key: v, className: "ss-tag" }, h("span", { className: "ss-tag__text" }, labelOf(v)),
++            h("span", {
++              className: "ss-tag__x", role: "button", tabIndex: -1, "aria-label": "Bỏ " + labelOf(v),
++              onMouseDown: function (e) { e.preventDefault(); e.stopPropagation(); },
++              onClick: function (e) { e.stopPropagation(); commit(values.filter(function (x) { return x !== v; })); }
++            }, h(Icon, { name: "x", size: 12, strokeWidth: 2.5 })));
++        }),
++        more > 0 ? h("span", { className: "ss-tag ss-tag--more", title: values.slice(max).map(labelOf).join(", ") }, "+" + more) : null);
++    }
++
++    var lastGroup = null;
++    var items = [];
++    shown.forEach(function (o, i) {
++      if (o.group && o.group !== lastGroup) { lastGroup = o.group; items.push(h("div", { key: "g-" + o.group, className: "ss-dd__group", role: "presentation" }, o.group)); }
++      var sel = isSel(o.value);
++      items.push(h("div", {
++        key: o.value, id: id + "-o" + i, role: "option", "aria-selected": sel, "data-active": i === act,
++        className: cx("ss-dd__opt", sel && "is-selected", i === act && "is-active"),
++        onMouseEnter: function () { actSt[1](i); },
++        onMouseDown: function (e) { e.preventDefault(); },
++        onClick: function () { choose(o.value); }
++      },
++        multi
++          ? h("span", { className: "ss-check", "data-state": sel ? "checked" : "off", "aria-hidden": "true" }, h("span", { className: "ss-check__box" }, h("svg", { viewBox: "0 0 16 16", width: 16, height: 16, fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, h("path", { className: "ss-check__mark", d: "M4 8.25 6.75 11 12 5.5", pathLength: 1 }))))
++          : h("span", { className: "ss-dd__check" }, sel ? h(Icon, { name: "check", size: 14 }) : null),
++        h("span", { className: "ss-dd__label" }, o.label),
++        o.hint ? h("span", { className: "ss-dd__hint" }, o.hint) : null));
++    });
++    if (custom) {
++      items.push(h("div", {
++        key: "__custom", id: id + "-o" + shown.length, role: "option", "aria-selected": false, "data-active": act === shown.length,
++        className: cx("ss-dd__opt ss-dd__opt--custom", act === shown.length && "is-active"),
++        onMouseEnter: function () { actSt[1](shown.length); },
++        onMouseDown: function (e) { e.preventDefault(); },
++        onClick: function () { choose(q.trim()); }
++      }, h("span", { className: "ss-dd__check" }, h(Icon, { name: "plus", size: 14 })), h("span", { className: "ss-dd__label" }, "Dùng “", h("b", null, q.trim()), "”")));
++    }
++    if (!total) items.push(h("div", { key: "__empty", className: "ss-dd__empty" }, "Không tìm thấy “" + q.trim() + "”"));
++
++    return h("div", {
++      ref: rootRef,
++      className: cx("ss-select", p.size === "sm" && "ss-select--sm", p.mono && "is-mono", multi && "is-multi", open && "is-open", p.className),
++      style: p.width ? { width: p.width } : undefined,
++      onKeyDown: onKey
++    },
++      h("button", {
++        type: "button", className: "ss-select__trigger", disabled: p.disabled,
++        "aria-haspopup": "listbox", "aria-expanded": open, "aria-controls": id + "-list", "aria-label": p["aria-label"],
++        onClick: function () { setOpen(!open); }
++      },
++        multi ? renderTags() : h("span", { className: cx("ss-select__value", !current && !value && "is-placeholder") }, current ? current.label : (value || p.placeholder || "Chọn…")),
++        h(Icon, { name: "chevron-down", size: 14 })),
++      open ? h("div", { className: cx("ss-dd", p.align === "end" && "ss-dd--end", p.side === "top" && "ss-dd--top") },
++        searchable ? h("div", { className: "ss-dd__search" },
++          h(Icon, { name: "search", size: 14 }),
++          h("input", {
++            ref: searchRef, value: q, placeholder: p.searchPlaceholder || (p.allowCustom ? "Tìm hoặc nhập tên tuỳ chỉnh…" : "Tìm…"),
++            role: "combobox", "aria-expanded": true, "aria-controls": id + "-list", "aria-activedescendant": total ? id + "-o" + act : undefined,
++            onChange: function (e) { qSt[1](e.target.value); }
++          }),
++          q ? h("span", { className: "ss-dd__count" }, shown.length + "/" + options.length) : null) : null,
++        h("div", { ref: listRef, id: id + "-list", className: "ss-dd__list", role: "listbox", "aria-multiselectable": multi || undefined, tabIndex: searchable ? -1 : 0 }, items),
++        multi ? h("div", { className: "ss-dd__foot" },
++          h("span", { className: "ss-dd__count" }, values.length + " đã chọn"),
++          h("span", { style: { flex: 1 } }),
++          h("button", { type: "button", className: "ss-dd__link", onMouseDown: function (e) { e.preventDefault(); }, onClick: function () { setAll(false); }, disabled: !values.length }, "Bỏ chọn"),
++          h("button", { type: "button", className: "ss-dd__link", onMouseDown: function (e) { e.preventDefault(); }, onClick: function () { setAll(true); }, disabled: !shown.length }, q ? "Chọn kết quả" : "Chọn tất cả")) : null) : null);
++  }
++
++  /* ---------- Input ---------- */
++  function Input(p) {
++    var o = rest(p, ["className", "mono", "invalid"]);
++    return h("input", Object.assign({ type: "text" }, o, {
++      className: cx("ss-input", p.mono && "is-mono", p.invalid && "is-invalid", p.className),
++      "aria-invalid": p.invalid || undefined
++    }));
++  }
++
++  /* ---------- Field ---------- */
++  function Field(p) {
++    return h("div", { className: cx("ss-field", p.inline && "ss-field--inline") },
++      h("div", { className: "ss-field__text" },
++        h("label", { className: "ss-field__label", htmlFor: p.htmlFor }, p.label),
++        p.hint ? h("p", { className: "ss-field__hint" }, p.hint) : null,
++        p.error ? h("p", { className: "ss-field__error" }, h(Icon, { name: "circle-alert", size: 12 }), p.error) : null),
++      h("div", { className: "ss-field__control" }, p.children));
++  }
++
++  /* ---------- Switch ---------- */
++  function Switch(p) {
++    return h("button", {
++      type: "button", role: "switch", "aria-checked": !!p.checked, "aria-label": p.label,
++      className: cx("ss-switch", p.checked && "is-on"),
++      onClick: function () { p.onChange && p.onChange(!p.checked); }
++    }, h("span", { className: "ss-switch__thumb" }));
++  }
++
++  /* ---------- Tabs ---------- */
++  function Tabs(p) {
++    return h("div", { className: cx("ss-tabs", p.variant === "pill" && "ss-tabs--pill"), role: "tablist" },
++      (p.tabs || []).map(function (t) {
++        return h("button", {
++          key: t.id, type: "button", role: "tab", "aria-selected": p.value === t.id,
++          className: cx("ss-tab", p.value === t.id && "is-on"),
++          onClick: function () { p.onChange && p.onChange(t.id); }
++        }, t.icon ? h(Icon, { name: t.icon, size: 14 }) : null, t.label);
++      }));
++  }
++
++  /* ---------- ChatToolbar ---------- */
++  var API_MODELS = [
++    { value: "gemini-1.5-pro", label: "gemini-1.5-pro", group: "Google Gemini" },
++    { value: "gemini-1.5-flash", label: "gemini-1.5-flash", group: "Google Gemini" },
++    { value: "gemini-2.0-flash", label: "gemini-2.0-flash", group: "Google Gemini" },
++    { value: "claude-sonnet-4", label: "claude-sonnet-4", group: "Anthropic" },
++    { value: "claude-opus-4", label: "claude-opus-4", group: "Anthropic" },
++    { value: "claude-haiku-3.5", label: "claude-haiku-3.5", group: "Anthropic" },
++    { value: "gpt-4o", label: "gpt-4o", group: "OpenAI" },
++    { value: "gpt-4o-mini", label: "gpt-4o-mini", group: "OpenAI" },
++    { value: "o3-mini", label: "o3-mini", group: "OpenAI" },
++    { value: "deepseek-chat", label: "deepseek-chat", group: "DeepSeek" },
++    { value: "deepseek-reasoner", label: "deepseek-reasoner", group: "DeepSeek" },
++    { value: "llama3.1:8b", label: "llama3.1:8b", group: "Ollama / Local", hint: "localhost:11434" },
++    { value: "qwen2.5-coder:7b", label: "qwen2.5-coder:7b", group: "Ollama / Local", hint: "localhost:11434" }
++  ];
++  var CLI_PROFILES = [{ value: "claude-code", label: "Claude Code" }, { value: "aider", label: "Aider" }, { value: "custom", label: "Custom Shell Script" }];
++  function ChatToolbar(p) {
++    var mode = p.mode || "api";
++    var options = p.options || (mode === "api" ? API_MODELS : CLI_PROFILES);
++    return h("div", { className: "ss-toolbar" },
++      h(ModeSwitch, { value: mode, onChange: p.onModeChange }),
++      h(Select, { size: "sm", mono: true, width: 200, side: "top", value: p.model, options: options, onChange: p.onModelChange, allowCustom: mode === "api", "aria-label": mode === "api" ? "Model" : "CLI profile" }),
++      h("span", { style: { flex: 1 } }),
++      p.contextCount ? h("span", { className: "ss-toolbar__ctx" }, h(Icon, { name: "file-text", size: 14 }), p.contextCount + " spec trong context") : null,
++      h(IconButton, { icon: "settings", size: "sm", label: mode === "api" ? "Cấu hình Direct API" : "Cấu hình CLI Agent", onClick: p.onSettings })
++    );
++  }
++
++  /* ---------- Composer ---------- */
++  function Composer(p) {
++    var ref = useRef(null);
++    var st = useState(p.defaultValue || "");
++    var value = p.value != null ? p.value : st[0];
++    function set(v) { if (p.value == null) st[1](v); p.onChange && p.onChange(v); }
++    useEffect(function () {
++      var el = ref.current; if (!el) return;
++      el.style.height = "auto";
++      el.style.height = Math.min(el.scrollHeight, 200) + "px";
++    }, [value]);
++    function send() { if (!value.trim() || p.busy) return; p.onSend && p.onSend(value); set(""); }
++    return h("div", { className: cx("ss-composer", p.busy && "is-busy") },
++      h("textarea", {
++        ref: ref, rows: 1, value: value, placeholder: p.placeholder || "Yêu cầu Agent sửa spec…",
++        onChange: function (e) { set(e.target.value); },
++        onKeyDown: function (e) { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } }
++      }),
++      h("div", { className: "ss-composer__bar" },
++        h("span", { className: "ss-composer__hint" }, h(Kbd, null, "⌘"), h(Kbd, null, "Enter"), " để gửi"),
++        h("span", { style: { flex: 1 } }),
++        p.busy
++          ? h(Button, { variant: "secondary", size: "sm", icon: "x", onClick: p.onStop }, "Dừng")
++          : h(Button, { variant: "primary", size: "sm", icon: "send-horizontal", disabled: !value.trim(), onClick: send }, "Send"))
++    );
++  }
++
++  /* ---------- ChatMessage ---------- */
++  function ChatMessage(p) {
++    var role = p.role || "assistant";
++    if (role === "log") {
++      return h("div", { className: "ss-msg ss-msg--log" },
++        h("div", { className: "ss-msg__loghead" }, h(Icon, { name: "terminal", size: 14 }), h("span", null, p.title || "stdout"), p.streaming ? h(Icon, { name: "loader-circle", size: 12, spin: true }) : null),
++        h("pre", { className: "ss-msg__log" }, p.children));
++    }
++    if (role === "tool") {
++      return h("div", { className: "ss-msg ss-msg--tool" },
++        h(Icon, { name: p.icon || "git-compare", size: 14 }),
++        h("code", null, p.title),
++        p.children ? h("span", { className: "ss-msg__toolnote" }, p.children) : null,
++        p.status ? h(StatusBadge, { status: p.status, label: p.statusLabel }) : null);
++    }
++    return h("div", { className: cx("ss-msg", "ss-msg--" + role) },
++      role === "assistant" ? h("span", { className: "ss-msg__avatar", "aria-hidden": "true" }, h(Icon, { name: "bot", size: 14 })) : null,
++      h("div", { className: "ss-msg__body" }, p.children));
++  }
++
++  /* ---------- Markdown line tint (mock of the Monaco markdown theme) ---------- */
++  function mdLine(text) {
++    if (/^#{1,6}\s/.test(text)) return h("span", { className: "tk-h" }, text);
++    var m = /^(\s*)([-*]|\d+\.)(\s.*)$/.exec(text);
++    var parts = [];
++    var body = text, lead = null;
++    if (m) { lead = [m[1], h("span", { key: "b", className: "tk-li" }, m[2])]; body = m[3]; }
++    var re = /(`[^`]+`|\*\*[^*]+\*\*)/g, last = 0, r, k = 0;
++    while ((r = re.exec(body))) {
++      if (r.index > last) parts.push(body.slice(last, r.index));
++      parts.push(h("span", { key: k++, className: r[0][0] === "`" ? "tk-code" : "tk-b" }, r[0]));
++      last = r.index + r[0].length;
++    }
++    parts.push(body.slice(last));
++    return lead ? [lead[0], lead[1]].concat(parts) : parts;
++  }
++
++  /* ---------- EditorPane ---------- */
++  function EditorPane(p) {
++    var lines = p.lines || [];
++    return h("section", { className: "ss-editor" },
++      h("div", { className: "ss-editor__tabbar" },
++        h("div", { className: "ss-editor__tab is-on" }, h(Icon, { name: "file-text", size: 14 }), h("span", null, p.filename || "untitled.md"), p.status === "unsaved" ? h("span", { className: "ss-dot ss-dot--primary", title: "Unsaved" }) : null),
++        h("span", { style: { flex: 1 } }),
++        p.status ? h(StatusBadge, { status: p.status }) : null,
++        p.actions),
++      h("div", { className: "ss-editor__body", role: "textbox", "aria-readonly": "true", "aria-label": "Monaco Editor (mô phỏng)" },
++        lines.map(function (t, i) {
++          return h("div", { key: i, className: cx("ss-line", p.cursorLine === i + 1 && "is-cursor") },
++            h("span", { className: "ss-line__no" }, i + 1),
++            h("span", { className: "ss-line__text" }, mdLine(t)));
++        }))
++    );
++  }
++
++  /* ---------- DiffReviewBar ---------- */
++  function DiffReviewBar(p) {
++    return h("div", { className: "ss-diffbar", role: "toolbar", "aria-label": "Duyệt thay đổi của Agent" },
++      h(Icon, { name: "git-compare", size: 16 }),
++      h("span", { className: "ss-diffbar__title" }, "Agent đề xuất sửa ", h("code", null, p.filename || "spec.md")),
++      h("span", { className: "ss-diffbar__stat" }, h("span", { className: "is-add" }, "+" + (p.added || 0)), " ", h("span", { className: "is-del" }, "−" + (p.removed || 0))),
++      h("span", { style: { flex: 1 } }),
++      h(Button, { variant: "secondary", size: "sm", icon: "x", onClick: p.onReject }, "Reject"),
++      h(Button, { variant: "primary", size: "sm", icon: "check", loading: p.saving, onClick: p.onApprove }, p.autoSync ? "Approve & Sync" : "Approve & Save"));
++  }
++
++  /* ---------- DiffView ---------- */
++  function DiffView(p) {
++    var rows = p.rows || [];
++    var ln = 0, rn = 0;
++    return h("section", { className: "ss-diff" },
++      h(DiffReviewBar, { filename: p.filename, added: p.added, removed: p.removed, onApprove: p.onApprove, onReject: p.onReject, saving: p.saving, autoSync: p.autoSync }),
++      h("div", { className: "ss-diff__heads" }, h("span", null, "Original"), h("span", null, "Proposed")),
++      h("div", { className: "ss-diff__grid" },
++        rows.map(function (r, i) {
++          var kind = r.kind || "same";
++          var hasL = r.left != null, hasR = r.right != null;
++          if (hasL) ln++; if (hasR) rn++;
++          var lk = kind === "same" ? "" : (hasL ? "is-del" : "is-empty");
++          var rk = kind === "same" ? "" : (hasR ? "is-add" : "is-empty");
++          return h(React.Fragment, { key: i },
++            h("div", { className: cx("ss-dline", lk) }, h("span", { className: "ss-line__no" }, hasL ? ln : ""), h("span", { className: "ss-dline__sign" }, lk === "is-del" ? "−" : ""), h("span", { className: "ss-line__text" }, hasL ? (r.leftMark ? [r.left.slice(0, r.leftMark[0]), h("mark", { key: "m" }, r.left.slice(r.leftMark[0], r.leftMark[1])), r.left.slice(r.leftMark[1])] : r.left) : "")),
++            h("div", { className: cx("ss-dline", rk) }, h("span", { className: "ss-line__no" }, hasR ? rn : ""), h("span", { className: "ss-dline__sign" }, rk === "is-add" ? "+" : ""), h("span", { className: "ss-line__text" }, hasR ? (r.rightMark ? [r.right.slice(0, r.rightMark[0]), h("mark", { key: "m" }, r.right.slice(r.rightMark[0], r.rightMark[1])), r.right.slice(r.rightMark[1])] : r.right) : "")));
++        }))
++    );
++  }
++
++  /* ---------- Toast ---------- */
++  var TOAST_ICON = { info: "info", warning: "triangle-alert", error: "circle-alert" };
++  function Toast(p) {
++    var v = TOAST_ICON[p.variant] ? p.variant : "info";
++    return h("div", {
++      className: cx("ss-toast", "ss-toast--" + v, p.className),
++      role: v === "error" ? "alert" : "status", "aria-live": v === "error" ? "assertive" : "polite"
++    },
++      h(Icon, { name: p.loading ? "loader-circle" : TOAST_ICON[v], spin: !!p.loading, className: "ss-toast__icon" }),
++      h("div", { className: "ss-toast__text" },
++        h("p", { className: "ss-toast__title" }, p.title),
++        p.description ? h("p", { className: "ss-toast__desc" }, p.description) : null),
++      p.action ? h(Button, { variant: "ghost", size: "sm", className: "ss-toast__action", onClick: p.action.onClick }, p.action.label) : null,
++      p.onClose !== false ? h(IconButton, { icon: "x", size: "sm", label: "Đóng thông báo", className: "ss-toast__close", onClick: p.onClose }) : null);
++  }
++
++  /* ---------- SettingsDialog ---------- */
++  function SettingsDialog(p) {
++    var tabState = useState(p.tab || "api");
++    var tab = tabState[0];
++    var s = useState({ provider: "gemini", model: "gemini-1.5-pro", cli: "claude-code", stream: true, strategy: "drive_sync", autoSync: false, confirm: true });
++    var v = s[0];
++    function set(k) { return function (x) { var n = Object.assign({}, v); n[k] = x; s[1](n); }; }
++    var body;
++    if (tab === "api") {
++      body = [
++        h(Field, { key: 1, label: "Provider" }, h(Select, { value: v.provider, onChange: set("provider"), options: [{ value: "gemini", label: "Google Gemini" }, { value: "anthropic", label: "Anthropic" }, { value: "openai", label: "OpenAI" }, { value: "deepseek", label: "DeepSeek" }, { value: "ollama", label: "Ollama / Local BaseURL" }] })),
++        h(Field, { key: 2, label: "API Key", hint: "Lưu trong .spec-studio/config.json trên máy, không gửi đi đâu khác." },
++          h("div", { className: "ss-row" }, h(Input, { type: "password", mono: true, defaultValue: "AIzaSyD-example-key-0000", style: { flex: 1 } }), h(Button, { variant: "secondary", icon: "refresh-cw" }, "Test"))),
++        h(Field, { key: 3, label: "Model ID", hint: "Chọn sẵn hoặc gõ tên model tuỳ chỉnh." }, h(Select, { mono: true, allowCustom: true, value: v.model, onChange: set("model"), options: API_MODELS })),
++        h(Field, { key: 4, label: "System Prompt Preset" }, h("textarea", { className: "ss-input ss-textarea", rows: 3, defaultValue: "Bạn là technical writer. Giữ nguyên cấu trúc heading, chỉ sửa phần được yêu cầu." }))
++      ];
++    } else if (tab === "cli") {
++      body = [
++        h(Field, { key: 1, label: "Active CLI" }, h(Select, { value: v.cli, onChange: set("cli"), options: CLI_PROFILES })),
++        h(Field, { key: 2, label: "Binary Path" }, h(Input, { mono: true, defaultValue: "/usr/local/bin/claude" })),
++        h(Field, { key: 3, label: "Default Arguments" }, h(Input, { mono: true, defaultValue: "--dangerously-skip-permissions" })),
++        h(Field, { key: 4, label: "Workspace Path", hint: "Thư mục gốc chứa các file .md." }, h(Input, { mono: true, defaultValue: "./specs" })),
++        h(Field, { key: 5, inline: true, label: "Stream Stdout", hint: "Đẩy log tiến trình vào khung chat." }, h(Switch, { checked: v.stream, onChange: set("stream"), label: "Stream Stdout" }))
++      ];
++    } else {
++      body = [
++        h(Field, { key: 1, label: "Notebook ID" }, h(Input, { mono: true, defaultValue: "xxxx-xxxx-xxxx" })),
++        h(Field, { key: 2, label: "Sync Strategy" }, h(Tabs, { variant: "pill", value: v.strategy, onChange: set("strategy"), tabs: [{ id: "drive_sync", label: "Google Drive Sync" }, { id: "rpc", label: "Direct Cookie RPC" }] })),
++        v.strategy === "drive_sync"
++          ? h(Field, { key: 3, label: "Drive Folder ID" }, h(Input, { mono: true, defaultValue: "yyyy-yyyy-yyyy" }))
++          : h(Field, { key: 3, label: "Cookie (SID, HSID, SSID) + SNlM0e", hint: "Chỉ lưu local." }, h(Input, { type: "password", mono: true, defaultValue: "SID=…; HSID=…; SSID=…" })),
++        h(Field, { key: 4, inline: true, label: "Tự động sync lên NBL sau khi Approve Diff" }, h(Switch, { checked: v.autoSync, onChange: set("autoSync"), label: "Tự động sync" })),
++        h(Field, { key: 5, inline: true, label: "Hiện hộp thoại xác nhận trước khi sync" }, h(Switch, { checked: v.confirm, onChange: set("confirm"), label: "Xác nhận trước khi sync" }))
++      ];
++    }
++    return h("div", { className: "ss-dialog", role: "dialog", "aria-modal": "true", "aria-label": "Settings" },
++      h("div", { className: "ss-dialog__head" }, h("h2", { className: "ss-dialog__title" }, "Settings"), h("span", { style: { flex: 1 } }), h(IconButton, { icon: "x", label: "Đóng", onClick: p.onClose })),
++      h(Tabs, { value: tab, onChange: tabState[1], tabs: [{ id: "api", label: "Direct API", icon: "key-round" }, { id: "cli", label: "CLI Agent Runner", icon: "terminal" }, { id: "nbl", label: "NotebookLM Sync", icon: "cloud-upload" }] }),
++      h("div", { className: "ss-dialog__body" }, body),
++      h("div", { className: "ss-dialog__foot" }, h("span", { className: "ss-dialog__path" }, ".spec-studio/config.json"), h("span", { style: { flex: 1 } }), h(Button, { variant: "ghost", onClick: p.onClose }, "Cancel"), h(Button, { variant: "primary", onClick: p.onSave }, "Save")));
++  }
++
++  /* ---------- Workbench (page) ---------- */
++  var DEMO_SPECS = [
++    { name: "overview.md", status: "synced", checked: true },
++    { name: "sidebar.md", status: "unsaved", checked: true },
++    { name: "settings-dialog.md", status: "syncing" },
++    { name: "nbl-sync.md", status: "error" },
++    { name: "tool-calling.md", status: "synced" }
++  ];
++  var DEMO_LINES = [
++    "## 3.2. Sidebar (Bên trái)",
++    "",
++    "* **Toggle Sidebar Icon:** Nút thu gọn / mở rộng sidebar.",
++    "* **Danh sách file Spec:**",
++    "  - *Click chọn xem:* Mở file trên Monaco Editor.",
++    "  - *Checkbox:* Đính kèm spec vào context của Agent.",
++    "* **Sync Status Badge:** `Synced`, `Unsaved`, `Syncing...`, `Error`."
++  ];
++  var DEMO_ROWS = [
++    { kind: "same", left: "## 3.2. Sidebar (Bên trái)", right: "## 3.2. Sidebar (Bên trái)" },
++    { kind: "same", left: "", right: "" },
++    { kind: "change", left: "* **Toggle Sidebar Icon:** Nút thu gọn.", right: "* **Toggle Sidebar Icon:** Nút thu gọn / mở rộng sidebar.", rightMark: [38, 56] },
++    { kind: "same", left: "* **Danh sách file Spec:**", right: "* **Danh sách file Spec:**" },
++    { kind: "add", right: "  - *Kéo thả:* Sắp xếp lại thứ tự spec." },
++    { kind: "remove", left: "* Badge trạng thái (TBD)" },
++    { kind: "add", right: "* **Sync Status Badge:** `Synced`, `Unsaved`, `Syncing...`, `Error`." }
++  ];
++  function Workbench(p) {
++    var specsSt = useState(p.specs || DEMO_SPECS);
++    var selSt = useState(p.selected || "sidebar.md");
++    var colSt = useState(false);
++    var modeSt = useState("api");
++    var modelSt = useState("gemini-1.5-pro");
++    var diffSt = useState(p.diff != null ? p.diff : true);
++    var specs = specsSt[0];
++    function onCheck(name, v) { specsSt[1](specs.map(function (s) { return s.name === name ? Object.assign({}, s, { checked: v }) : s; })); }
++    var count = specs.filter(function (s) { return s.checked; }).length;
++    return h("div", { className: cx("ss-workbench", colSt[0] && "is-collapsed") },
++      h(AppHeader, { path: "~/projects/quick-edit-nbl/specs" }),
++      h(SpecSidebar, { specs: specs, selected: selSt[0], collapsed: colSt[0], onToggle: function () { colSt[1](!colSt[0]); }, onSelect: selSt[1], onCheck: onCheck, onCheckAll: function (v) { specsSt[1](specs.map(function (x) { return Object.assign({}, x, { checked: v }); })); } }),
++      h("main", { className: "ss-workbench__main" },
++        diffSt[0]
++          ? h(DiffView, { filename: selSt[0], rows: DEMO_ROWS, added: 3, removed: 2, onApprove: function () { diffSt[1](false); }, onReject: function () { diffSt[1](false); } })
++          : h(EditorPane, { filename: selSt[0], status: "unsaved", lines: DEMO_LINES, cursorLine: 3 }),
++        h("div", { className: "ss-workbench__chat" },
++          h("div", { className: "ss-workbench__log" },
++            h(ChatMessage, { role: "user" }, "Bổ sung phần kéo thả và badge trạng thái cho sidebar.md"),
++            h(ChatMessage, { role: "tool", title: "propose_spec_update(sidebar.md)", status: diffSt[0] ? "unsaved" : "synced", statusLabel: diffSt[0] ? "Chờ duyệt" : "Đã lưu" }),
++            h(ChatMessage, { role: "assistant" }, "Mình đã đề xuất 3 dòng thêm và 2 dòng xoá. Kiểm tra diff ở trên rồi bấm Approve & Save.")),
++          h(ChatToolbar, { mode: modeSt[0], model: modelSt[0], contextCount: count, onModeChange: function (m) { modeSt[1](m); modelSt[1](m === "api" ? "gemini-1.5-pro" : "claude-code"); }, onModelChange: modelSt[1] }),
++          h(Composer, null)))
++    );
++  }
++
++  window.SpecStudio = Object.assign(window.SpecStudio || {}, {
++    Icon: Icon, Button: Button, IconButton: IconButton, Kbd: Kbd, StatusBadge: StatusBadge, Checkbox: Checkbox,
++    SpecListItem: SpecListItem, ContextMenu: ContextMenu, SpecSidebar: SpecSidebar, AppHeader: AppHeader,
++    ModeSwitch: ModeSwitch, Select: Select, Input: Input, Field: Field, Switch: Switch, Tabs: Tabs,
++    ChatToolbar: ChatToolbar, Composer: Composer, ChatMessage: ChatMessage, EditorPane: EditorPane,
++    DiffReviewBar: DiffReviewBar, DiffView: DiffView, Toast: Toast, SettingsDialog: SettingsDialog, Workbench: Workbench
++  });
++})();
+diff --git a/design/reference/index.d.ts b/design/reference/index.d.ts
+new file mode 100644
+index 0000000..aa766b3
+--- /dev/null
++++ b/design/reference/index.d.ts
+@@ -0,0 +1,110 @@
++import type * as React from 'react';
++
++export type IconName = 'settings' | 'panel-left' | 'ellipsis' | 'send-horizontal' | 'check' | 'x' | 'refresh-cw' | 'file-text' | 'terminal' | 'key-round' | 'loader-circle' | 'circle-alert' | 'trash-2' | 'pencil' | 'plus' | 'chevron-down' | 'bot' | 'cloud-upload' | 'git-compare' | 'search' | 'info' | 'triangle-alert';
++export type SyncStatus = 'synced' | 'unsaved' | 'syncing' | 'error';
++export type AgentMode = 'api' | 'cli';
++
++export interface IconProps { name: IconName; size?: number; strokeWidth?: number; spin?: boolean; className?: string }
++export declare function Icon(props: IconProps): React.ReactElement;
++
++export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
++  /** primary = hành động chính (Approve & Save, Send, Save); secondary = Reject/Test; outline; ghost = Cancel; tonal = Force Sync; destructive = Delete */
++  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'tonal' | 'destructive';
++  size?: 'md' | 'sm';
++  icon?: IconName; iconRight?: IconName; loading?: boolean;
++}
++export declare function Button(props: ButtonProps): React.ReactElement;
++
++export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> { icon: IconName; label: string; active?: boolean; size?: 'md' | 'sm' }
++export declare function IconButton(props: IconButtonProps): React.ReactElement;
++
++export interface KbdProps { children: React.ReactNode }
++export declare function Kbd(props: KbdProps): React.ReactElement;
++
++export interface StatusBadgeProps { status: SyncStatus; label?: string; compact?: boolean }
++export declare function StatusBadge(props: StatusBadgeProps): React.ReactElement;
++
++export interface CheckboxProps { checked?: boolean; indeterminate?: boolean; disabled?: boolean; onChange?: (checked: boolean) => void; label?: string; children?: React.ReactNode; className?: string }
++export declare function Checkbox(props: CheckboxProps): React.ReactElement;
++
++export interface SpecListItemProps {
++  name: string; status?: SyncStatus; checked?: boolean; selected?: boolean;
++  onSelect?: (name: string) => void; onCheck?: (name: string, checked: boolean) => void; onMenu?: (name: string, event: React.MouseEvent) => void;
++}
++export declare function SpecListItem(props: SpecListItemProps): React.ReactElement;
++
++export interface MenuItem { id?: string; label?: string; icon?: IconName; shortcut?: string; tone?: 'destructive'; divider?: boolean }
++export interface ContextMenuProps { items?: MenuItem[]; onSelect?: (id: string) => void; style?: React.CSSProperties; className?: string }
++export declare function ContextMenu(props: ContextMenuProps): React.ReactElement;
++
++export interface SpecSidebarProps {
++  specs: Array<{ name: string; status?: SyncStatus; checked?: boolean }>; selected?: string; collapsed?: boolean;
++  onToggle?: () => void; onCreate?: () => void; onCheckAll?: (checked: boolean) => void; onSelect?: (name: string) => void; onCheck?: (name: string, checked: boolean) => void; onMenu?: (name: string, event: React.MouseEvent) => void;
++  footer?: React.ReactNode;
++}
++export declare function SpecSidebar(props: SpecSidebarProps): React.ReactElement;
++
++export interface AppHeaderProps { title?: string; path?: string; onSettings?: () => void; onToggleSidebar?: () => void; children?: React.ReactNode }
++export declare function AppHeader(props: AppHeaderProps): React.ReactElement;
++
++export interface ModeSwitchProps { value: AgentMode; onChange?: (mode: AgentMode) => void }
++export declare function ModeSwitch(props: ModeSwitchProps): React.ReactElement;
++
++export interface SelectOption { value: string; label: string; group?: string; hint?: string }
++export interface SelectProps {
++  options: Array<string | SelectOption>;
++  /** multiple: value/defaultValue là string[] và onChange nhận string[] */
++  multiple?: boolean; maxTags?: number;
++  value?: string | string[]; defaultValue?: string | string[]; onChange?: (value: any) => void;
++  size?: 'md' | 'sm'; mono?: boolean; width?: number | string; align?: 'start' | 'end'; /** 'top' khi Select nằm sát đáy màn hình (Quick Setting Toolbar) */ side?: 'bottom' | 'top'; placeholder?: string; disabled?: boolean;
++  /** true/false ép bật/tắt ô tìm; mặc định tự bật khi options.length >= searchThreshold */
++  searchable?: boolean; searchThreshold?: number; searchPlaceholder?: string;
++  /** cho phép chọn giá trị tự gõ khi không khớp item nào (Model ID) */
++  allowCustom?: boolean; defaultOpen?: boolean; className?: string; 'aria-label'?: string;
++}
++export declare function Select(props: SelectProps): React.ReactElement;
++
++export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> { mono?: boolean; invalid?: boolean }
++export declare function Input(props: InputProps): React.ReactElement;
++
++export interface FieldProps { label: string; hint?: string; error?: string; inline?: boolean; htmlFor?: string; children: React.ReactNode }
++export declare function Field(props: FieldProps): React.ReactElement;
++
++export interface SwitchProps { checked?: boolean; onChange?: (checked: boolean) => void; label: string }
++export declare function Switch(props: SwitchProps): React.ReactElement;
++
++export interface TabsProps { tabs: Array<{ id: string; label: string; icon?: IconName }>; value: string; onChange?: (id: string) => void; variant?: 'underline' | 'pill' }
++export declare function Tabs(props: TabsProps): React.ReactElement;
++
++export interface ChatToolbarProps { mode: AgentMode; model?: string; options?: SelectProps['options']; contextCount?: number; onModeChange?: (mode: AgentMode) => void; onModelChange?: (value: string) => void; onSettings?: () => void }
++export declare function ChatToolbar(props: ChatToolbarProps): React.ReactElement;
++
++export interface ComposerProps { value?: string; defaultValue?: string; onChange?: (value: string) => void; onSend?: (value: string) => void; onStop?: () => void; busy?: boolean; placeholder?: string }
++export declare function Composer(props: ComposerProps): React.ReactElement;
++
++export interface ChatMessageProps { role: 'user' | 'assistant' | 'tool' | 'log'; title?: string; icon?: IconName; status?: SyncStatus; statusLabel?: string; streaming?: boolean; children?: React.ReactNode }
++export declare function ChatMessage(props: ChatMessageProps): React.ReactElement;
++
++export interface EditorPaneProps { filename: string; lines: string[]; status?: SyncStatus; cursorLine?: number; actions?: React.ReactNode }
++export declare function EditorPane(props: EditorPaneProps): React.ReactElement;
++
++export interface DiffReviewBarProps { filename: string; added?: number; removed?: number; saving?: boolean; autoSync?: boolean; onApprove?: () => void; onReject?: () => void }
++export declare function DiffReviewBar(props: DiffReviewBarProps): React.ReactElement;
++
++export interface DiffRow { kind: 'same' | 'change' | 'add' | 'remove'; left?: string; right?: string; leftMark?: [number, number]; rightMark?: [number, number] }
++export interface DiffViewProps extends DiffReviewBarProps { rows: DiffRow[] }
++export declare function DiffView(props: DiffViewProps): React.ReactElement;
++
++export interface ToastProps {
++  variant?: 'info' | 'warning' | 'error'; title: string; description?: React.ReactNode;
++  action?: { label: string; onClick?: () => void }; loading?: boolean; onClose?: (() => void) | false; className?: string;
++}
++export declare function Toast(props: ToastProps): React.ReactElement;
++
++export interface SettingsDialogProps { tab?: 'api' | 'cli' | 'nbl'; onClose?: () => void; onSave?: () => void }
++export declare function SettingsDialog(props: SettingsDialogProps): React.ReactElement;
++
++export interface WorkbenchProps { specs?: SpecSidebarProps['specs']; selected?: string; diff?: boolean }
++export declare function Workbench(props: WorkbenchProps): React.ReactElement;
++
++declare global { interface Window { SpecStudio: { Icon: typeof Icon; Button: typeof Button; IconButton: typeof IconButton; Kbd: typeof Kbd; StatusBadge: typeof StatusBadge; Checkbox: typeof Checkbox; SpecListItem: typeof SpecListItem; ContextMenu: typeof ContextMenu; SpecSidebar: typeof SpecSidebar; AppHeader: typeof AppHeader; ModeSwitch: typeof ModeSwitch; Select: typeof Select; Input: typeof Input; Field: typeof Field; Switch: typeof Switch; Tabs: typeof Tabs; ChatToolbar: typeof ChatToolbar; Composer: typeof Composer; ChatMessage: typeof ChatMessage; EditorPane: typeof EditorPane; DiffReviewBar: typeof DiffReviewBar; DiffView: typeof DiffView; Toast: typeof Toast; SettingsDialog: typeof SettingsDialog; Workbench: typeof Workbench } } }
+diff --git a/design/tokens.json b/design/tokens.json
+new file mode 100644
+index 0000000..b7106bc
+--- /dev/null
++++ b/design/tokens.json
+@@ -0,0 +1,601 @@
++{
++  "name": "Spec Studio",
++  "version": 1,
++  "color": {
++    "themes": [
++      {
++        "id": "light",
++        "name": "Light"
++      },
++      {
++        "id": "dark",
++        "name": "Dark"
++      }
++    ],
++    "tokens": [
++      {
++        "name": "color-background",
++        "value": {
++          "light": "#f9fafb",
++          "dark": "#0f1113"
++        },
++        "usage": "Nền ứng dụng: vùng chatbox, khoảng trống quanh editor."
++      },
++      {
++        "name": "color-foreground",
++        "value": {
++          "light": "#111827",
++          "dark": "#e5e7eb"
++        },
++        "usage": "Chữ chính trên color-background, color-card, color-popover, color-sidebar, color-muted."
++      },
++      {
++        "name": "color-card",
++        "value": {
++          "light": "#ffffff",
++          "dark": "#16181b"
++        },
++        "usage": "Bề mặt nổi: panel editor, khung chat, ô nhập."
++      },
++      {
++        "name": "color-card-foreground",
++        "value": {
++          "light": "{color-foreground}",
++          "dark": "{color-foreground}"
++        },
++        "usage": "Chữ trên color-card."
++      },
++      {
++        "name": "color-popover",
++        "value": {
++          "light": "#ffffff",
++          "dark": "#1c1f23"
++        },
++        "usage": "Dropdown, context menu (3 chấm), Settings Dialog."
++      },
++      {
++        "name": "color-popover-foreground",
++        "value": {
++          "light": "{color-foreground}",
++          "dark": "{color-foreground}"
++        },
++        "usage": "Chữ trên color-popover."
++      },
++      {
++        "name": "color-sidebar",
++        "value": {
++          "light": "#f3f4f6",
++          "dark": "#131518"
++        },
++        "usage": "Nền Sidebar danh sách spec và Header."
++      },
++      {
++        "name": "color-sidebar-foreground",
++        "value": {
++          "light": "{color-foreground}",
++          "dark": "{color-foreground}"
++        },
++        "usage": "Tên file spec trên color-sidebar."
++      },
++      {
++        "name": "color-sidebar-accent",
++        "value": {
++          "light": "#e5e7eb",
++          "dark": "#24272c"
++        },
++        "usage": "Hàng spec đang được chọn (đang mở trong editor)."
++      },
++      {
++        "name": "color-muted",
++        "value": {
++          "light": "#f3f4f6",
++          "dark": "#1b1e22"
++        },
++        "usage": "Nền phụ: thanh tab, toolbar, bong bóng chat của user, badge Synced."
++      },
++      {
++        "name": "color-muted-foreground",
++        "value": {
++          "light": "#4b5563",
++          "dark": "#9ca3af"
++        },
++        "usage": "Chữ phụ, metadata, placeholder, icon nghỉ, trạng thái Synced; đọc được trên color-background, color-card, color-muted, color-sidebar, color-sidebar-accent, color-popover."
++      },
++      {
++        "name": "color-accent",
++        "value": {
++          "light": "#eceef1",
++          "dark": "#25282d"
++        },
++        "usage": "Nền hover của item, ghost button, menu item."
++      },
++      {
++        "name": "color-accent-foreground",
++        "value": {
++          "light": "{color-foreground}",
++          "dark": "{color-foreground}"
++        },
++        "usage": "Chữ trên color-accent."
++      },
++      {
++        "name": "color-secondary",
++        "value": {
++          "light": "#eceef1",
++          "dark": "#25282d"
++        },
++        "usage": "Nút phụ: Reject, Test Connection."
++      },
++      {
++        "name": "color-secondary-foreground",
++        "value": {
++          "light": "{color-foreground}",
++          "dark": "{color-foreground}"
++        },
++        "usage": "Chữ trên color-secondary."
++      },
++      {
++        "name": "color-border",
++        "value": {
++          "light": "#e5e7eb",
++          "dark": "#2a2d33"
++        },
++        "usage": "Đường kẻ mảnh: chia Sidebar / Workspace / Chatbox, viền card. Chỉ mang tính trang trí."
++      },
++      {
++        "name": "color-input",
++        "value": {
++          "light": "#878d98",
++          "dark": "#70757e"
++        },
++        "usage": "Viền ô nhập, select, checkbox, switch tắt (≥3:1 trên color-card)."
++      },
++      {
++        "name": "color-primary",
++        "value": {
++          "light": "#1d5fd6",
++          "dark": "#5b9df8"
++        },
++        "usage": "Màu thương hiệu (blue). Nút chính (Approve & Save, Send, Save), checkbox đã chọn, Switch bật, file/tab đang mở, trạng thái Unsaved và Syncing. Dạng chữ: trên color-background, color-card, color-sidebar, color-sidebar-accent, color-primary-soft."
++      },
++      {
++        "name": "color-primary-foreground",
++        "value": {
++          "light": "#ffffff",
++          "dark": "#0b1526"
++        },
++        "usage": "Chữ và icon trên nền color-primary."
++      },
++      {
++        "name": "color-primary-soft",
++        "value": {
++          "light": "#e7effd",
++          "dark": "#162640"
++        },
++        "usage": "Nền nhạt phía sau chữ color-primary: badge Unsaved, avatar Agent, nút tonal, lựa chọn đang bật."
++      },
++      {
++        "name": "color-ring",
++        "value": {
++          "light": "{color-primary}",
++          "dark": "{color-primary}"
++        },
++        "usage": "Viền focus 2px cho mọi control (≥3:1 trên mọi bề mặt)."
++      },
++      {
++        "name": "color-destructive",
++        "value": {
++          "light": "#c0262d",
++          "dark": "#f2877f"
++        },
++        "usage": "Ngoại lệ duy nhất ngoài blue/gray: Delete spec, trạng thái Error, dòng bị xoá trong diff. Dạng chữ: trên color-card, color-popover, color-destructive-soft."
++      },
++      {
++        "name": "color-destructive-foreground",
++        "value": {
++          "light": "#ffffff",
++          "dark": "#0f1113"
++        },
++        "usage": "Chữ trên nền color-destructive."
++      },
++      {
++        "name": "color-destructive-soft",
++        "value": {
++          "light": "#fdeceb",
++          "dark": "#3a1a1a"
++        },
++        "usage": "Nền nhạt phía sau chữ color-destructive (badge Error, banner lỗi)."
++      },
++      {
++        "name": "color-info",
++        "value": {
++          "light": "{color-primary}",
++          "dark": "{color-primary}"
++        },
++        "usage": "Info (blue, alias của color-primary): icon, tiêu đề toast thông tin (ví dụ \"Đã lưu sidebar.md\", \"Đang đồng bộ lên NotebookLM\"). Dạng chữ: trên color-info-soft, color-card, color-popover."
++      },
++      {
++        "name": "color-info-soft",
++        "value": {
++          "light": "{color-primary-soft}",
++          "dark": "{color-primary-soft}"
++        },
++        "usage": "Nền toast / banner info."
++      },
++      {
++        "name": "color-info-border",
++        "value": {
++          "light": "#b7cdf7",
++          "dark": "#2a4a80"
++        },
++        "usage": "Viền toast / banner info. Viền chỉ để phân vùng; nghĩa nằm ở icon và chữ."
++      },
++      {
++        "name": "color-warning",
++        "value": {
++          "light": "#8f5200",
++          "dark": "#f2b544"
++        },
++        "usage": "Warning (amber): icon, tiêu đề toast cảnh báo (ví dụ \"Spec đang có thay đổi chưa lưu\", \"Cookie NotebookLM sắp hết hạn\"). Dạng chữ: trên color-warning-soft, color-card, color-popover."
++      },
++      {
++        "name": "color-warning-soft",
++        "value": {
++          "light": "#fff6e5",
++          "dark": "#2b2111"
++        },
++        "usage": "Nền toast / banner warning."
++      },
++      {
++        "name": "color-warning-border",
++        "value": {
++          "light": "#f1cf8f",
++          "dark": "#5e4618"
++        },
++        "usage": "Viền toast / banner warning."
++      },
++      {
++        "name": "color-error",
++        "value": {
++          "light": "{color-destructive}",
++          "dark": "{color-destructive}"
++        },
++        "usage": "Error (red, alias của color-destructive): icon, tiêu đề toast lỗi (ví dụ \"Sync thất bại: 401\", \"Không ghi được file\"). Dạng chữ: trên color-error-soft, color-card, color-popover."
++      },
++      {
++        "name": "color-error-soft",
++        "value": {
++          "light": "{color-destructive-soft}",
++          "dark": "{color-destructive-soft}"
++        },
++        "usage": "Nền toast / banner error."
++      },
++      {
++        "name": "color-error-border",
++        "value": {
++          "light": "#f3bbb7",
++          "dark": "#6b2b2b"
++        },
++        "usage": "Viền toast / banner error."
++      },
++      {
++        "name": "color-editor",
++        "value": {
++          "light": "#ffffff",
++          "dark": "#131518"
++        },
++        "usage": "Nền Monaco Editor (editor.background)."
++      },
++      {
++        "name": "color-editor-gutter",
++        "value": {
++          "light": "#6b7280",
++          "dark": "#8b919c"
++        },
++        "usage": "Số dòng Monaco (editorLineNumber.foreground), trên color-editor."
++      },
++      {
++        "name": "color-editor-line",
++        "value": {
++          "light": "#f6f7f9",
++          "dark": "#1b1e22"
++        },
++        "usage": "Dòng con trỏ đang đứng (editor.lineHighlightBackground)."
++      },
++      {
++        "name": "color-editor-selection",
++        "value": {
++          "light": "#d6e4fc",
++          "dark": "#1f3a66"
++        },
++        "usage": "Vùng bôi chọn (editor.selectionBackground)."
++      },
++      {
++        "name": "color-diff-added",
++        "value": {
++          "light": "#e3edfd",
++          "dark": "#14294a"
++        },
++        "usage": "Dòng được thêm trong DiffEditor (diffEditor.insertedLineBackground), sắc blue. Đi kèm dấu + ở gutter."
++      },
++      {
++        "name": "color-diff-added-text",
++        "value": {
++          "light": "#bcd3fa",
++          "dark": "#22447a"
++        },
++        "usage": "Đoạn chữ được thêm trong dòng (diffEditor.insertedTextBackground)."
++      },
++      {
++        "name": "color-diff-removed",
++        "value": {
++          "light": "#fce8e7",
++          "dark": "#36191a"
++        },
++        "usage": "Dòng bị xoá (diffEditor.removedLineBackground). Đi kèm dấu − ở gutter."
++      },
++      {
++        "name": "color-diff-removed-text",
++        "value": {
++          "light": "#f6bdb9",
++          "dark": "#6a2a2a"
++        },
++        "usage": "Đoạn chữ bị xoá trong dòng (diffEditor.removedTextBackground)."
++      }
++    ]
++  },
++  "type": {
++    "fonts": [],
++    "families": {
++      "sans": "\"Geist\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif",
++      "mono": "\"Geist Mono\", ui-monospace, \"SF Mono\", Menlo, Consolas, monospace"
++    },
++    "groups": [
++      {
++        "name": "Interface",
++        "family": "sans",
++        "styles": [
++          {
++            "name": "display",
++            "fontSize": "40px",
++            "lineHeight": "44px",
++            "fontWeight": 600,
++            "letterSpacing": "-0.02em",
++            "sample": "Spec Studio",
++            "usage": "Chỉ dùng cho màn hình trống (chưa có spec) và trang chào."
++          },
++          {
++            "name": "title",
++            "fontSize": "18px",
++            "lineHeight": "24px",
++            "fontWeight": 600,
++            "letterSpacing": "-0.01em",
++            "sample": "Settings",
++            "usage": "Tiêu đề Dialog."
++          },
++          {
++            "name": "heading",
++            "fontSize": "14px",
++            "lineHeight": "20px",
++            "fontWeight": 600,
++            "sample": "NotebookLM Synchronization",
++            "usage": "Tiêu đề nhóm trong Settings, tên app trên Header."
++          },
++          {
++            "name": "body",
++            "fontSize": "14px",
++            "lineHeight": "20px",
++            "fontWeight": 400,
++            "sample": "Chọn một hoặc nhiều spec để đính kèm vào context.",
++            "usage": "Nội dung chat, mô tả field."
++          },
++          {
++            "name": "label",
++            "fontSize": "13px",
++            "lineHeight": "18px",
++            "fontWeight": 500,
++            "sample": "api-gateway.md",
++            "usage": "Tên file trong Sidebar, nhãn nút, nhãn field."
++          },
++          {
++            "name": "caption",
++            "fontSize": "12px",
++            "lineHeight": "16px",
++            "fontWeight": 400,
++            "sample": "Synced 2 phút trước",
++            "usage": "Metadata, gợi ý dưới field, nhãn badge."
++          },
++          {
++            "name": "overline",
++            "fontSize": "11px",
++            "lineHeight": "16px",
++            "fontWeight": 600,
++            "letterSpacing": "0.06em",
++            "sample": "SPECS",
++            "usage": "Tiêu đề nhóm Sidebar, viết HOA."
++          }
++        ]
++      },
++      {
++        "name": "Code",
++        "family": "mono",
++        "styles": [
++          {
++            "name": "editor",
++            "fontSize": "13px",
++            "lineHeight": "20px",
++            "fontWeight": 400,
++            "sample": "## 3.2. Sidebar (Bên trái)",
++            "usage": "Monaco Editor và DiffEditor (fontSize 13, lineHeight 20)."
++          },
++          {
++            "name": "log",
++            "fontSize": "12px",
++            "lineHeight": "18px",
++            "fontWeight": 400,
++            "sample": "$ claude --dangerously-skip-permissions",
++            "usage": "Log stdout của CLI Agent trong chat, đường dẫn, ID."
++          },
++          {
++            "name": "kbd",
++            "fontSize": "11px",
++            "lineHeight": "16px",
++            "fontWeight": 500,
++            "sample": "⌘ Enter",
++            "usage": "Phím tắt."
++          }
++        ]
++      }
++    ]
++  },
++  "spacing": {
++    "tokens": [
++      {
++        "name": "space-0.5",
++        "value": "2px",
++        "usage": "Khe giữa icon và chấm trạng thái."
++      },
++      {
++        "name": "space-1",
++        "value": "4px",
++        "usage": "Khe trong badge, giữa icon và chữ nhỏ."
++      },
++      {
++        "name": "space-1.5",
++        "value": "6px",
++        "usage": "Khe giữa icon và nhãn trong nút."
++      },
++      {
++        "name": "space-2",
++        "value": "8px",
++        "usage": "Padding ngang item Sidebar, khe giữa các nút."
++      },
++      {
++        "name": "space-3",
++        "value": "12px",
++        "usage": "Padding ngang nút, padding Sidebar."
++      },
++      {
++        "name": "space-4",
++        "value": "16px",
++        "usage": "Padding Header, Chatbox, nội dung Dialog."
++      },
++      {
++        "name": "space-5",
++        "value": "20px",
++        "usage": "Khe giữa các field trong Settings."
++      },
++      {
++        "name": "space-6",
++        "value": "24px",
++        "usage": "Padding Dialog, khe giữa các nhóm cấu hình."
++      },
++      {
++        "name": "space-8",
++        "value": "32px",
++        "usage": "Khoảng cách các section lớn."
++      },
++      {
++        "name": "space-12",
++        "value": "48px",
++        "usage": "Lề màn hình trống."
++      }
++    ]
++  },
++  "radius": {
++    "tokens": [
++      {
++        "name": "radius-sm",
++        "value": "4px",
++        "usage": "Checkbox, badge, kbd, khối code inline."
++      },
++      {
++        "name": "radius-md",
++        "value": "6px",
++        "usage": "Nút, ô nhập, select, item Sidebar, menu item."
++      },
++      {
++        "name": "radius-lg",
++        "value": "8px",
++        "usage": "Card, popover, khung Chatbox."
++      },
++      {
++        "name": "radius-xl",
++        "value": "12px",
++        "usage": "Settings Dialog."
++      },
++      {
++        "name": "radius-full",
++        "value": "9999px",
++        "usage": "Switch, chấm trạng thái, segmented control."
++      }
++    ]
++  },
++  "shadow": {
++    "tokens": [
++      {
++        "name": "shadow-popover",
++        "value": {
++          "light": "0 4px 16px rgba(17, 24, 39, 0.10), 0 1px 2px rgba(17, 24, 39, 0.06)",
++          "dark": "0 4px 16px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04)"
++        },
++        "usage": "Dropdown, context menu."
++      },
++      {
++        "name": "shadow-dialog",
++        "value": {
++          "light": "0 24px 64px rgba(17, 24, 39, 0.18), 0 2px 6px rgba(17, 24, 39, 0.08)",
++          "dark": "0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05)"
++        },
++        "usage": "Settings Dialog."
++      },
++      {
++        "name": "shadow-float",
++        "value": {
++          "light": "0 2px 8px rgba(17, 24, 39, 0.08)",
++          "dark": "0 2px 8px rgba(0, 0, 0, 0.4)"
++        },
++        "usage": "Thanh Approve / Reject nổi trên DiffEditor."
++      }
++    ]
++  },
++  "size": {
++    "note": "Kích thước bố cục cố định của Workbench.",
++    "tokens": [
++      {
++        "name": "size-header",
++        "value": "48px",
++        "usage": "Chiều cao Header."
++      },
++      {
++        "name": "size-sidebar",
++        "value": "264px",
++        "usage": "Độ rộng Sidebar khi mở."
++      },
++      {
++        "name": "size-sidebar-collapsed",
++        "value": "48px",
++        "usage": "Độ rộng Sidebar khi thu gọn (chỉ còn icon)."
++      },
++      {
++        "name": "size-row",
++        "value": "32px",
++        "usage": "Chiều cao item Sidebar, menu item."
++      },
++      {
++        "name": "size-control",
++        "value": "32px",
++        "usage": "Chiều cao nút, ô nhập, select mặc định."
++      },
++      {
++        "name": "size-control-sm",
++        "value": "28px",
++        "usage": "Nút, select trong thanh Quick Setting và tab bar."
++      },
++      {
++        "name": "size-icon",
++        "value": "16px",
++        "usage": "Icon Lucide mặc định (stroke 2)."
++      }
++    ]
++  }
++}
+\ No newline at end of file
+diff --git a/docs/spec.md b/docs/spec.md
+new file mode 100644
+index 0000000..55283f0
+--- /dev/null
++++ b/docs/spec.md
+@@ -0,0 +1,184 @@
++# Technical Specification: Spec Studio & NotebookLM Sync Workbench
++
++## 1. Tổng quan & Mục tiêu (Overview & Objectives)
++* **Tên dự án:** Spec Studio (Local Workbench)
++* **Mục tiêu:** Ứng dụng local chạy trên Next.js quản lý và chỉnh sửa tập trung các file đặc tả kỹ thuật (`.md`). Tích hợp AI Agent (Direct API hoặc Local CLI) tự động cập nhật spec và xử lý bài toán đồng bộ hóa (replace/update) lên Google NotebookLM (NBL).
++* **Vấn đề giải quyết:** NotebookLM xem source là immutable snapshot, không hỗ trợ sửa trực tiếp content của source ID có sẵn qua API công khai. Hệ thống này giải quyết vòng lặp: quản lý spec local $\to$ AI đề xuất/sửa spec $\to$ tự động trigger pipeline đồng bộ (Drive Sync hoặc RPC Xóa/Nạp lại).
++
++---
++
++## 2. Kiến trúc Kỹ thuật (Tech Stack & Architecture)
++
++* **Framework:** **Next.js (App Router)** chạy full-stack trên môi trường Node.js local.
++  * **Frontend (Client):** React, Tailwind CSS, Lucide React, Radix UI / shadcn/ui.
++  * **Backend (Route Handlers):** Next.js API Routes (`app/api/*`) xử lý I/O với hệ thống file local (`node:fs/promises`) và tiến trình hệ điều hành (`node:child_process`).
++* **Editor & Diff View:** `@monaco-editor/react` (sử dụng component `<DiffEditor />` có sẵn để review code/spec).
++* **AI Orchestration:** **Vercel AI SDK** (`ai`, `@ai-sdk/react`, `@ai-sdk/google`, `@ai-sdk/anthropic`):
++  * Dùng hook `useChat` và streaming UI component.
++  * Hỗ trợ Tool / Function Calling native.
++* **CLI Runner:** `spawn` / `execa` thực thi các terminal tool có sẵn trên máy (Claude Code, Aider, custom scripts) và stream output trực tiếp về client qua Server-Sent Events (SSE).
++
++---
++
++## 3. Đặc tả Giao diện & Tính năng (UI/UX Specifications)
++
++Thiết kế giao diện bám sát wireframe:
++
++### 3.1. Header & Navigation
++* **Logo / App Name:** Đặt tại góc trên bên trái[cite: 1].
++* **Settings Action:** Icon bánh răng tại góc trên bên phải[cite: 1] để kích hoạt Settings Dialog toàn hệ thống.
++
++### 3.2. Sidebar (Bên trái) - Quản lý Danh mục Spec
++* **Toggle Sidebar Icon:** Nút thu gọn / mở rộng sidebar[cite: 1].
++* **Danh sách file Spec:**
++  * **Item Selection[cite: 1]:**
++    * *Click chọn xem:* Mở file markdown tương ứng lên Monaco Editor ở vùng trung tâm.
++    * *Checkbox (Multi-select)[cite: 1]:* Chọn một hoặc nhiều spec để đính kèm vào Context của AI Agent khi chat.
++  * **Context Action Menu (3 chấm)[cite: 1]:**
++    * Xóa file local (Delete spec)[cite: 1].
++    * Đổi tên file (Rename).
++    * Force Sync: Kích hoạt đồng bộ ngay lập tức file này lên NotebookLM.
++  * **Sync Status Badge:** Hiển thị trạng thái của từng file (`Synced`, `Unsaved`, `Syncing...`, `Error`).
++
++### 3.3. Workspace Trung tâm (Monaco Editor & Diff Review)
++* **Editor Mode:** Soạn thảo Markdown với live syntax highlight, autosave xuống file local.
++* **Diff Mode (Review AI Changes):**
++  * Kích hoạt tự động khi Agent đề xuất sửa đổi spec.
++  * Sử dụng Monaco `<DiffEditor />` chia 2 cột (Original vs Proposed) highlight xanh/đỏ.
++  * Nút hành động nổi trên thanh bar: `Approve & Save` (ghi đè file) và `Reject`.
++
++### 3.4. Footer Toolbar & Chatbox
++* **Quick Setting Toolbar (Nằm ngay trên Chatbox)[cite: 1]:**
++  * Switcher chế độ: `[ API Key Mode ]` $\leftrightarrow$ `[ CLI Agent Mode ]`[cite: 1].
++  * Dropdown chọn nhanh model hoặc CLI profile đang kích hoạt (ví dụ: `gemini-1.5-pro`, `claude-code`)[cite: 1].
++  * Icon Setting mở nhanh tab cấu hình tương ứng[cite: 1].
++* **Chatbox tương tác[cite: 1]:**
++  * Textarea nhập prompt tự co giãn chiều cao (Hỗ trợ phím tắt `Ctrl/Cmd + Enter` để gửi)[cite: 1].
++  * Button Send[cite: 1].
++  * Hiển thị log stream từ Agent (khi dùng CLI runner hoặc LLM streaming API).
++
++---
++
++## 4. Đặc tả Cấu hình (Settings Dialog)
++
++Modal cấu hình gồm 3 tab độc lập:
++
++### Tab 1: Direct API (LLM Integration)
++* **Provider:** Select (`Google Gemini`, `Anthropic`, `OpenAI`, `DeepSeek`, `Ollama / Local BaseURL`).
++* **API Key:** Input masked có tính năng Test Connection.
++* **Model ID:** Dropdown chọn model hoặc tự nhập custom model name.
++* **System Prompt Preset:** Khai báo persona và quy tắc viết spec cho Agent.
++
++### Tab 2: CLI Agent Runner
++* **Active CLI:** Select profile (`Claude Code`, `Aider`, `Custom Shell Script`).
++* **Binary Path:** Đường dẫn thực thi (ví dụ: `/usr/local/bin/claude` hoặc `npx @anthropic-ai/claude-code`).
++* **Default Arguments:** Flags truyền vào tiến trình (ví dụ: `--dangerously-skip-permissions`).
++* **Workspace Path:** Thư mục gốc chứa các file `.md` local.
++* **Stream Stdout:** Bật/tắt truyền log tiến trình terminal vào UI Chat.
++
++### Tab 3: NotebookLM Synchronization
++* **Notebook ID:** Target Notebook URL ID trên Google NotebookLM.
++* **Sync Strategy:**
++  1. *Google Drive Sync:* Cấu hình OAuth/Service Account và Google Drive Folder ID. Lưu spec dưới dạng Google Doc $\to$ Trigger lệnh refresh source trên NotebookLM.
++  2. *Direct Cookie RPC:* Cấu hình Cookie (`SID`, `HSID`, `SSID`) và `SNlM0e` token để tự động hóa vòng lặp Delete Source cũ $\to$ Upload Source mới qua RPC endpoint.
++* **Automation:**
++  * Toggle: `Tự động sync lên NBL sau khi Approve Diff`.
++  * Toggle: `Hiện hộp thoại xác nhận trước khi sync`.
++
++---
++
++## 5. Cấu trúc Dữ liệu & Tool Calling
++
++### 5.1. File cấu hình local (`.spec-studio/config.json`)
++```json
++{
++  "activeMode": "api",
++  "specsDir": "./specs",
++  "api": {
++    "provider": "gemini",
++    "apiKey": "AIzaSy...",
++    "model": "gemini-1.5-pro",
++    "temperature": 0.2
++  },
++  "cli": {
++    "activeProfile": "claude-code",
++    "profiles": [
++      {
++        "id": "claude-code",
++        "name": "Claude Code",
++        "command": "/usr/local/bin/claude",
++        "args": ["--dangerously-skip-permissions"]
++      }
++    ]
++  },
++  "nbl": {
++    "notebookId": "xxxx-xxxx-xxxx",
++    "syncStrategy": "drive_sync",
++    "driveFolderId": "yyyy-yyyy-yyyy",
++    "autoSyncOnApprove": false
++  }
++}
++### 5.2. Tools cấp cho AI Agent (Vercel AI SDK Tools)
++
++-   `list_specs()`: Trả về danh sách file `.md` trong thư mục `specsDir`.
++-   `read_spec({ filename })`: Đọc toàn bộ nội dung file spec được chọn.
++-   `propose_spec_update({ filename, newContent })`: Đẩy nội dung mới lên giao diện Diff Editor để người dùng duyệt (chưa ghi đè file).
++-   `apply_spec_update({ filename, content })`: Ghi đè trực tiếp xuống disk khi người dùng bấm Approve.
++-   `delete_spec({ filename })`: Xóa file spec khỏi thư mục local.
++-   `trigger_nbl_sync({ filename })`: Gọi module đồng bộ file tương ứng lên NotebookLM.
++
++## 6\. Luồng Xử lý Dữ liệu Chính (Workflows)
++
++### 6.1. Luồng Sửa Spec bằng AI Agent (Diff Review Loop)
++
++Plaintext
++
++```
++1. User chọn checkbox các spec liên quan trên Sidebar[cite: 1] -> Nhập yêu cầu vào Chatbox[cite: 1].
++2. Next.js Route Handler gom nội dung các file đã chọn đưa vào context của LLM.
++3. LLM thực thi, gọi tool `propose_spec_update`.
++4. Workspace chuyển từ chế độ Monaco thông thường sang Monaco DiffEditor.
++5. User kiểm tra diff trực quan:
++   ├── Reject -> Hủy bản nháp, giữ nguyên file cũ.
++   └── Approve -> Backend ghi đè nội dung vào file .md local.
++                  └── Nếu cấu hình autoSync: kích hoạt pipeline đẩy lên NBL.
++```
++
++### 6.2. Luồng Đồng bộ lên NotebookLM
++
++Plaintext
++
++```
++[Kích hoạt Sync (Auto hoặc Force Sync)]
++          │
++          ├── [Chiến lược 1: Drive Sync]
++          │     ├── Ghi đè nội dung file .md vào file Google Doc trên Drive API.
++          │     └── Trigger lệnh Refresh Source trên NotebookLM.
++          │
++          └── [Chiến lược 2: RPC Delete & Replace]
++                ├── Gọi RPC GetSources lấy ID của source trùng tên spec.
++                ├── Gọi RPC DeleteSource(source_id).
++                └── Gọi RPC AddSource(notebook_id, new_content).
++```
++
++## 7. Kế hoạch Triển khai (Checklist)
++
++-   [ ] **Phase 1: Next.js Foundation & File I/O**
++    
++    -   Khởi tạo project `create-next-app` (App Router, Tailwind CSS).
++    -   Viết API Route Handler đọc/ghi/xóa file `.md` từ thư mục local.
++    -   Xây dựng layout theo wireframe: Sidebar, Workspace, Chatbox[cite: 1].
++    -   Tích hợp `@monaco-editor/react` (cả Editor và DiffEditor).
++-   [ ] **Phase 2: Settings Engine**
++    
++    -   Dựng UI Settings Dialog (Radix Dialog / shadcn) với 3 tab: API, CLI, NBL.
++    -   Xây dựng API route đọc/ghi cấu hình vào file local `.spec-studio/config.json`.
++-   [ ] **Phase 3: Agent Integration (API & CLI)**
++    
++    -   Tích hợp Vercel AI SDK (`useChat`) cho Direct API Mode kết hợp Function Calling.
++    -   Xây dựng API Route chạy CLI qua `child_process.spawn`, stream stdout về giao diện chat.
++    -   Kết nối luồng Diff Approval giữa Chatbox và Monaco DiffEditor.
++-   [ ] **Phase 4: NotebookLM Sync Engine**
++    
++    -   Xây dựng module đồng bộ qua Google Drive API v3.
++    -   Xây dựng fallback sync bằng reverse-engineered RPC script.
+\ No newline at end of file
+-- 
+2.43.0
+
