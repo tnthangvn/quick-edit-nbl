@@ -17,7 +17,7 @@
 * **AI Orchestration:** **Vercel AI SDK** (`ai`, `@ai-sdk/react`, `@ai-sdk/google`, `@ai-sdk/anthropic`):
   * Dùng hook `useChat` và streaming UI component.
   * Hỗ trợ Tool / Function Calling native.
-* **CLI Runner:** `spawn` / `execa` thực thi các terminal tool có sẵn trên máy (Claude Code, Aider, custom scripts) và stream output trực tiếp về client qua Server-Sent Events (SSE).
+* **CLI Runner:** `spawn` / `execa` thực thi các terminal tool có sẵn trên máy (Claude Code, Codex CLI của OpenAI/ChatGPT, Antigravity CLI của Google, Aider, custom scripts) và stream output trực tiếp về client qua Server-Sent Events (SSE).
 
 ---
 
@@ -138,7 +138,20 @@ Modal cấu hình gồm 5 tab độc lập (tab 1, 2, 5 là cấu hình chung c�
 * **System Prompt Preset:** Khai báo persona và quy tắc viết spec cho Agent.
 
 ### Tab 2: CLI Agent Runner
-* **Active CLI:** Select profile (`Claude Code`, `Aider`, `Custom Shell Script`).
+* **Active CLI:** chọn profile dạng thẻ: `Claude Code` (Anthropic), `Codex CLI` (OpenAI · đăng nhập bằng tài khoản ChatGPT hoặc API key), `Antigravity CLI` (Google · lệnh `agy`), `Aider`, `Custom Shell Script`. Mỗi thẻ hiện trạng thái tự dò (`which <binary>`): tìm thấy / không tìm thấy, kèm lệnh cài đặt gợi ý.
+* **Profile mặc định đề xuất** (`{prompt}` = yêu cầu của người dùng kèm danh sách spec trong context; tiến trình luôn chạy với `cwd` = `workspacePath`):
+
+| Profile | Binary | Default Arguments | Đăng nhập | Stream log |
+| --- | --- | --- | --- | --- |
+| Claude Code | `claude` | `-p {prompt} --output-format stream-json --dangerously-skip-permissions` | `claude` (lần đầu) | `stream-json` |
+| Codex CLI (ChatGPT) | `codex` | `exec --sandbox workspace-write --json {prompt}` | `codex login` (tài khoản ChatGPT) hoặc biến `CODEX_API_KEY` | JSON Lines (`--json`) |
+| Antigravity CLI | `agy` | `-p {prompt} --mode=accept-edits --output-format stream-json` | đăng nhập Google ở lần chạy đầu (lưu keyring); CI: `GEMINI_API_KEY` | `stream-json` |
+| Aider | `aider` | `--yes --no-auto-commits --message {prompt}` | API key của model | text |
+| Custom Shell Script | tuỳ ý | `--file {spec} --prompt {prompt}` | — | text |
+
+  * Codex: `exec` mặc định chạy sandbox chỉ-đọc, nên cần `--sandbox workspace-write` để sửa file; `--full-auto` đã cũ, không dùng. Có thể thêm `-o <file>` để lấy riêng câu trả lời cuối.
+  * Antigravity: `--mode=accept-edits` chỉ tự duyệt thao tác sửa file; muốn tự duyệt cả lệnh shell thì dùng `--dangerously-skip-permissions` (chỉ nên dùng trong thư mục/VM riêng). Lần chạy headless đầu tiên cần đã đăng nhập từ phiên tương tác, nếu không sẽ báo `authentication required`.
+  * Runner đọc stdout theo `outputFormat` của profile (`stream-json` / `jsonl` / `text`) để hiện log, tool call và phát hiện đề xuất sửa file, rồi đưa vào luồng Diff Review (6.1) thay vì ghi thẳng.
 * **Binary Path:** Đường dẫn thực thi (ví dụ: `/usr/local/bin/claude` hoặc `npx @anthropic-ai/claude-code`).
 * **Default Arguments:** Flags truyền vào tiến trình (ví dụ: `--dangerously-skip-permissions`).
 * **Workspace Path:** Thư mục gốc chứa các file `.md` local.
@@ -187,7 +200,23 @@ Modal cấu hình gồm 5 tab độc lập (tab 1, 2, 5 là cấu hình chung c�
         "id": "claude-code",
         "name": "Claude Code",
         "command": "/usr/local/bin/claude",
-        "args": ["--dangerously-skip-permissions"]
+        "args": ["-p", "{prompt}", "--output-format", "stream-json", "--dangerously-skip-permissions"],
+        "outputFormat": "stream-json"
+      },
+      {
+        "id": "codex",
+        "name": "Codex CLI (ChatGPT)",
+        "command": "/usr/local/bin/codex",
+        "args": ["exec", "--sandbox", "workspace-write", "--json", "{prompt}"],
+        "outputFormat": "jsonl",
+        "env": { "CODEX_API_KEY": "secret:codex_api_key" }
+      },
+      {
+        "id": "antigravity",
+        "name": "Antigravity CLI",
+        "command": "~/.local/bin/agy",
+        "args": ["-p", "{prompt}", "--mode=accept-edits", "--output-format", "stream-json"],
+        "outputFormat": "stream-json"
       }
     ]
   },
@@ -398,6 +427,7 @@ Nếu storage và NotebookLM Drive Sync cùng dùng một thư mục Drive, bư�
     
     -   Tích hợp Vercel AI SDK (`useChat`) cho Direct API Mode kết hợp Function Calling.
     -   Xây dựng API Route chạy CLI qua `child_process.spawn`, stream stdout về giao diện chat.
+    -   Profile CLI có sẵn: Claude Code, Codex CLI (OpenAI/ChatGPT), Antigravity CLI (`agy`), Aider, Custom; parser cho `stream-json` / `jsonl` / `text`; tự dò binary và trạng thái đăng nhập.
     -   Kết nối luồng Diff Approval giữa Chatbox và Monaco DiffEditor.
 -   [ ] **Phase 4: NotebookLM Sync Engine**
     

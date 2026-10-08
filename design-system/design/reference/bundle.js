@@ -382,7 +382,7 @@
     { value: "llama3.1:8b", label: "llama3.1:8b", group: "Ollama / Local", hint: "localhost:11434" },
     { value: "qwen2.5-coder:7b", label: "qwen2.5-coder:7b", group: "Ollama / Local", hint: "localhost:11434" }
   ];
-  var CLI_PROFILES = [{ value: "claude-code", label: "Claude Code" }, { value: "aider", label: "Aider" }, { value: "custom", label: "Custom Shell Script" }];
+  var CLI_PROFILES = [{ value: "claude-code", label: "Claude Code", hint: "Anthropic" }, { value: "codex", label: "Codex CLI", hint: "OpenAI · ChatGPT" }, { value: "antigravity", label: "Antigravity CLI", hint: "Google · agy" }, { value: "aider", label: "Aider" }, { value: "custom", label: "Custom Shell Script" }];
   function ChatToolbar(p) {
     var mode = p.mode || "api";
     var options = p.options || (mode === "api" ? API_MODELS : CLI_PROFILES);

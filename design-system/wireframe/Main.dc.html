@@ -41,6 +41,34 @@ a{color:inherit}a:hover{color:inherit}
 .wf-pill.is-busy{color:var(--color-primary);border-color:var(--color-info-border)}
 .wf-send-ring{animation:wf-ring 1.4s var(--ease-out) infinite}
 .wf-toastwrap{position:absolute;right:24px;bottom:24px;z-index:30}
+@keyframes wf-panel{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.wf-sync{width:380px;border:1px solid var(--color-border);border-radius:8px;background:var(--color-popover);box-shadow:var(--shadow-popover);overflow:hidden;animation:wf-panel .28s var(--ease-out) both}
+.wf-sync__head{display:flex;align-items:center;gap:8px;padding:10px 8px 10px 14px}
+.wf-sync__title{flex:1;min-width:0;font-size:13px;line-height:18px;font-weight:600}
+.wf-sync__sub{display:block;font-size:12px;line-height:16px;font-weight:400;color:var(--color-muted-foreground)}
+.wf-sync__bar{height:3px;background:var(--color-muted)}
+.wf-sync__bar i{display:block;height:100%;background:var(--color-primary);transition:width .4s var(--ease-out)}
+.wf-sync__bar.is-err i{background:var(--color-destructive)}
+.wf-sync__list{display:flex;flex-direction:column;padding:6px}
+.wf-tgt{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px;border-radius:6px;transition:background-color .2s var(--ease-out),opacity .2s var(--ease-out)}
+.wf-tgt.is-wait{opacity:.55}
+.wf-tgt.is-run{background:var(--color-primary-soft)}
+.wf-tgt.is-err{background:var(--color-destructive-soft)}
+.wf-tgt__ic{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;background:var(--color-muted);color:var(--color-muted-foreground)}
+.wf-tgt.is-run .wf-tgt__ic,.wf-tgt.is-ok .wf-tgt__ic{background:var(--color-card);color:var(--color-primary)}
+.wf-tgt.is-err .wf-tgt__ic{background:var(--color-card);color:var(--color-destructive)}
+.wf-tgt__t{font-size:13px;line-height:18px;font-weight:500}
+.wf-tgt__d{display:block;font-family:var(--font-mono);font-size:11px;line-height:16px;color:var(--color-muted-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wf-tgt.is-err .wf-tgt__d{color:var(--color-destructive)}
+.wf-tgt__s{display:inline-flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap}
+.wf-tgt.is-ok .wf-tgt__s{color:var(--color-primary)}
+.wf-tgt.is-err .wf-tgt__s{color:var(--color-destructive)}
+.wf-tgt.is-run .wf-tgt__s{color:var(--color-primary)}
+.wf-tgt.is-wait .wf-tgt__s{color:var(--color-muted-foreground)}
+.wf-chip{display:inline-flex;align-items:center;gap:4px;padding:0 6px;height:18px;border-radius:4px;background:var(--color-muted);font-size:11px;color:var(--color-muted-foreground)}
+.wf-chip i{width:6px;height:6px;border-radius:9999px;background:currentColor}
+.wf-chip.is-ok{color:var(--color-primary)}.wf-chip.is-run{color:var(--color-primary)}.wf-chip.is-err{color:var(--color-destructive)}
+.wf-chip.is-run i{animation:wf-dot 1s var(--ease-in-out) infinite}
 .wf-modelmenu{position:absolute;left:0;bottom:calc(100% + 4px);min-width:220px;z-index:40}
 @media (prefers-reduced-motion: reduce){.wf *,.wf *::before,.wf *::after{animation-duration:1ms !important;animation-iteration-count:1 !important;transition-duration:1ms !important}}
 </style>
@@ -65,6 +93,7 @@ a{color:inherit}a:hover{color:inherit}
         <svg class="ss-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg>
       </sc-if>
       <span>{{syncPillText}}</span>
+      <sc-for list="{{targetChips}}" as="c" hint-placeholder-count="3"><span class="wf-chip {{c.cls}}" title="{{c.label}}"><i></i>{{c.short}}</span></sc-for>
     </span>
     <a href="Settings.dc.html" class="ss-iconbtn" aria-label="Settings" title="Settings">
       <svg class="ss-icon" data-icon="settings" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
@@ -292,26 +321,51 @@ a{color:inherit}a:hover{color:inherit}
     </div>
   </main>
 
-  <!-- Toast -->
-  <sc-if value="{{showToast}}" hint-placeholder-val="{{ false }}">
+  <!-- Sync activity panel -->
+  <sc-if value="{{showSync}}" hint-placeholder-val="{{ false }}">
     <div class="wf-toastwrap">
-      <div class="ss-toast ss-toast--{{toast.variant}}" role="status">
-        <sc-if value="{{toast.loading}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin ss-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
-        <sc-if value="{{toast.done}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop ss-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
-        <sc-if value="{{toast.info}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-toast__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></sc-if>
-        <div class="ss-toast__text">
-          <p class="ss-toast__title">{{toast.title}}</p>
-          <p class="ss-toast__desc">{{toast.desc}}</p>
+      <section class="wf-sync" role="status" aria-live="polite" aria-label="Tiến trình đồng bộ">
+        <div class="wf-sync__head">
+          <sc-if value="{{syncRunning}}" hint-placeholder-val="{{ true }}"><svg class="ss-icon ss-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--color-primary);"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+          <sc-if value="{{syncAllOk}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--color-primary);"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+          <sc-if value="{{syncHasErr}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--color-destructive);"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg></sc-if>
+          <span class="wf-sync__title">{{syncTitle}}<span class="wf-sync__sub">{{syncSub}}</span></span>
+          <button type="button" class="ss-iconbtn ss-iconbtn--sm" aria-label="{{collapseLabel}}" title="{{collapseLabel}}" onClick="{{toggleCollapse}}">
+            <svg class="ss-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: rotate({{chevRot}}); transition: transform .2s var(--ease-out);"><path d="m6 9 6 6 6-6"></path></svg>
+          </button>
+          <button type="button" class="ss-iconbtn ss-iconbtn--sm" aria-label="Đóng" title="Đóng" onClick="{{closeSync}}" disabled="{{syncRunning}}">
+            <svg class="ss-icon" data-icon="x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
         </div>
-        <button type="button" class="ss-iconbtn ss-iconbtn--sm ss-toast__close" aria-label="Đóng thông báo" onClick="{{closeToast}}">
-          <svg class="ss-icon" data-icon="x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
-        </button>
-      </div>
+        <div class="wf-sync__bar {{barCls}}" aria-hidden="true"><i style="width: {{syncPct}};"></i></div>
+        <sc-if value="{{syncExpanded}}" hint-placeholder-val="{{ true }}">
+          <div class="wf-sync__list">
+            <sc-for list="{{targets}}" as="t" hint-placeholder-count="4">
+              <div class="wf-tgt {{t.cls}}">
+                <span class="wf-tgt__ic" aria-hidden="true">
+                  <sc-if value="{{t.isLocal}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg></sc-if>
+                  <sc-if value="{{t.isGit}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg></sc-if>
+                  <sc-if value="{{t.isDrive}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg></sc-if>
+                  <sc-if value="{{t.isNbl}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg></sc-if>
+                </span>
+                <span style="min-width: 0;"><span class="wf-tgt__t">{{t.label}}</span><span class="wf-tgt__d">{{t.detail}}</span></span>
+                <span class="wf-tgt__s">
+                  <sc-if value="{{t.run}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg></sc-if>
+                  <sc-if value="{{t.ok}}" hint-placeholder-val="{{ false }}"><svg class="ss-icon ss-pop" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if>
+                  <sc-if value="{{t.err}}" hint-placeholder-val="{{ false }}"><button type="button" class="ss-btn ss-btn--ghost ss-btn--sm" style="height: 24px; color: var(--color-destructive);" onClick="{{t.retry}}">Thử lại</button></sc-if>
+                  <sc-if value="{{t.hasLink}}" hint-placeholder-val="{{ false }}"><span style="font-family: var(--font-mono); font-size: 11px; text-decoration: underline; text-underline-offset: 2px;">{{t.link}}</span></sc-if>
+                  <span>{{t.stateLabel}}</span>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </section>
     </div>
   </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Giao diện"},"syncGit":{"editor":"boolean","default":true,"section":"Workspace: nơi đồng bộ"},"gitMode":{"editor":"enum","options":["push","pull_request"],"default":"pull_request","section":"Workspace: nơi đồng bộ"},"syncDrive":{"editor":"boolean","default":true,"section":"Workspace: nơi đồng bộ"},"syncNbl":{"editor":"boolean","default":true,"section":"Workspace: nơi đồng bộ"},"failGitPush":{"editor":"boolean","default":false,"section":"Workspace: nơi đồng bộ"},"$preview":{"width":1440,"height":900}}'>
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -328,6 +382,7 @@ class Component extends DCLogic {
       applied: false,
       messages: [],
       toast: null,
+      sync: null,
       specs: [
         { name: 'overview.md', status: 'synced', checked: true },
         { name: 'sidebar.md', status: 'synced', checked: true },
@@ -354,7 +409,7 @@ class Component extends DCLogic {
     var self = this, file = s.selected;
     this.clear();
     var ctx = s.specs.filter(function (x) { return x.checked; }).map(function (x) { return x.name; });
-    this.setState({ phase: 'running', prompt: '', modelOpen: false, toast: null, applied: false, saveStep: 'idle',
+    this.setState({ phase: 'running', prompt: '', modelOpen: false, toast: null, sync: null, applied: false, saveStep: 'idle',
       messages: [{ id: 'u', kind: 'user', text: s.prompt }, { id: 'th', kind: 'thinking' }] });
     this.later(700, function () {
       self.dropThinking();
@@ -370,22 +425,65 @@ class Component extends DCLogic {
       self.setState({ phase: 'review' });
     });
   }
+  buildTargets(file) {
+    var p = this.props, list = [];
+    var git = p.syncGit ?? true, drive = p.syncDrive ?? true, nbl = p.syncNbl ?? true, pr = (p.gitMode ?? 'pull_request') === 'pull_request';
+    list.push({ id: 'local', kind: 'local', label: 'Ghi file local', detail: 'specs/' + file, doneDetail: 'specs/' + file + ' · 2.1 KB', ms: 500 });
+    if (git) list.push({ id: 'git', kind: 'git', label: pr ? 'Git · Pull Request' : 'Git · Push', detail: 'commit “docs(spec): update ' + file + '”',
+      steps: pr ? ['push spec/2026-10-08-' + file.replace('.md', '') + '…', 'gh pr create…'] : ['git push origin main…'],
+      doneDetail: pr ? 'tnthangvn/quick-edit-nbl' : 'main · a3f9c21', link: pr ? 'PR #12' : '', ms: 900 });
+    if (drive) list.push({ id: 'drive', kind: 'drive', label: 'Google Drive', detail: 'Specs/QuickEdit/' + file, doneDetail: 'Specs/QuickEdit/' + file + ' · đã ghi đè', ms: 800 });
+    if (nbl) list.push({ id: 'nbl', kind: 'nbl', label: 'NotebookLM', detail: 'refresh source “' + file + '”', doneDetail: 'Spec Studio · source ' + file, ms: 1000 });
+    return list.map(function (t) { return Object.assign({ status: 'wait' }, t); });
+  }
+  setTarget(id, patch) { this.setState(function (s) { return { sync: Object.assign({}, s.sync, { targets: s.sync.targets.map(function (t) { return t.id === id ? Object.assign({}, t, patch) : t; }) }) }; }); }
+  runTarget(t, at, after) {
+    var self = this, fail = t.id === 'git' && (this.props.failGitPush ?? false) && !t.retried;
+    this.later(at, function () { self.setTarget(t.id, { status: 'run' }); });
+    var step = at;
+    (t.steps || []).forEach(function (d, i) { step += 350; self.later(step, function () { self.setTarget(t.id, { detail: d }); }); });
+    this.later(step + t.ms, function () {
+      if (fail) self.setTarget(t.id, { status: 'err', detail: 'push bị từ chối (403) · kiểm tra quyền repo' });
+      else self.setTarget(t.id, { status: 'ok', detail: t.doneDetail });
+      if (after) after();
+    });
+    return step + t.ms;
+  }
+  finishSync(file) {
+    var self = this;
+    this.later(60, function () {
+      var bad = self.state.sync.targets.some(function (t) { return t.status === 'err'; });
+      self.setSpec(file, { status: bad ? 'error' : 'synced' });
+      self.patchMsg('t2', { status: bad ? 'error' : 'synced', label: bad ? 'Sync lỗi 1 nơi' : 'Đã đồng bộ', note: 'Approve & Save' });
+      self.setState(function (s) { return { sync: Object.assign({}, s.sync, { running: false }) }; });
+      if (!bad) self.later(5000, function () { self.setState(function (s) { return { sync: s.sync ? Object.assign({}, s.sync, { collapsed: true }) : s.sync }; }); });
+    });
+  }
   approve() {
     var self = this, file = this.state.selected;
     if (this.state.saveStep !== 'idle') return;
     this.setState({ saveStep: 'loading' });
     this.later(900, function () { self.setState({ saveStep: 'done' }); });
     this.later(1500, function () {
-      self.setState({ phase: 'idle', saveStep: 'idle', applied: true,
-        toast: { variant: 'info', title: 'Đã lưu ' + file, desc: 'Đang đồng bộ lên NotebookLM…', kind: 'loading' } });
+      var targets = self.buildTargets(file);
+      self.setState({ phase: 'idle', saveStep: 'idle', applied: true, sync: { file: file, targets: targets, running: true, collapsed: false } });
       self.setSpec(file, { status: 'syncing' });
-      self.patchMsg('t2', { status: 'synced', label: 'Đã lưu', note: 'Approve & Save' });
+      self.patchMsg('t2', { status: 'syncing', label: 'Đang đồng bộ', note: 'Approve & Save' });
+      // local first, then remote targets run one after another (each independent: a failure does not stop the next)
+      var at = 150;
+      targets.forEach(function (t) { at = self.runTarget(t, at) + 120; });
+      self.later(at, function () { self.finishSync(file); });
     });
-    this.later(3600, function () {
-      self.setSpec(file, { status: 'synced' });
-      self.setState({ toast: { variant: 'info', title: 'Đã đồng bộ lên NotebookLM', desc: file + ' · Drive Sync · vừa xong', kind: 'done' } });
-    });
-    this.later(7600, function () { self.setState({ toast: null }); });
+  }
+  retry(id) {
+    var self = this, s = this.state, t = s.sync.targets.filter(function (x) { return x.id === id; })[0];
+    if (!t) return;
+    var file = s.sync.file;
+    this.setState({ sync: Object.assign({}, s.sync, { running: true, collapsed: false }) });
+    this.setSpec(file, { status: 'syncing' });
+    var end = this.runTarget(Object.assign({}, t, { retried: true, steps: t.steps }), 100);
+    this.setTarget(id, { retried: true });
+    this.later(end + 80, function () { self.finishSync(file); });
   }
   reject() {
     this.clear();
@@ -471,6 +569,25 @@ class Component extends DCLogic {
       ? [{ v: 'gemini-1.5-pro', h: 'Google' }, { v: 'gemini-2.0-flash', h: 'Google' }, { v: 'claude-sonnet-4', h: 'Anthropic' }, { v: 'gpt-4o', h: 'OpenAI' }, { v: 'deepseek-chat', h: 'DeepSeek' }]
       : [{ v: 'claude-code', h: 'CLI' }, { v: 'aider', h: 'CLI' }, { v: 'custom-script', h: 'Shell' }];
     var anySyncing = s.specs.some(function (x) { return x.status === 'syncing'; });
+    var ST = { wait: 'Chờ', run: 'Đang chạy', ok: 'Xong', err: 'Lỗi' };
+    var syncTargets = s.sync ? s.sync.targets.map(function (t) {
+      return { label: t.label, detail: t.detail, cls: 'is-' + t.status, run: t.status === 'run', ok: t.status === 'ok', err: t.status === 'err',
+        isLocal: t.kind === 'local', isGit: t.kind === 'git', isDrive: t.kind === 'drive', isNbl: t.kind === 'nbl',
+        hasLink: t.status === 'ok' && !!t.link, link: t.link || '', stateLabel: t.status === 'ok' && t.link ? '' : ST[t.status],
+        retry: function () { self.retry(t.id); } };
+    }) : [];
+    var syncTotal = syncTargets.length;
+    var syncDone = s.sync ? s.sync.targets.filter(function (t) { return t.status === 'ok'; }).length : 0;
+    var syncErr = s.sync ? s.sync.targets.some(function (t) { return t.status === 'err'; }) : false;
+    var syncNames = s.sync ? s.sync.targets.filter(function (t) { return t.kind !== 'local'; }).map(function (t) { return { git: 'Git', drive: 'Drive', nbl: 'NotebookLM' }[t.kind]; }).join(' · ') : '';
+    var cfg = [];
+    if (this.props.syncGit ?? true) cfg.push(['git', 'Git']);
+    if (this.props.syncDrive ?? true) cfg.push(['drive', 'Drive']);
+    if (this.props.syncNbl ?? true) cfg.push(['nbl', 'NBL']);
+    var chips = cfg.map(function (c) {
+      var st = s.sync ? (s.sync.targets.filter(function (t) { return t.kind === c[0]; })[0] || {}).status : 'ok';
+      return { short: c[1], label: c[1] + ': ' + (ST[st] || 'Xong'), cls: st === 'run' ? 'is-run' : st === 'err' ? 'is-err' : st === 'wait' ? '' : 'is-ok' };
+    });
     var syncedCount = s.specs.filter(function (x) { return x.status === 'synced'; }).length;
     var t = s.toast;
     var messages = s.messages.map(function (m) {
@@ -521,7 +638,22 @@ class Component extends DCLogic {
       composerCls: s.phase === 'running' ? 'is-busy' : '',
       anySyncing: anySyncing, notSyncing: !anySyncing,
       syncPillCls: anySyncing ? 'is-busy' : '',
-      syncPillText: anySyncing ? 'Đang đồng bộ NotebookLM…' : 'NotebookLM · ' + syncedCount + '/' + s.specs.length + ' synced',
+      syncPillText: anySyncing ? 'Đang đồng bộ…' : syncedCount + '/' + s.specs.length + ' synced',
+      showSync: !!s.sync,
+      syncRunning: !!(s.sync && s.sync.running),
+      syncAllOk: !!(s.sync && !s.sync.running && !syncErr),
+      syncHasErr: !!(s.sync && !s.sync.running && syncErr),
+      syncTitle: !s.sync ? '' : s.sync.running ? 'Đang đồng bộ ' + s.sync.file : syncErr ? 'Đồng bộ ' + syncDone + '/' + syncTotal + ' nơi · 1 lỗi' : 'Đã đồng bộ ' + s.sync.file,
+      syncSub: !s.sync ? '' : s.sync.running ? syncDone + '/' + syncTotal + ' nơi · lỗi ở một nơi không chặn nơi khác' : syncErr ? 'Các nơi còn lại đã cập nhật. Sửa lỗi rồi Thử lại.' : syncTotal + ' nơi · ' + syncNames,
+      syncPct: syncTotal ? Math.round(syncDone / syncTotal * 100) + '%' : '0%',
+      barCls: syncErr && s.sync && !s.sync.running ? 'is-err' : '',
+      syncExpanded: !!(s.sync && !s.sync.collapsed),
+      chevRot: s.sync && s.sync.collapsed ? '180deg' : '0deg',
+      collapseLabel: s.sync && s.sync.collapsed ? 'Mở rộng' : 'Thu gọn',
+      toggleCollapse: function () { self.setState({ sync: Object.assign({}, s.sync, { collapsed: !s.sync.collapsed }) }); },
+      closeSync: function () { self.setState({ sync: null }); },
+      targets: syncTargets,
+      targetChips: chips,
       showToast: !!t,
       toast: t ? { variant: t.variant, title: t.title, desc: t.desc, loading: t.kind === 'loading', done: t.kind === 'done', info: t.kind === 'info' } : { variant: 'info', title: '', desc: '', loading: false, done: false, info: false },
       closeToast: function () { self.setState({ toast: null }); }

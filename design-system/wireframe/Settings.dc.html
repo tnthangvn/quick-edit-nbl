@@ -61,7 +61,7 @@ a{color:inherit}a:hover{color:inherit}
 
   <!-- Backdrop + dialog -->
   <div class="wf-backdrop" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(17, 24, 39, 0.45);">
-    <div class="ss-dialog" role="dialog" aria-modal="true" aria-labelledby="wf-settings-title" style="width: 600px;">
+    <div class="ss-dialog" role="dialog" aria-modal="true" aria-labelledby="wf-settings-title" style="width: 600px; height: 640px; max-height: calc(100vh - 48px); display: flex; flex-direction: column;">
       <div class="ss-dialog__head">
         <h2 id="wf-settings-title" class="ss-dialog__title">Settings</h2>
         <span style="flex: 1;"></span>
@@ -87,7 +87,7 @@ a{color:inherit}a:hover{color:inherit}
 
       <!-- Tab: Direct API -->
       <sc-if value="{{isApi}}" hint-placeholder-val="{{ true }}">
-        <div class="ss-dialog__body wf-panel" role="tabpanel" aria-label="Direct API">
+        <div class="ss-dialog__body wf-panel" style="flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable;" role="tabpanel" aria-label="Direct API">
           <div class="ss-field">
             <label class="ss-field__label" for="wf-provider">Provider</label>
             <div class="ss-select" style="width: 100%;">
@@ -125,7 +125,7 @@ a{color:inherit}a:hover{color:inherit}
 
       <!-- Tab: CLI -->
       <sc-if value="{{isCli}}" hint-placeholder-val="{{ false }}">
-        <div class="ss-dialog__body wf-panel" role="tabpanel" aria-label="CLI Agent Runner">
+        <div class="ss-dialog__body wf-panel" style="flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable;" role="tabpanel" aria-label="CLI Agent Runner">
           <div class="ss-field">
             <span class="ss-field__label">Active CLI</span>
             <div class="wf-strategy" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
@@ -159,7 +159,7 @@ a{color:inherit}a:hover{color:inherit}
 
       <!-- Tab: NotebookLM -->
       <sc-if value="{{isNbl}}" hint-placeholder-val="{{ false }}">
-        <div class="ss-dialog__body wf-panel" role="tabpanel" aria-label="NotebookLM Sync">
+        <div class="ss-dialog__body wf-panel" style="flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable;" role="tabpanel" aria-label="NotebookLM Sync">
           <div class="ss-field">
             <label class="ss-field__label" for="wf-nb">Notebook ID</label>
             <input id="wf-nb" class="ss-input is-mono" value="nbl-7f3a-29c1-b04e" readonly="{{yes}}">
