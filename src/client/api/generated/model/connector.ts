@@ -30,6 +30,8 @@ export interface Connector {
   secretKeys: string[];
   agentTools: string[];
   hasToken: boolean;
+  /** @nullable */
+  tokenMasked: string | null;
   status: ConnectorStatus | null;
   /** @nullable */
   account: string | null;

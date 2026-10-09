@@ -31,6 +31,7 @@ export const ListConnectorsResponse = zod.object({
   "secretKeys": zod.array(zod.string()),
   "agentTools": zod.array(zod.string()),
   "hasToken": zod.boolean(),
+  "tokenMasked": zod.string().nullable(),
   "status": zod.union([zod.enum(['CONNECTED', 'NEEDS_LOGIN', 'CLI_NOT_FOUND', 'ERROR']).describe('Trạng thái kết nối của connector'),zod.null()]),
   "account": zod.string().nullable(),
   "scopes": zod.array(zod.string()),
@@ -114,6 +115,7 @@ export const CreateConnectorResponse = zod.object({
   "secretKeys": zod.array(zod.string()),
   "agentTools": zod.array(zod.string()),
   "hasToken": zod.boolean(),
+  "tokenMasked": zod.string().nullable(),
   "status": zod.union([zod.enum(['CONNECTED', 'NEEDS_LOGIN', 'CLI_NOT_FOUND', 'ERROR']).describe('Trạng thái kết nối của connector'),zod.null()]),
   "account": zod.string().nullable(),
   "scopes": zod.array(zod.string()),
@@ -194,6 +196,7 @@ export const UpdateConnectorResponse = zod.object({
   "secretKeys": zod.array(zod.string()),
   "agentTools": zod.array(zod.string()),
   "hasToken": zod.boolean(),
+  "tokenMasked": zod.string().nullable(),
   "status": zod.union([zod.enum(['CONNECTED', 'NEEDS_LOGIN', 'CLI_NOT_FOUND', 'ERROR']).describe('Trạng thái kết nối của connector'),zod.null()]),
   "account": zod.string().nullable(),
   "scopes": zod.array(zod.string()),
@@ -327,5 +330,20 @@ export const ListConnectorToolsResponse = zod.object({
   "description": zod.string().nullable(),
   "enabled": zod.boolean()
 }))
+})
+
+/**
+ * @summary Xem token PAT của connector (plaintext, không cache)
+ */
+export const revealConnectorTokenPathConnectorIdMax = 64;
+
+
+
+export const RevealConnectorTokenParams = zod.object({
+  "connectorId": zod.string().min(1).max(revealConnectorTokenPathConnectorIdMax)
+})
+
+export const RevealConnectorTokenResponse = zod.object({
+  "value": zod.string()
 })
 

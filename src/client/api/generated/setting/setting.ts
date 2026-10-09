@@ -30,6 +30,7 @@ import type {
   ExportedSettings,
   ExportedSettingsOutput,
   ImportSettingsResult,
+  SecretValue,
   UpdateSettingsInput,
   ValidationErrorResponse,
   WorkspaceConfig,
@@ -795,6 +796,182 @@ export const useDeleteWorkspaceSecret = <TError = globalThis.Error & { info?: Er
         TContext
       > => {
       return useMutation(getDeleteWorkspaceSecretMutationOptions(options), queryClient);
+    }
+    export const getRevealWorkspaceSecretUrl = (workspaceId: string,
+    kind: WorkspaceSecretKind,) => {
+
+
+
+
+  return `/api/workspaces/${workspaceId}/secrets/${kind}/reveal`
+}
+
+/**
+ * @summary Xem secret của Workspace do người dùng nhập (plaintext, không cache)
+ */
+export const revealWorkspaceSecret = async (workspaceId: string,
+    kind: WorkspaceSecretKind, options?: RequestInit): Promise<SecretValue> => {
+
+  const res = await fetch(getRevealWorkspaceSecretUrl(workspaceId,kind),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: SecretValue, status?: number} = new globalThis.Error();
+    const data : SecretValue = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: SecretValue = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getRevealWorkspaceSecretMutationKey = () => ['revealWorkspaceSecret'] as const;
+
+export const getRevealWorkspaceSecretMutationOptions = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revealWorkspaceSecret>>, TError,RevealWorkspaceSecretMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof revealWorkspaceSecret>>, TError,RevealWorkspaceSecretMutationVariables, TContext> => {
+
+const mutationKey = getRevealWorkspaceSecretMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revealWorkspaceSecret>>, RevealWorkspaceSecretMutationVariables> = (props) => {
+          const {workspaceId,kind} = props ?? {};
+
+          return  revealWorkspaceSecret(workspaceId,kind,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevealWorkspaceSecretMutationResult = NonNullable<Awaited<ReturnType<typeof revealWorkspaceSecret>>>
+
+    export type RevealWorkspaceSecretMutationError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }
+    export type RevealWorkspaceSecretMutationVariables = {workspaceId: string;kind: WorkspaceSecretKind}
+
+    /**
+ * @summary Xem secret của Workspace do người dùng nhập (plaintext, không cache)
+ */
+export const useRevealWorkspaceSecret = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revealWorkspaceSecret>>, TError,RevealWorkspaceSecretMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof revealWorkspaceSecret>>,
+        TError,
+        RevealWorkspaceSecretMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRevealWorkspaceSecretMutationOptions(options), queryClient);
+    }
+    export const getRevealApiKeyUrl = () => {
+
+
+
+
+  return `/api/settings/api-key/reveal`
+}
+
+/**
+ * @summary Xem API key của provider đang chọn (plaintext, không cache)
+ */
+export const revealApiKey = async ( options?: RequestInit): Promise<SecretValue> => {
+
+  const res = await fetch(getRevealApiKeyUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: SecretValue, status?: number} = new globalThis.Error();
+    const data : SecretValue = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: SecretValue = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getRevealApiKeyMutationKey = () => ['revealApiKey'] as const;
+
+export const getRevealApiKeyMutationOptions = <TError = globalThis.Error & { info?: ErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revealApiKey>>, TError,void, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof revealApiKey>>, TError,void, TContext> => {
+
+const mutationKey = getRevealApiKeyMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revealApiKey>>, void> = () => {
+
+
+          return  revealApiKey(fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevealApiKeyMutationResult = NonNullable<Awaited<ReturnType<typeof revealApiKey>>>
+
+    export type RevealApiKeyMutationError = globalThis.Error & { info?: ErrorResponse; status?: number }
+
+
+    /**
+ * @summary Xem API key của provider đang chọn (plaintext, không cache)
+ */
+export const useRevealApiKey = <TError = globalThis.Error & { info?: ErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revealApiKey>>, TError,void, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof revealApiKey>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getRevealApiKeyMutationOptions(options), queryClient);
     }
     export const getExportSettingsUrl = () => {
 

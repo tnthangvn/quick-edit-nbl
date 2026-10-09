@@ -139,7 +139,8 @@
     "secret": {
       "show": "Show",
       "hide": "Hide",
-      "setPlaceholder": "Saved · type to replace"
+      "setPlaceholder": "Saved · type to replace",
+      "maskedPlaceholder": "{masked} · type to replace"
     }
   }
 }

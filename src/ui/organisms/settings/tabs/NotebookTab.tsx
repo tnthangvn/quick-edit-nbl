@@ -5,12 +5,13 @@ import { CircleCheck, SearchCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import type * as z from "zod";
-import { useCheckNotebook } from "@/client/api/generated";
+import { revealWorkspaceSecret, useCheckNotebook } from "@/client/api/generated";
 import { SyncStrategy, type NotebookCheckResult, type WorkspaceSecretKind } from "@/client/api/generated/model";
 import type { UpdateWorkspaceConfigBody } from "@/client/api/generated/zod/setting/setting.zod";
 import { useErrorMessage } from "@/client/api/useErrorMessage";
 import { Field } from "@/ui/molecules/field";
 import { SecretInput } from "@/ui/molecules/secret-input";
+import { notify } from "@/ui/primitives/sonner";
 import { Button } from "@/ui/primitives/button";
 import { ChoiceCard, ChoiceCardGroup } from "@/ui/primitives/choice-card";
 import { Icon } from "@/ui/primitives/icon";
@@ -32,16 +33,25 @@ type NotebookTabProps = {
   onSecretsChange: (next: NotebookSecrets) => void;
   /** Loại secret nào đã lưu (từ `listWorkspaceSecrets`). */
   secretSet: Partial<Record<WorkspaceSecretKind, boolean>>;
+  /** Bản che của secret đã lưu (từ `listWorkspaceSecrets`). */
+  secretMasked: Partial<Record<WorkspaceSecretKind, string | null>>;
 };
 
 /** Tab 3 — NotebookLM Synchronization (spec 4): Notebook ID, Sync Strategy (Drive Sync / Cookie RPC), secret chỉ ghi, tự động hoá. */
-export function NotebookTab({ workspaceId, secrets, onSecretsChange, secretSet }: NotebookTabProps) {
+export function NotebookTab({ workspaceId, secrets, onSecretsChange, secretSet, secretMasked }: NotebookTabProps) {
   const t = useTranslations("settings.notebook");
   const errorMessage = useErrorMessage();
   const { control, register, getValues, formState } = useFormContext<ConfigForm>();
   const strategy = useWatch({ control, name: "nbl.syncStrategy" });
   const [result, setResult] = React.useState<NotebookCheckResult | null>(null);
   const check = useCheckNotebook({ mutation: { onSuccess: setResult, onError: () => setResult(null) } });
+
+  const revealProps = (kind: WorkspaceSecretKind) => ({
+    isSet: secretSet[kind],
+    masked: secretMasked[kind],
+    onReveal: async () => (await revealWorkspaceSecret(workspaceId, kind)).value,
+    onRevealError: (err: unknown) => notify.error(errorMessage(err)),
+  });
 
   const runCheck = () => {
     const nbl = getValues("nbl");
@@ -94,7 +104,7 @@ export function NotebookTab({ workspaceId, secrets, onSecretsChange, secretSet }
         <>
           <Field label={t("cookie")} hint={t("cookieHint")}>
             <SecretInput
-              isSet={secretSet.NOTEBOOK_COOKIE}
+              {...revealProps("NOTEBOOK_COOKIE")}
               placeholder="SID=…; HSID=…; SSID=…"
               value={secrets.NOTEBOOK_COOKIE ?? ""}
               onChange={(e) => onSecretsChange({ ...secrets, NOTEBOOK_COOKIE: e.target.value })}
@@ -102,7 +112,7 @@ export function NotebookTab({ workspaceId, secrets, onSecretsChange, secretSet }
           </Field>
           <Field label={t("token")} hint={t("tokenHint")}>
             <SecretInput
-              isSet={secretSet.NOTEBOOK_TOKEN}
+              {...revealProps("NOTEBOOK_TOKEN")}
               placeholder="SNlM0e"
               value={secrets.NOTEBOOK_TOKEN ?? ""}
               onChange={(e) => onSecretsChange({ ...secrets, NOTEBOOK_TOKEN: e.target.value })}

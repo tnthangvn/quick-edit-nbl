@@ -13,7 +13,8 @@
       "GOOGLE_OAUTH_STATE_INVALID": "The Google sign-in session expired or is invalid. Try again.",
       "GOOGLE_OAUTH_FAILED": "Google sign-in failed.",
       "DRIVE_NOT_FOUND": "Drive folder or file not found (or access denied).",
-      "DRIVE_REQUEST_FAILED": "Google Drive request failed."
+      "DRIVE_REQUEST_FAILED": "Google Drive request failed.",
+      "GIT_IDENTITY_MISSING": "Git author name and email are not set. Run git config --global user.name \"Name\" and git config --global user.email \"email\", then retry."
     }
   }
 }

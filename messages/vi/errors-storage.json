@@ -13,7 +13,8 @@
       "GOOGLE_OAUTH_STATE_INVALID": "Phiên đăng nhập Google đã hết hạn hoặc không hợp lệ. Thử lại.",
       "GOOGLE_OAUTH_FAILED": "Đăng nhập Google thất bại.",
       "DRIVE_NOT_FOUND": "Không tìm thấy thư mục hoặc file trên Drive (hoặc không có quyền).",
-      "DRIVE_REQUEST_FAILED": "Gọi Google Drive thất bại."
+      "DRIVE_REQUEST_FAILED": "Gọi Google Drive thất bại.",
+      "GIT_IDENTITY_MISSING": "Git chưa có tên và email tác giả. Chạy git config --global user.name \"Tên\" và git config --global user.email \"email\" rồi thử lại."
     }
   }
 }

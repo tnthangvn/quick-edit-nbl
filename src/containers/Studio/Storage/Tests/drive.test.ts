@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { DRIVE_GOOGLE_DOC_MIME, GoogleError, type DriveFile, type DriveGateway } from "@/ship/adapters/google";
+import { DisconnectGoogleOAuthTask } from "../Tasks/DisconnectGoogleOAuthTask";
 import { DownloadDriveFolderTask } from "../Tasks/DownloadDriveFolderTask";
 import { UploadDriveFileTask } from "../Tasks/UploadDriveFileTask";
 
@@ -62,5 +63,21 @@ describe("Drive tasks (gateway giả)", () => {
     await expect(new UploadDriveFileTask(fail("UNAUTHORIZED")).run(up)).rejects.toMatchObject({ code: "STORAGE.GOOGLE_AUTH_REQUIRED" });
     await expect(new UploadDriveFileTask(fail("NOT_FOUND")).run(up)).rejects.toMatchObject({ code: "STORAGE.DRIVE_NOT_FOUND" });
     await expect(new UploadDriveFileTask(fail("FAILED")).run(up)).rejects.toMatchObject({ code: "STORAGE.DRIVE_REQUEST_FAILED" });
+  });
+});
+
+describe("DisconnectGoogleOAuthTask", () => {
+  it("chỉ xoá refresh token ở ref được chỉ định", async () => {
+    const store = new Map([
+      ["google:oauth", '{"refresh_token":"shared"}'],
+      ["ws1:google_oauth", '{"refresh_token":"ws"}'],
+    ]);
+    const fake = {
+      get: async (ref: string) => store.get(ref),
+      set: async (ref: string, value: string) => void store.set(ref, value),
+      delete: async (ref: string) => void store.delete(ref),
+    };
+    await new DisconnectGoogleOAuthTask(fake).run({ secretRef: "google:oauth" });
+    expect([...store.keys()]).toEqual(["ws1:google_oauth"]);
   });
 });

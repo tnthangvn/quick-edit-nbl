@@ -10,4 +10,7 @@ import type { WorkspaceSecretKind } from './workspaceSecretKind';
 export interface WorkspaceSecretState {
   kind: WorkspaceSecretKind;
   isSet: boolean;
+  /** @nullable */
+  masked: string | null;
+  revealable: boolean;
 }

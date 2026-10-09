@@ -50,3 +50,8 @@ export const getGoogleOAuthStatusContract = defineContract({
   request: { query: GoogleOAuthQuery },
   responses: { 200: GoogleOAuthStatusResponse },
 });
+
+export const disconnectGoogleOAuthContract = defineContract({
+  request: { query: GoogleOAuthQuery },
+  responses: { 200: GoogleOAuthStatusResponse, 404: ErrorResponse },
+});

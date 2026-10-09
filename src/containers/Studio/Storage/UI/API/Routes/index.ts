@@ -1,6 +1,7 @@
 import type { RouteDefinition } from "@/ship/engine/defineRoute";
 import {
   completeGoogleOAuthRoute,
+  disconnectGoogleOAuthRoute,
   getGoogleOAuthStatusRoute,
   getStorageStatusRoute,
   pullWorkspaceRoute,
@@ -17,4 +18,5 @@ export const routes: RouteDefinition<any, any>[] = [
   startGoogleOAuthRoute,
   completeGoogleOAuthRoute,
   getGoogleOAuthStatusRoute,
+  disconnectGoogleOAuthRoute,
 ];

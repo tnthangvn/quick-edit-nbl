@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import type * as z from "zod";
-import { getListConnectorsQueryKey, useCreateConnector, useUpdateConnector } from "@/client/api/generated";
+import { getListConnectorsQueryKey, revealConnectorToken, useCreateConnector, useUpdateConnector } from "@/client/api/generated";
 import { ConnectorType, GitProvider, McpTransport, type Connector, type UpdateConnectorInput } from "@/client/api/generated/model";
 import { CreateConnectorBody } from "@/client/api/generated/zod/connector/connector.zod";
 import { useErrorMessage } from "@/client/api/useErrorMessage";
@@ -265,7 +265,14 @@ function ConnectorForm({ onOpenChange, connector, defaults, onSaved }: Omit<Conn
 
             {type === "TOKEN" ? (
               <Field label={t("token")} hint={t("tokenHint")} error={fieldError(formState.errors, "token")}>
-                <SecretInput isSet={connector?.hasToken} placeholder="ghp_…" {...register("token", { setValueAs: emptyToUndefined })} />
+                <SecretInput
+                  isSet={connector?.hasToken}
+                  masked={connector?.tokenMasked}
+                  onReveal={connector ? async () => (await revealConnectorToken(connector.id)).value : undefined}
+                  onRevealError={(err) => notify.error(errorMessage(err))}
+                  placeholder="ghp_…"
+                  {...register("token", { setValueAs: emptyToUndefined })}
+                />
               </Field>
             ) : null}
 

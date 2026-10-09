@@ -28,6 +28,7 @@ import type {
   Connector,
   ConnectorCheck,
   ConnectorList,
+  ConnectorTokenValue,
   ConnectorToolList,
   CreateConnectorInput,
   DetectedCliList,
@@ -1036,3 +1037,90 @@ export function useListConnectorTools<TData = Awaited<ReturnType<typeof listConn
 
 
 
+export const getRevealConnectorTokenUrl = (connectorId: string,) => {
+
+
+
+
+  return `/api/connectors/${connectorId}/token/reveal`
+}
+
+/**
+ * @summary Xem token PAT của connector (plaintext, không cache)
+ */
+export const revealConnectorToken = async (connectorId: string, options?: RequestInit): Promise<ConnectorTokenValue> => {
+
+  const res = await fetch(getRevealConnectorTokenUrl(connectorId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: ConnectorTokenValue, status?: number} = new globalThis.Error();
+    const data : ConnectorTokenValue = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: ConnectorTokenValue = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getRevealConnectorTokenMutationKey = () => ['revealConnectorToken'] as const;
+
+export const getRevealConnectorTokenMutationOptions = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revealConnectorToken>>, TError,RevealConnectorTokenMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof revealConnectorToken>>, TError,RevealConnectorTokenMutationVariables, TContext> => {
+
+const mutationKey = getRevealConnectorTokenMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revealConnectorToken>>, RevealConnectorTokenMutationVariables> = (props) => {
+          const {connectorId} = props ?? {};
+
+          return  revealConnectorToken(connectorId,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevealConnectorTokenMutationResult = NonNullable<Awaited<ReturnType<typeof revealConnectorToken>>>
+
+    export type RevealConnectorTokenMutationError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }
+    export type RevealConnectorTokenMutationVariables = {connectorId: string}
+
+    /**
+ * @summary Xem token PAT của connector (plaintext, không cache)
+ */
+export const useRevealConnectorToken = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revealConnectorToken>>, TError,RevealConnectorTokenMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof revealConnectorToken>>,
+        TError,
+        RevealConnectorTokenMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRevealConnectorTokenMutationOptions(options), queryClient);
+    }

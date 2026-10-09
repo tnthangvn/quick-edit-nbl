@@ -7,6 +7,7 @@ import { DriveNotFoundException } from "./DriveNotFoundException";
 import { DriveRequestFailedException } from "./DriveRequestFailedException";
 import { GitAuthFailedException } from "./GitAuthFailedException";
 import { GitCommandFailedException } from "./GitCommandFailedException";
+import { GitIdentityMissingException } from "./GitIdentityMissingException";
 import { GoogleAuthRequiredException } from "./GoogleAuthRequiredException";
 import { GoogleNotConfiguredException } from "./GoogleNotConfiguredException";
 import { PullConflictException } from "./PullConflictException";
@@ -18,6 +19,8 @@ export function gitFailure(command: string, r: RunResult): AppException {
   switch (classifyGitFailure(r)) {
     case "AUTH":
       return new GitAuthFailedException(params);
+    case "IDENTITY":
+      return new GitIdentityMissingException(params);
     case "REJECTED":
       return command === "push" ? new PushRejectedException(params) : new GitCommandFailedException(params);
     case "CONFLICT":

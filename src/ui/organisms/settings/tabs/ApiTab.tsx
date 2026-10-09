@@ -5,7 +5,7 @@ import { CircleCheck, Plug } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import type * as z from "zod";
-import { useTestLlmConnection } from "@/client/api/generated";
+import { revealApiKey, useTestLlmConnection } from "@/client/api/generated";
 import { LlmProvider, type LlmConnectionTestResult } from "@/client/api/generated/model";
 import type { UpdateSettingsBody } from "@/client/api/generated/zod/setting/setting.zod";
 import { useErrorMessage } from "@/client/api/useErrorMessage";
@@ -17,6 +17,7 @@ import { Combobox } from "@/ui/primitives/combobox";
 import { Icon } from "@/ui/primitives/icon";
 import { Input } from "@/ui/primitives/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/primitives/select";
+import { notify } from "@/ui/primitives/sonner";
 import { Textarea } from "@/ui/primitives/textarea";
 import { fieldError } from "@/ui/organisms/settings/form-errors";
 
@@ -37,7 +38,18 @@ const nullIfEmpty = (v: unknown) => (typeof v === "string" && v.trim() === "" ? 
 const undefinedIfEmpty = (v: unknown) => (typeof v === "string" && v === "" ? undefined : v);
 
 /** Tab 1 — Direct API (spec 4): Provider, API key chỉ ghi + Test, Model ID (chọn hoặc tự nhập), System Prompt. */
-export function ApiTab({ hasApiKey, savedProvider, workspaceId }: { hasApiKey: boolean; savedProvider?: LlmProvider; workspaceId?: string }) {
+export function ApiTab({
+  hasApiKey,
+  apiKeyMasked,
+  savedProvider,
+  workspaceId,
+}: {
+  hasApiKey: boolean;
+  /** Bản che API key đã lưu (từ getSettings). */
+  apiKeyMasked?: string | null;
+  savedProvider?: LlmProvider;
+  workspaceId?: string;
+}) {
   const t = useTranslations("settings.api");
   const errorMessage = useErrorMessage();
   const { control, register, setValue, getValues, formState } = useFormContext<SettingsForm>();
@@ -108,6 +120,9 @@ export function ApiTab({ hasApiKey, savedProvider, workspaceId }: { hasApiKey: b
       >
         <SecretInput
           isSet={keySaved}
+          masked={keySaved ? apiKeyMasked : null}
+          onReveal={async () => (await revealApiKey()).value}
+          onRevealError={(err) => notify.error(errorMessage(err))}
           placeholder={t("apiKeyPlaceholder")}
           {...register("api.apiKey", { setValueAs: undefinedIfEmpty })}
           trailing={

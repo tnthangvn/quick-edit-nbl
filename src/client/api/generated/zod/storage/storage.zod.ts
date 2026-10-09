@@ -138,3 +138,18 @@ export const GetGoogleOAuthStatusResponse = zod.object({
   "connected": zod.boolean()
 })
 
+/**
+ * @summary Đăng xuất Google: xoá refresh token (của Workspace hoặc dùng chung)
+ */
+
+
+
+export const DisconnectGoogleOAuthQueryParams = zod.object({
+  "workspaceId": zod.string().min(1).optional()
+})
+
+export const DisconnectGoogleOAuthResponse = zod.object({
+  "configured": zod.boolean(),
+  "connected": zod.boolean()
+})
+

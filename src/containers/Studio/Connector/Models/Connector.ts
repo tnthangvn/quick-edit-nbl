@@ -43,6 +43,9 @@ declare module "@/ship/contracts/data" {
   }
 }
 
+/** Connector kèm bản che token PAT (vd "ghp_••••••••a1b2"); null khi không có token. Trả ra API thay cho plaintext. */
+export type ConnectorView = ConnectorRow & { token_masked: string | null };
+
 /** Ref secret: token PAT = "connector:<id>:token"; env/header bí mật = "connector:<id>:secret:<KEY>". */
 export const connectorSecretRef = (connectorId: string, key?: string) =>
   key === undefined ? `connector:${connectorId}:token` : `connector:${connectorId}:secret:${key}`;

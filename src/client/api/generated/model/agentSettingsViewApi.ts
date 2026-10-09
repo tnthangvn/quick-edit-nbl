@@ -20,4 +20,6 @@ export type AgentSettingsViewApi = {
   temperature: number;
   systemPrompt: string;
   hasApiKey: boolean;
+  /** @nullable */
+  apiKeyMasked: string | null;
 };

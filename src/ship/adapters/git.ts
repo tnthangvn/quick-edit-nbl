@@ -39,8 +39,9 @@ export function gitErrorDetail(r: RunResult, max = 600): string {
 }
 
 /** Phân loại lỗi git từ stderr để chọn mã lỗi phù hợp. */
-export function classifyGitFailure(r: RunResult): "AUTH" | "REJECTED" | "CONFLICT" | "OTHER" {
+export function classifyGitFailure(r: RunResult): "AUTH" | "REJECTED" | "CONFLICT" | "IDENTITY" | "OTHER" {
   const s = `${r.stderr}\n${r.stdout}`;
+  if (/author identity unknown|please tell me who you are|unable to auto-detect email address|empty ident name/i.test(s)) return "IDENTITY";
   if (/authentication failed|could not read (username|password)|permission denied|access denied|\b403\b|\b401\b|invalid credentials/i.test(s)) return "AUTH";
   if (/\[rejected\]|non-fast-forward|fetch first|remote rejected|protected branch/i.test(s)) return "REJECTED";
   if (/not possible to fast-forward|diverg|conflict|would be overwritten|unmerged/i.test(s)) return "CONFLICT";

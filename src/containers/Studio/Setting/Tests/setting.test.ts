@@ -8,12 +8,15 @@ import { CreateWorkspaceRecordTask } from "../../Workspace/Tasks/CreateWorkspace
 import { GetWorkspaceTask } from "../../Workspace/Tasks/GetWorkspaceTask";
 import { GetEffectiveAgentSettingsAction } from "../Actions/GetEffectiveAgentSettingsAction";
 import { ListWorkspaceSecretsAction } from "../Actions/ListWorkspaceSecretsAction";
+import { RevealWorkspaceSecretAction } from "../Actions/RevealWorkspaceSecretAction";
 import { UpdateSettingsAction, type UpdateSettingsInput } from "../Actions/UpdateSettingsAction";
 import { WriteWorkspaceSecretAction } from "../Actions/WriteWorkspaceSecretAction";
 import { DEFAULT_CLI_PROFILES } from "../Models/defaultAgentSettings";
 import { DEFAULT_NOTEBOOK_CONFIG, type WorkspaceConfig } from "../Models/WorkspaceConfig";
 import { CheckSecretsPresenceTask } from "../Tasks/CheckSecretsPresenceTask";
+import { MaskSecretsTask } from "../Tasks/MaskSecretsTask";
 import { GetAgentSettingsTask } from "../Tasks/GetAgentSettingsTask";
+import { ReadSecretTask } from "../Tasks/ReadSecretTask";
 import { ReadWorkspaceConfigTask } from "../Tasks/ReadWorkspaceConfigTask";
 import { SaveAgentSettingsTask } from "../Tasks/SaveAgentSettingsTask";
 import { WriteSecretTask } from "../Tasks/WriteSecretTask";
@@ -31,7 +34,7 @@ const settingsInput = (over: Partial<UpdateSettingsInput["api"]> = {}): UpdateSe
 describe("Setting", () => {
   let tmp: string;
   let store: MemorySecrets;
-  const update = () => new UpdateSettingsAction(new WriteSecretTask(store), new CheckSecretsPresenceTask(store), new SaveAgentSettingsTask());
+  const update = () => new UpdateSettingsAction(new WriteSecretTask(store), new MaskSecretsTask(store), new SaveAgentSettingsTask());
 
   beforeEach(() => {
     tmp = mkdtempSync(path.join(os.tmpdir(), "spec-studio-setting-"));
@@ -57,19 +60,20 @@ describe("Setting", () => {
     expect(s.cli.profiles.every((p) => p.args.includes("{prompt}"))).toBe(true);
   });
 
-  it("API key chỉ ghi: lưu theo provider, response chỉ có hasApiKey", async () => {
-    const saved = await update().run({ ...settingsInput(), api: { ...settingsInput().api, apiKey: "sk-secret" } });
-    expect(saved.api.apiKeyRef).toBe("llm:GOOGLE");
-    expect(store.data.get("llm:GOOGLE")).toBe("sk-secret");
+  it("API key: lưu theo provider, response chỉ có hasApiKey + bản che", async () => {
+    const saved = await update().run({ ...settingsInput(), api: { ...settingsInput().api, apiKey: "sk-secret-abcdef-1234" } });
+    expect(saved.settings.api.apiKeyRef).toBe("llm:GOOGLE");
+    expect(store.data.get("llm:GOOGLE")).toBe("sk-secret-abcdef-1234");
     const view = new AgentSettingsTransformer().transform(saved);
     expect(view.api.hasApiKey).toBe(true);
-    expect(JSON.stringify(view)).not.toContain("sk-secret");
+    expect(view.api.apiKeyMasked).toBe("sk-s••••••••1234");
+    expect(JSON.stringify(view)).not.toContain("sk-secret-abcdef-1234");
     expect(JSON.stringify(view)).not.toContain("apiKeyRef");
 
     // Đổi provider chưa có key → không có ref; quay lại GOOGLE → dùng lại key cũ.
-    expect((await update().run(settingsInput({ provider: "OPENAI", model: "gpt" }))).api.apiKeyRef).toBeNull();
-    expect((await update().run(settingsInput())).api.apiKeyRef).toBe("llm:GOOGLE");
-    expect((await update().run({ ...settingsInput(), api: { ...settingsInput().api, apiKey: null } })).api.apiKeyRef).toBeNull();
+    expect((await update().run(settingsInput({ provider: "OPENAI", model: "gpt" }))).settings.api.apiKeyRef).toBeNull();
+    expect((await update().run(settingsInput())).settings.api.apiKeyRef).toBe("llm:GOOGLE");
+    expect((await update().run({ ...settingsInput(), api: { ...settingsInput().api, apiKey: null } })).settings.api.apiKeyRef).toBeNull();
     expect(store.data.has("llm:GOOGLE")).toBe(false);
   });
 
@@ -132,9 +136,15 @@ describe("Setting", () => {
     expect(effective.api).toMatchObject({ provider: "ANTHROPIC", apiKeyRef: null });
 
     await new WriteWorkspaceSecretAction(new GetWorkspaceTask(), new WriteSecretTask(store)).run({ workspaceId: ws.id, kind: "NOTEBOOK_COOKIE", value: "SID=1" });
-    const list = await new ListWorkspaceSecretsAction(new GetWorkspaceTask(), new CheckSecretsPresenceTask(store)).run({ workspaceId: ws.id });
-    expect(list.find((s) => s.kind === "NOTEBOOK_COOKIE")).toEqual({ kind: "NOTEBOOK_COOKIE", isSet: true });
+    const list = await new ListWorkspaceSecretsAction(new GetWorkspaceTask(), new MaskSecretsTask(store)).run({ workspaceId: ws.id });
+    expect(list.find((s) => s.kind === "NOTEBOOK_COOKIE")).toEqual({ kind: "NOTEBOOK_COOKIE", isSet: true, masked: "••••••••", revealable: true });
+    expect(list.find((s) => s.kind === "GOOGLE_OAUTH")?.revealable).toBe(false);
     expect(list.find((s) => s.kind === "GIT_TOKEN")?.isSet).toBe(false);
     expect(store.data.get(`${ws.id}:notebook_cookie`)).toBe("SID=1");
+
+    const reveal = new RevealWorkspaceSecretAction(new GetWorkspaceTask(), new ReadSecretTask(store));
+    expect(await reveal.run({ workspaceId: ws.id, kind: "NOTEBOOK_COOKIE" })).toEqual({ value: "SID=1" });
+    await expect(reveal.run({ workspaceId: ws.id, kind: "GIT_TOKEN" })).rejects.toMatchObject({ code: "SETTING.SECRET_NOT_SET" });
+    await expect(reveal.run({ workspaceId: ws.id, kind: "GOOGLE_OAUTH" })).rejects.toMatchObject({ code: "SETTING.SECRET_NOT_REVEALABLE" });
   });
 });

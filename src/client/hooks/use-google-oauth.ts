@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { getGetGoogleOAuthStatusQueryKey, getGoogleOAuthStatus, startGoogleOAuth, useGetGoogleOAuthStatus } from "@/client/api/generated";
+import {
+  getGetGoogleOAuthStatusQueryKey,
+  getGoogleOAuthStatus,
+  startGoogleOAuth,
+  useDisconnectGoogleOAuth,
+  useGetGoogleOAuthStatus,
+} from "@/client/api/generated";
 
 const POLL_MS = 1500;
 const TIMEOUT_MS = 5 * 60_000;
@@ -11,6 +17,7 @@ const TIMEOUT_MS = 5 * 60_000;
  * Đăng nhập Google (Drive / NotebookLM Drive Sync): mở popup tới `authUrl` của `startGoogleOAuth`,
  * hỏi `getGoogleOAuthStatus` mỗi 1.5s tới khi `connected` hoặc popup bị đóng / quá 5 phút.
  * Popup được mở ngay trong sự kiện click (tránh bị chặn) rồi mới gán URL.
+ * `disconnect` xoá refresh token (của Workspace nếu có workspaceId, ngược lại token dùng chung).
  */
 export function useGoogleOAuth(workspaceId?: string) {
   const params = workspaceId ? { workspaceId } : undefined;
@@ -20,6 +27,12 @@ export function useGoogleOAuth(workspaceId?: string) {
   const [error, setError] = useState<unknown>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const popupRef = useRef<Window | null>(null);
+  const disconnectMutation = useDisconnectGoogleOAuth({
+    mutation: {
+      onSuccess: (next) => queryClient.setQueryData(getGetGoogleOAuthStatusQueryKey(params), next),
+      onError: (err) => setError(err),
+    },
+  });
 
   const stop = useCallback(() => {
     if (timer.current) clearInterval(timer.current);
@@ -69,6 +82,12 @@ export function useGoogleOAuth(workspaceId?: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId, queryClient, stop]);
 
+  const disconnect = useCallback(() => {
+    setError(null);
+    disconnectMutation.mutate({ params });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceId, disconnectMutation.mutate]);
+
   return {
     configured: status.data?.configured ?? false,
     connected: status.data?.connected ?? false,
@@ -77,5 +96,7 @@ export function useGoogleOAuth(workspaceId?: string) {
     connecting,
     error,
     connect,
+    disconnecting: disconnectMutation.isPending,
+    disconnect,
   };
 }

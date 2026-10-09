@@ -110,7 +110,20 @@ const badgeVariants = cva("inline-flex items-center gap-1 rounded-sm px-1.5 text
 - ID do app sinh (UUID v7), `created_at` / `updated_at` dạng ISO do `RepositoryBase` gán, để dữ liệu giống nhau giữa hai driver.
 - Transaction mở ở Action, truyền `repo.withTransaction(trx)` xuống Task. JSON: ghi tạm rồi rename từng file khi commit, khoá theo model trong tiến trình.
 - POSTGRES: thay đổi schema qua migration (`make migration name=... container=...`). JSON: không cần migration, `make migrate` bỏ qua. Seeder viết qua repository nên chạy được cả hai driver.
-- Secret (token, cookie, API key) không lưu qua repository hay `config.json`: dùng keychain (`@napi-rs/keyring`), dự phòng `~/.spec-studio/secrets.json` quyền 600.
+- Secret: xem mục **Secret (dữ liệu nhạy cảm)** bên dưới.
+
+## Secret (dữ liệu nhạy cảm)
+
+- Mọi thông tin nhạy cảm (GitHub/GitLab PAT, refresh token Google Drive, cookie/token NotebookLM, API key LLM, env/header bí mật của MCP...) **phải mã hoá trước khi lưu**, chỉ đi qua `secrets` (`SecretStore` trong `src/ship/adapters/secrets.ts`). Không ghi secret vào model nghiệp vụ, `config.json`, log hay file export.
+- `secrets` lưu vào model `secrets` theo `DATA_DRIVER` (JSON: `DATA_DIR/secrets.json`; POSTGRES: bảng `secrets`). Cột `value` luôn là ciphertext `enc:v1:...` (AES-256-GCM, IV ngẫu nhiên, xem `src/ship/adapters/cipher.ts`).
+- Master key: env `SECRET_ENCRYPTION_KEY` (32 byte, base64/hex). Local bỏ trống thì tự sinh `~/.spec-studio/master.key` quyền 600; chạy server bắt buộc khai env/KMS. Không commit master key; mất key là mất mọi secret.
+- Model nghiệp vụ chỉ giữ **ref** (`llm:<provider>`, `connector:<id>:token`, `<workspaceId>:<kind>`) hoặc cờ (`has_token`). Chỉ BE giải mã, ngay lúc cần dùng (Task gọi `secrets.get`).
+- API trả ra FE:
+  - GET/list/create/update: **không bao giờ plaintext**, chỉ cờ (`isSet`, `hasToken`, `hasApiKey`) và bản che (`masked`, `tokenMasked`, `apiKeyMasked`) tạo bằng `maskSecret()`.
+  - Plaintext chỉ qua endpoint reveal riêng, `POST .../reveal` (vd `revealApiKey`, `revealWorkspaceSecret`, `revealConnectorToken`), gọi khi người dùng bấm Hiện. Response API có `Cache-Control: no-store`.
+  - Secret do hệ thống cấp (refresh token OAuth) không có reveal (`SETTING.SECRET_NOT_REVEALABLE`).
+- FE: plaintext đã reveal chỉ để trong state của component (`SecretInput`), không đưa vào TanStack Query, Zustand hay form khi người dùng chưa sửa.
+- Thêm loại secret mới: khai ref, ghi qua `secrets.set`, trả bản che trong DTO, thêm endpoint reveal nếu người dùng tự nhập, viết test chứng minh file/bảng không chứa plaintext.
 
 ## Enum
 

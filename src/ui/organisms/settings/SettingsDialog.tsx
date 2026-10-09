@@ -152,6 +152,7 @@ function SettingsPanel({ onOpenChange, workspaceId, initialTab, saving, setSavin
   const configReady = useWatch({ control: configForm.control, name: "version" }) !== undefined;
 
   const secretSet = Object.fromEntries((secretsQ.data?.items ?? []).map((s) => [s.kind, s.isSet])) as Partial<Record<WorkspaceSecretKind, boolean>>;
+  const secretMasked = Object.fromEntries((secretsQ.data?.items ?? []).map((s) => [s.kind, s.masked])) as Partial<Record<WorkspaceSecretKind, string | null>>;
 
   const save = async () => {
     const settingsDirty = Boolean(settingsQ.data) && settingsForm.formState.isDirty;
@@ -270,7 +271,7 @@ function SettingsPanel({ onOpenChange, workspaceId, initialTab, saving, setSavin
             </DialogHeader>
             <DialogBody>
               <TabsContent value="API" className="flex flex-col gap-5">
-                {settingsBody(<ApiTab hasApiKey={settingsQ.data?.api.hasApiKey ?? false} savedProvider={settingsQ.data?.api.provider} workspaceId={workspaceId} />)}
+                {settingsBody(<ApiTab hasApiKey={settingsQ.data?.api.hasApiKey ?? false} apiKeyMasked={settingsQ.data?.api.apiKeyMasked} savedProvider={settingsQ.data?.api.provider} workspaceId={workspaceId} />)}
               </TabsContent>
               <TabsContent value="CLI" className="flex flex-col gap-5">
                 {settingsBody(<CliTab workspacePath={workspaceQ.data?.path} />)}
@@ -278,7 +279,7 @@ function SettingsPanel({ onOpenChange, workspaceId, initialTab, saving, setSavin
               {workspaceId ? (
                 <>
                   <TabsContent value="NOTEBOOK" className="flex flex-col gap-5">
-                    {configBody(<NotebookTab workspaceId={workspaceId} secrets={secrets} onSecretsChange={setSecrets} secretSet={secretSet} />)}
+                    {configBody(<NotebookTab workspaceId={workspaceId} secrets={secrets} onSecretsChange={setSecrets} secretSet={secretSet} secretMasked={secretMasked} />)}
                   </TabsContent>
                   <TabsContent value="WORKSPACE" className="flex flex-col gap-5">
                     {configBody(<WorkspaceTab workspace={workspaceQ.data} onRemove={() => setRemoveOpen(true)} />)}

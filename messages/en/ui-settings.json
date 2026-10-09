@@ -32,7 +32,7 @@
       },
       "apiKey": "API Key",
       "apiKeyPlaceholder": "Paste API key…",
-      "apiKeyHint": "Stored locally only (keychain / secrets.json), never sent anywhere else.",
+      "apiKeyHint": "Encrypted with AES-256 before storing, never sent anywhere else.",
       "apiKeyHintOllama": "A local Ollama usually doesn't need an API key.",
       "removeKey": "Remove Key",
       "keyWillBeRemoved": "The saved key will be removed when you Save.",
@@ -164,7 +164,19 @@
       "alreadyAdded": "Added",
       "add": "Add",
       "addAnyway": "Add Anyway",
-      "added": "Added connector {name}"
+      "added": "Added connector {name}",
+      "google": {
+        "title": "Google Drive",
+        "description": "Sign in once; shared by Drive-backed workspaces and NotebookLM Drive Sync.",
+        "checking": "Checking Google sign-in…",
+        "connected": "OAuth granted Drive access · token shared by every project.",
+        "notConnected": "Not signed in to Google.",
+        "notConfigured": "Google OAuth is not configured on the server (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).",
+        "badgeConnected": "Connected",
+        "waiting": "Waiting for sign-in…",
+        "signIn": "Sign In With Google",
+        "signOut": "Sign Out"
+      }
     },
     "connectorForm": {
       "createTitle": "Add connector",
@@ -182,7 +194,7 @@
         },
         "TOKEN": {
           "title": "Personal Access Token",
-          "description": "Stored in the keychain / secrets.json."
+          "description": "Encrypted with AES-256 before storing."
         },
         "SSH": {
           "title": "SSH key",

@@ -154,7 +154,8 @@ export function defineRoute<const Req extends RouteRequest = RouteRequest, const
       const schema = def as z.ZodType;
       // Dev/test: bắt Controller trả lệch schema để docs/api.json luôn đúng với thực tế.
       const body = env().NODE_ENV === "production" ? output.body : schema.parse(output.body);
-      return Response.json(body, { status: output.status });
+      // API có thể trả bản che / plaintext secret (endpoint reveal): không cho trình duyệt hay proxy cache.
+      return Response.json(body, { status: output.status, headers: { "Cache-Control": "no-store" } });
     } catch (err) {
       return toErrorResponse(err);
     }

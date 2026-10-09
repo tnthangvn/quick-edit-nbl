@@ -4,6 +4,7 @@ import * as React from "react";
 import { DiffEditor, Editor, type DiffOnMount, type OnChange, type OnMount } from "@monaco-editor/react";
 import { CircleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useActivityEpoch } from "@/client/hooks/use-activity-epoch";
 import { useThemeToggle } from "@/client/hooks/use-theme-toggle";
 import { useMonacoStatus } from "@/client/monaco-loader";
 import { MONACO_OPTIONS, monacoThemeName, registerSpecStudioThemes } from "@/client/monaco-theme";
@@ -39,14 +40,19 @@ type SpecMonacoEditorProps = {
   ariaLabel: string;
 };
 
-/** Editor Markdown (EditorPane.md): mỗi file một model (`path`) để giữ undo / vị trí con trỏ khi đổi file. */
+/**
+ * Editor Markdown (EditorPane.md): mỗi file một model (`path`) để giữ undo / vị trí con trỏ khi đổi file.
+ * `epoch`: tạo lại editor khi route được hiện lại từ `<Activity>` (editor cũ đã dispose lúc ẩn).
+ */
 export function SpecMonacoEditor({ workspaceId, file, value, onChange, ariaLabel }: SpecMonacoEditorProps) {
   const { resolved } = useThemeToggle();
+  const epoch = useActivityEpoch();
   const handleChange = React.useCallback<OnChange>((v) => onChange(v ?? ""), [onChange]);
   const handleMount = React.useCallback<OnMount>((editor) => editor.focus(), []);
   return (
     <MonacoGate>
       <Editor
+        key={epoch}
         path={modelPath(workspaceId, file)}
         language="markdown"
         value={value}
@@ -82,6 +88,7 @@ type SpecMonacoDiffProps = {
  */
 export function SpecMonacoDiff({ workspaceId, file, original, proposed, instanceId, modifiedRef, onStats, ariaLabel }: SpecMonacoDiffProps) {
   const { resolved } = useThemeToggle();
+  const epoch = useActivityEpoch();
   const cleanup = React.useRef<(() => void) | null>(null);
 
   const handleMount = React.useCallback<DiffOnMount>(
@@ -118,6 +125,7 @@ export function SpecMonacoDiff({ workspaceId, file, original, proposed, instance
   return (
     <MonacoGate>
       <DiffEditor
+        key={epoch}
         original={original}
         modified={proposed}
         language="markdown"

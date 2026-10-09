@@ -5,6 +5,8 @@ import { getSettingsRoute } from "./getSettings.route";
 import { getWorkspaceConfigRoute } from "./getWorkspaceConfig.route";
 import { importSettingsRoute } from "./importSettings.route";
 import { listWorkspaceSecretsRoute } from "./listWorkspaceSecrets.route";
+import { revealApiKeyRoute } from "./revealApiKey.route";
+import { revealWorkspaceSecretRoute } from "./revealWorkspaceSecret.route";
 import { setWorkspaceSecretRoute } from "./setWorkspaceSecret.route";
 import { updateSettingsRoute } from "./updateSettings.route";
 import { updateWorkspaceConfigRoute } from "./updateWorkspaceConfig.route";
@@ -19,6 +21,8 @@ export const routes: RouteDefinition<any, any>[] = [
   listWorkspaceSecretsRoute,
   setWorkspaceSecretRoute,
   deleteWorkspaceSecretRoute,
+  revealWorkspaceSecretRoute,
+  revealApiKeyRoute,
   exportSettingsRoute,
   importSettingsRoute,
 ];

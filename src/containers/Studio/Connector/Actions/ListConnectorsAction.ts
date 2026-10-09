@@ -1,14 +1,18 @@
 import "server-only";
 import { Action } from "@/ship/parents/Action";
-import type { ConnectorRow } from "../Models/Connector";
+import type { ConnectorView } from "../Models/Connector";
 import { ListConnectorsTask } from "../Tasks/ListConnectorsTask";
+import { MaskConnectorTokensTask } from "../Tasks/MaskConnectorTokensTask";
 
-export class ListConnectorsAction extends Action<void, ConnectorRow[]> {
-  constructor(private readonly listConnectors = new ListConnectorsTask()) {
+export class ListConnectorsAction extends Action<void, ConnectorView[]> {
+  constructor(
+    private readonly listConnectors = new ListConnectorsTask(),
+    private readonly maskTokens = new MaskConnectorTokensTask(),
+  ) {
     super();
   }
 
-  run(): Promise<ConnectorRow[]> {
-    return this.listConnectors.run();
+  async run(): Promise<ConnectorView[]> {
+    return this.maskTokens.run({ rows: await this.listConnectors.run() });
   }
 }

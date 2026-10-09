@@ -26,6 +26,7 @@ import type {
 
 import type {
   CompleteGoogleOAuthParams,
+  DisconnectGoogleOAuthParams,
   ErrorResponse,
   GetGoogleOAuthStatusParams,
   GoogleOAuthStart,
@@ -707,3 +708,97 @@ export function useGetGoogleOAuthStatus<TData = Awaited<ReturnType<typeof getGoo
 
 
 
+export const getDisconnectGoogleOAuthUrl = (params?: DisconnectGoogleOAuthParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/google/oauth?${stringifiedParams}` : `/api/google/oauth`
+}
+
+/**
+ * @summary Đăng xuất Google: xoá refresh token (của Workspace hoặc dùng chung)
+ */
+export const disconnectGoogleOAuth = async (params?: DisconnectGoogleOAuthParams, options?: RequestInit): Promise<GoogleOAuthStatus> => {
+
+  const res = await fetch(getDisconnectGoogleOAuthUrl(params),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: GoogleOAuthStatus, status?: number} = new globalThis.Error();
+    const data : GoogleOAuthStatus = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: GoogleOAuthStatus = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getDisconnectGoogleOAuthMutationKey = () => ['disconnectGoogleOAuth'] as const;
+
+export const getDisconnectGoogleOAuthMutationOptions = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disconnectGoogleOAuth>>, TError,DisconnectGoogleOAuthMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof disconnectGoogleOAuth>>, TError,DisconnectGoogleOAuthMutationVariables, TContext> => {
+
+const mutationKey = getDisconnectGoogleOAuthMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof disconnectGoogleOAuth>>, DisconnectGoogleOAuthMutationVariables> = (props) => {
+          const {params} = props ?? {};
+
+          return  disconnectGoogleOAuth(params,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DisconnectGoogleOAuthMutationResult = NonNullable<Awaited<ReturnType<typeof disconnectGoogleOAuth>>>
+
+    export type DisconnectGoogleOAuthMutationError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }
+    export type DisconnectGoogleOAuthMutationVariables = {params?: DisconnectGoogleOAuthParams}
+
+    /**
+ * @summary Đăng xuất Google: xoá refresh token (của Workspace hoặc dùng chung)
+ */
+export const useDisconnectGoogleOAuth = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disconnectGoogleOAuth>>, TError,DisconnectGoogleOAuthMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof disconnectGoogleOAuth>>,
+        TError,
+        DisconnectGoogleOAuthMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDisconnectGoogleOAuthMutationOptions(options), queryClient);
+    }

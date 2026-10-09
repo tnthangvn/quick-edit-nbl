@@ -7,6 +7,7 @@ import { listConnectorBranchesRoute } from "./listConnectorBranches.route";
 import { listConnectorReposRoute } from "./listConnectorRepos.route";
 import { listConnectorToolsRoute } from "./listConnectorTools.route";
 import { listConnectorsRoute } from "./listConnectors.route";
+import { revealConnectorTokenRoute } from "./revealConnectorToken.route";
 import { updateConnectorRoute } from "./updateConnector.route";
 
 /** Mọi route của container Connector. Thêm route mới vào mảng này để vào docs/api.json. */
@@ -21,4 +22,5 @@ export const routes: RouteDefinition<any, any>[] = [
   listConnectorReposRoute,
   listConnectorBranchesRoute,
   listConnectorToolsRoute,
+  revealConnectorTokenRoute,
 ];

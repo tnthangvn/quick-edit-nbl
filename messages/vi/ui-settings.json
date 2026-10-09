@@ -32,7 +32,7 @@
       },
       "apiKey": "API Key",
       "apiKeyPlaceholder": "Dán API key…",
-      "apiKeyHint": "Chỉ lưu local (keychain / secrets.json), không gửi đi đâu khác.",
+      "apiKeyHint": "Mã hoá AES-256 trước khi lưu, không gửi đi đâu khác.",
       "apiKeyHintOllama": "Ollama chạy local thường không cần API key.",
       "removeKey": "Remove Key",
       "keyWillBeRemoved": "Key đã lưu sẽ bị xoá khi bấm Save.",
@@ -164,7 +164,19 @@
       "alreadyAdded": "Đã thêm",
       "add": "Add",
       "addAnyway": "Add Anyway",
-      "added": "Đã thêm connector {name}"
+      "added": "Đã thêm connector {name}",
+      "google": {
+        "title": "Google Drive",
+        "description": "Đăng nhập một lần, dùng chung cho Workspace lưu trên Drive và NotebookLM Drive Sync.",
+        "checking": "Đang kiểm tra đăng nhập Google…",
+        "connected": "OAuth đã cấp quyền Drive · token dùng chung cho mọi project.",
+        "notConnected": "Chưa đăng nhập Google.",
+        "notConfigured": "Máy chủ chưa cấu hình Google OAuth (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).",
+        "badgeConnected": "Đã kết nối",
+        "waiting": "Đang chờ đăng nhập…",
+        "signIn": "Sign In With Google",
+        "signOut": "Sign Out"
+      }
     },
     "connectorForm": {
       "createTitle": "Thêm connector",
@@ -182,7 +194,7 @@
         },
         "TOKEN": {
           "title": "Personal Access Token",
-          "description": "Lưu trong keychain / secrets.json."
+          "description": "Mã hoá AES-256 trước khi lưu."
         },
         "SSH": {
           "title": "SSH key",

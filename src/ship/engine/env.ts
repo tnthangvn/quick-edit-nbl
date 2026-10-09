@@ -15,6 +15,8 @@ const EnvSchema = z
     DATABASE_URL: z.string().optional(),
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
+    /** Master key mã hoá secret (32 byte, base64 hoặc hex). Bỏ trống: tự sinh <SPEC_STUDIO_HOME>/master.key. */
+    SECRET_ENCRYPTION_KEY: z.string().optional(),
   })
   .transform((env) => ({
     ...env,

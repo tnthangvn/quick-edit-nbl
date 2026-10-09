@@ -1,6 +1,7 @@
 import "server-only";
 import { defineRoute } from "@/ship/engine/defineRoute";
 import { CompleteGoogleOAuthController } from "../Controllers/CompleteGoogleOAuthController";
+import { DisconnectGoogleOAuthController } from "../Controllers/DisconnectGoogleOAuthController";
 import { GetGoogleOAuthStatusController } from "../Controllers/GetGoogleOAuthStatusController";
 import { GetStorageStatusController } from "../Controllers/GetStorageStatusController";
 import { PullWorkspaceController } from "../Controllers/PullWorkspaceController";
@@ -8,6 +9,7 @@ import { PushWorkspaceController } from "../Controllers/PushWorkspaceController"
 import { StartGoogleOAuthController } from "../Controllers/StartGoogleOAuthController";
 import {
   completeGoogleOAuthContract,
+  disconnectGoogleOAuthContract,
   getGoogleOAuthStatusContract,
   getStorageStatusContract,
   pullWorkspaceContract,
@@ -73,4 +75,14 @@ export const getGoogleOAuthStatusRoute = defineRoute({
   tags: ["Storage"],
   summary: "Đã cấu hình / đã đăng nhập Google chưa",
   controller: GetGoogleOAuthStatusController,
+});
+
+export const disconnectGoogleOAuthRoute = defineRoute({
+  ...disconnectGoogleOAuthContract,
+  operationId: "disconnectGoogleOAuth",
+  method: "delete",
+  path: "/api/google/oauth",
+  tags: ["Storage"],
+  summary: "Đăng xuất Google: xoá refresh token (của Workspace hoặc dùng chung)",
+  controller: DisconnectGoogleOAuthController,
 });

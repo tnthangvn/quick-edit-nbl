@@ -1744,6 +1744,139 @@
         }
       }
     },
+    "/api/workspaces/{workspaceId}/secrets/{kind}/reveal": {
+      "post": {
+        "operationId": "revealWorkspaceSecret",
+        "tags": [
+          "Setting"
+        ],
+        "summary": "Xem secret của Workspace do người dùng nhập (plaintext, không cache)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "kind",
+            "schema": {
+              "$ref": "#/components/schemas/WorkspaceSecretKind"
+            },
+            "required": true,
+            "description": "Loại secret riêng của Workspace"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecretValue"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/api-key/reveal": {
+      "post": {
+        "operationId": "revealApiKey",
+        "tags": [
+          "Setting"
+        ],
+        "summary": "Xem API key của provider đang chọn (plaintext, không cache)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecretValue"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/export": {
       "get": {
         "operationId": "exportSettings",
@@ -2446,6 +2579,79 @@
         }
       }
     },
+    "/api/connectors/{connectorId}/token/reveal": {
+      "post": {
+        "operationId": "revealConnectorToken",
+        "tags": [
+          "Connector"
+        ],
+        "summary": "Xem token PAT của connector (plaintext, không cache)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connectorId",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectorTokenValue"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/filesystem/browse": {
       "get": {
         "operationId": "browseDirectory",
@@ -2978,6 +3184,67 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GoogleOAuthStatus"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/google/oauth": {
+      "delete": {
+        "operationId": "disconnectGoogleOAuth",
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Đăng xuất Google: xoá refresh token (của Workspace hoặc dùng chung)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workspaceId",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleOAuthStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -5489,6 +5756,7 @@
           "SETTING.CLI_PROFILE_DUPLICATE",
           "SETTING.WORKSPACE_ID_MISMATCH",
           "SETTING.SECRET_NOT_SET",
+          "SETTING.SECRET_NOT_REVEALABLE",
           "CONNECTOR.NOT_FOUND",
           "CONNECTOR.NOT_SUPPORTED",
           "CONNECTOR.CLI_NOT_FOUND",
@@ -5508,6 +5776,7 @@
           "STORAGE.PUSH_REJECTED",
           "STORAGE.GIT_AUTH_FAILED",
           "STORAGE.GIT_COMMAND_FAILED",
+          "STORAGE.GIT_IDENTITY_MISSING",
           "STORAGE.CLONE_FAILED",
           "STORAGE.GOOGLE_NOT_CONFIGURED",
           "STORAGE.GOOGLE_AUTH_REQUIRED",
@@ -6109,6 +6378,12 @@
               },
               "hasApiKey": {
                 "type": "boolean"
+              },
+              "apiKeyMasked": {
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             },
             "required": [
@@ -6117,7 +6392,8 @@
               "baseUrl",
               "temperature",
               "systemPrompt",
-              "hasApiKey"
+              "hasApiKey",
+              "apiKeyMasked"
             ],
             "additionalProperties": false
           },
@@ -6180,11 +6456,34 @@
           },
           "isSet": {
             "type": "boolean"
+          },
+          "masked": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "revealable": {
+            "type": "boolean"
           }
         },
         "required": [
           "kind",
-          "isSet"
+          "isSet",
+          "masked",
+          "revealable"
+        ],
+        "additionalProperties": false
+      },
+      "SecretValue": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
         ],
         "additionalProperties": false
       },
@@ -6306,6 +6605,12 @@
           "hasToken": {
             "type": "boolean"
           },
+          "tokenMasked": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "status": {
             "anyOf": [
               {
@@ -6361,6 +6666,7 @@
           "secretKeys",
           "agentTools",
           "hasToken",
+          "tokenMasked",
           "status",
           "account",
           "scopes",
@@ -6612,6 +6918,18 @@
           "name",
           "description",
           "enabled"
+        ],
+        "additionalProperties": false
+      },
+      "ConnectorTokenValue": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
         ],
         "additionalProperties": false
       },

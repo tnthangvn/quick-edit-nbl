@@ -2,15 +2,19 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { AsyncEntry } from "@napi-rs/keyring";
+import { decryptSecret, encryptSecret } from "@/ship/adapters/cipher";
 import { logger } from "@/ship/adapters/logger";
+import "@/ship/contracts/secrets";
 import { env } from "@/ship/engine/env";
+import { RepositoryBase } from "@/ship/parents/RepositoryBase";
 
 const SERVICE = "spec-studio";
 
 /**
  * Kho secret (API key, PAT, OAuth refresh token, cookie NotebookLM).
- * Ưu tiên keychain của hệ điều hành; máy không có keychain (Linux headless, CI) thì dùng
- * ~/.spec-studio/secrets.json quyền 600. Secret không bao giờ nằm trong repository hay config.json.
+ * Lưu qua repository (model `secrets`, chạy trên DATA_DRIVER: JSON hoặc POSTGRES), giá trị luôn mã hoá
+ * AES-256-GCM bằng master key (ship/adapters/cipher); chỉ giải mã trong BE khi cần dùng.
+ * Secret cũ trong keychain / secrets.json được chuyển sang kho mã hoá ở lần đọc đầu tiên rồi xoá khỏi chỗ cũ.
  *
  * Tham chiếu secret là chuỗi `ref` (vd "ws_7f3a29c1:git_token", "llm:google"); trong cấu hình viết "secret:<ref>".
  */
@@ -64,8 +68,8 @@ class FileSecretStore implements SecretStore {
   }
 }
 
-/** Thử keychain; lỗi (không có Secret Service / D-Bus) thì chuyển sang file và ghi nhớ lựa chọn. */
-class FallbackSecretStore implements SecretStore {
+/** Kho cũ (trước khi mã hoá): keychain, lỗi (không có Secret Service / D-Bus) thì secrets.json. Chỉ còn dùng để chuyển dữ liệu. */
+class LegacySecretStore implements SecretStore {
   private chosen?: SecretStore;
   private readonly keyring = new KeyringSecretStore();
   private readonly file = new FileSecretStore();
@@ -93,8 +97,66 @@ class FallbackSecretStore implements SecretStore {
   }
 }
 
-const globalForSecrets = globalThis as unknown as { __specStudioSecrets?: SecretStore };
-export const secrets: SecretStore = (globalForSecrets.__specStudioSecrets ??= new FallbackSecretStore());
+class SecretRepository extends RepositoryBase<"secrets"> {
+  protected readonly model = "secrets" as const;
+
+  async findValue(ref: string): Promise<string | undefined> {
+    return (await this.findOne({ ref }))?.value;
+  }
+  async saveValue(ref: string, value: string): Promise<void> {
+    await this.upsert({ ref, value }, ["ref"]);
+  }
+  async deleteByRef(ref: string): Promise<void> {
+    await this.delete({ ref });
+  }
+}
+
+/** Secret mã hoá trong DB / JSON; đọc trượt thì thử kho cũ và chuyển sang (một lần). */
+export class EncryptedSecretStore implements SecretStore {
+  constructor(
+    private readonly repo: Pick<SecretRepository, "findValue" | "saveValue" | "deleteByRef"> = new SecretRepository(),
+    private readonly legacy?: SecretStore,
+  ) {}
+
+  async get(ref: string) {
+    const stored = await this.repo.findValue(ref);
+    if (stored !== undefined) return decryptSecret(stored);
+    return this.migrateLegacy(ref);
+  }
+  async set(ref: string, value: string) {
+    await this.repo.saveValue(ref, encryptSecret(value));
+  }
+  async delete(ref: string) {
+    await this.repo.deleteByRef(ref);
+    await this.legacyDelete(ref);
+  }
+
+  private async migrateLegacy(ref: string): Promise<string | undefined> {
+    if (!this.legacy) return undefined;
+    let value: string | undefined;
+    try {
+      value = await this.legacy.get(ref);
+    } catch (err) {
+      logger.warn({ err, ref }, "không đọc được secret cũ");
+      return undefined;
+    }
+    if (value === undefined) return undefined;
+    await this.set(ref, value);
+    await this.legacyDelete(ref);
+    return value;
+  }
+
+  private async legacyDelete(ref: string) {
+    try {
+      await this.legacy?.delete(ref);
+    } catch {
+      // Không có ở kho cũ: bỏ qua.
+    }
+  }
+}
+
+const globalForSecrets = globalThis as unknown as { __specStudioEncryptedSecrets?: SecretStore };
+export const secrets: SecretStore = (globalForSecrets.__specStudioEncryptedSecrets ??= new EncryptedSecretStore(undefined, new LegacySecretStore()));
 
 /** "secret:<ref>" → giá trị thật; chuỗi thường giữ nguyên. */
 export async function resolveSecretValue(value: string): Promise<string | undefined> {

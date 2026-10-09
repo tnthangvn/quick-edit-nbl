@@ -28,7 +28,8 @@ export const GetSettingsResponse = zod.object({
   "baseUrl": zod.string().nullable(),
   "temperature": zod.number().min(getSettingsResponseApiTemperatureMin).max(getSettingsResponseApiTemperatureMax),
   "systemPrompt": zod.string(),
-  "hasApiKey": zod.boolean()
+  "hasApiKey": zod.boolean(),
+  "apiKeyMasked": zod.string().nullable()
 }),
   "cli": zod.object({
   "activeProfileId": zod.string(),
@@ -106,7 +107,8 @@ export const UpdateSettingsResponse = zod.object({
   "baseUrl": zod.string().nullable(),
   "temperature": zod.number().min(updateSettingsResponseApiTemperatureMin).max(updateSettingsResponseApiTemperatureMax),
   "systemPrompt": zod.string(),
-  "hasApiKey": zod.boolean()
+  "hasApiKey": zod.boolean(),
+  "apiKeyMasked": zod.string().nullable()
 }),
   "cli": zod.object({
   "activeProfileId": zod.string(),
@@ -397,7 +399,9 @@ export const ListWorkspaceSecretsParams = zod.object({
 export const ListWorkspaceSecretsResponse = zod.object({
   "items": zod.array(zod.object({
   "kind": zod.enum(['NOTEBOOK_COOKIE', 'NOTEBOOK_TOKEN', 'GIT_TOKEN', 'GOOGLE_OAUTH']).describe('Loại secret riêng của Workspace'),
-  "isSet": zod.boolean()
+  "isSet": zod.boolean(),
+  "masked": zod.string().nullable(),
+  "revealable": zod.boolean()
 }))
 })
 
@@ -436,6 +440,29 @@ export const DeleteWorkspaceSecretParams = zod.object({
 })
 
 export const DeleteWorkspaceSecretResponse = zod.void()
+
+/**
+ * @summary Xem secret của Workspace do người dùng nhập (plaintext, không cache)
+ */
+export const revealWorkspaceSecretPathWorkspaceIdMax = 64;
+
+
+
+export const RevealWorkspaceSecretParams = zod.object({
+  "workspaceId": zod.string().min(1).max(revealWorkspaceSecretPathWorkspaceIdMax),
+  "kind": zod.enum(['NOTEBOOK_COOKIE', 'NOTEBOOK_TOKEN', 'GIT_TOKEN', 'GOOGLE_OAUTH']).describe('Loại secret riêng của Workspace')
+})
+
+export const RevealWorkspaceSecretResponse = zod.object({
+  "value": zod.string()
+})
+
+/**
+ * @summary Xem API key của provider đang chọn (plaintext, không cache)
+ */
+export const RevealApiKeyResponse = zod.object({
+  "value": zod.string()
+})
 
 /**
  * @summary Xuất cấu hình cơ bản (Direct API, CLI Agent Runner, Connectors) — không kèm secret

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Loại secret riêng của một Workspace (ghi-một-chiều, không bao giờ trả ra API):
+ * Loại secret riêng của một Workspace (API chỉ trả bản che; plaintext chỉ qua endpoint reveal):
  * NOTEBOOK_COOKIE (SID/HSID/SSID cho RPC), NOTEBOOK_TOKEN (SNlM0e), GIT_TOKEN (PAT riêng của Workspace),
  * GOOGLE_OAUTH (refresh token Google cho Drive / NotebookLM Drive Sync).
  */
@@ -12,3 +12,6 @@ export type WorkspaceSecretKind = z.infer<typeof WorkspaceSecretKind>;
 
 /** Tham chiếu trong secret store: "<workspaceId>:<kind viết thường>", vd "ws_7f3a29c1:git_token". */
 export const workspaceSecretRef = (workspaceId: string, kind: WorkspaceSecretKind) => `${workspaceId}:${kind.toLowerCase()}`;
+
+/** Secret người dùng tự nhập, được xem lại qua reveal. GOOGLE_OAUTH do OAuth cấp nên không. */
+export const REVEALABLE_WORKSPACE_SECRETS: readonly WorkspaceSecretKind[] = ["NOTEBOOK_COOKIE", "NOTEBOOK_TOKEN", "GIT_TOKEN"];

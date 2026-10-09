@@ -139,7 +139,8 @@
     "secret": {
       "show": "Hiện",
       "hide": "Ẩn",
-      "setPlaceholder": "Đã lưu · nhập để thay"
+      "setPlaceholder": "Đã lưu · nhập để thay",
+      "maskedPlaceholder": "{masked} · nhập để thay"
     }
   }
 }

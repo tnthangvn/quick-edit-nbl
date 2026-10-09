@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { redactCredentials } from "@/ship/adapters/git";
+import { gitFailure } from "../Exceptions/mapFailures";
 import type { CreatePullRequestTask } from "../../Connector/Tasks/CreatePullRequestTask";
 import type { ResolveGitCredentialsTask } from "../../Connector/Tasks/ResolveGitCredentialsTask";
 import type { GitStorageConfig } from "../../Setting/Models/WorkspaceConfig";
@@ -167,5 +168,13 @@ describe("Storage git tasks (repo thật trong thư mục tạm)", () => {
     await expect(
       new CloneRepositoryTask().run({ remoteUrl: "https://example.invalid/does/not/exist.git", branch: "main", targetPath: path.join(root, "c3"), env: {} }),
     ).rejects.toMatchObject({ code: "STORAGE.CLONE_FAILED" });
+  });
+});
+
+describe("gitFailure", () => {
+  it("thiếu user.name / user.email → STORAGE.GIT_IDENTITY_MISSING thay vì lỗi chung", () => {
+    const stderr = "Author identity unknown\n\n*** Please tell me who you are.\n\nfatal: unable to auto-detect email address";
+    expect(gitFailure("commit", { exitCode: 128, stdout: "", stderr, timedOut: false })).toMatchObject({ code: "STORAGE.GIT_IDENTITY_MISSING" });
+    expect(gitFailure("commit", { exitCode: 1, stdout: "", stderr: "fatal: boom", timedOut: false })).toMatchObject({ code: "STORAGE.GIT_COMMAND_FAILED" });
   });
 });

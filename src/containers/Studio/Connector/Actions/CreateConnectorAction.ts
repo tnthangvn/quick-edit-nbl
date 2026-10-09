@@ -4,8 +4,9 @@ import type { ConnectorType, GitProvider } from "@/ship/contracts/enums/sync";
 import { Action } from "@/ship/parents/Action";
 import type { McpTransport } from "../Enums/McpTransport";
 import { KNOWN_CLIS } from "../Gateways/cliTools";
-import type { ConnectorRow } from "../Models/Connector";
+import type { ConnectorView } from "../Models/Connector";
 import { CreateConnectorTask } from "../Tasks/CreateConnectorTask";
+import { MaskConnectorTokensTask } from "../Tasks/MaskConnectorTokensTask";
 import { WriteConnectorSecretsTask } from "../Tasks/WriteConnectorSecretsTask";
 
 export type CreateConnectorInput = {
@@ -27,19 +28,20 @@ export type CreateConnectorInput = {
 };
 
 /** Thêm connector (Tab 5 / Wizard). Secret ghi vào secret store trước, bản ghi chỉ giữ tên khoá. */
-export class CreateConnectorAction extends Action<CreateConnectorInput, ConnectorRow> {
+export class CreateConnectorAction extends Action<CreateConnectorInput, ConnectorView> {
   constructor(
     private readonly createConnector = new CreateConnectorTask(),
     private readonly writeSecrets = new WriteConnectorSecretsTask(),
+    private readonly maskTokens = new MaskConnectorTokensTask(),
   ) {
     super();
   }
 
-  async run({ secrets, token, agentTools, ...input }: CreateConnectorInput): Promise<ConnectorRow> {
+  async run({ secrets, token, agentTools, ...input }: CreateConnectorInput): Promise<ConnectorView> {
     const id = uuidv7();
     const isMcp = input.type === "MCP";
     await this.writeSecrets.run({ connectorId: id, token: input.type === "TOKEN" ? token : undefined, secrets: isMcp ? secrets : {} });
-    return this.createConnector.run({
+    const row = await this.createConnector.run({
       id,
       name: input.name,
       type: input.type,
@@ -64,5 +66,7 @@ export class CreateConnectorAction extends Action<CreateConnectorInput, Connecto
       scopes: [],
       checked_at: null,
     });
+    const [view] = await this.maskTokens.run({ rows: [row] });
+    return view;
   }
 }

@@ -2,7 +2,7 @@ import "server-only";
 import type { AgentSettings } from "@/ship/contracts/agentSettings";
 import { Action } from "@/ship/parents/Action";
 import { llmApiKeyRef } from "../Models/defaultAgentSettings";
-import { CheckSecretsPresenceTask } from "../Tasks/CheckSecretsPresenceTask";
+import { MaskSecretsTask } from "../Tasks/MaskSecretsTask";
 import { SaveAgentSettingsTask } from "../Tasks/SaveAgentSettingsTask";
 import { WriteSecretTask } from "../Tasks/WriteSecretTask";
 
@@ -19,19 +19,20 @@ export type UpdateSettingsInput = {
  * Lưu cấu hình chung. API key nằm trong secret store theo provider ("llm:<provider>"), cấu hình chỉ giữ ref;
  * đổi provider thì tự trỏ tới key đã lưu của provider đó (nếu có).
  */
-export class UpdateSettingsAction extends Action<UpdateSettingsInput, AgentSettings> {
+export class UpdateSettingsAction extends Action<UpdateSettingsInput, { settings: AgentSettings; apiKeyMasked: string | null }> {
   constructor(
     private readonly writeSecret = new WriteSecretTask(),
-    private readonly checkSecrets = new CheckSecretsPresenceTask(),
+    private readonly maskSecrets = new MaskSecretsTask(),
     private readonly saveAgentSettings = new SaveAgentSettingsTask(),
   ) {
     super();
   }
 
-  async run({ activeMode, api: { apiKey, ...api }, cli }: UpdateSettingsInput): Promise<AgentSettings> {
+  async run({ activeMode, api: { apiKey, ...api }, cli }: UpdateSettingsInput): Promise<{ settings: AgentSettings; apiKeyMasked: string | null }> {
     const ref = llmApiKeyRef(api.provider);
     if (apiKey !== undefined) await this.writeSecret.run({ ref, value: apiKey });
-    const hasKey = apiKey !== undefined ? apiKey !== null : (await this.checkSecrets.run({ refs: [ref] }))[ref];
-    return this.saveAgentSettings.run({ activeMode, api: { ...api, apiKeyRef: hasKey ? ref : null }, cli });
+    const apiKeyMasked = (await this.maskSecrets.run({ refs: [ref] }))[ref];
+    const settings = await this.saveAgentSettings.run({ activeMode, api: { ...api, apiKeyRef: apiKeyMasked !== null ? ref : null }, cli });
+    return { settings, apiKeyMasked };
   }
 }
