@@ -23,7 +23,10 @@
       "GIT_BRANCH_NOT_FOUND": "Không tìm thấy branch {branch} trên remote.",
       "DRIVE_NOT_CONFIGURED": "Chưa cấu hình Google OAuth cho Drive.",
       "DRIVE_ACCESS_DENIED": "Không có quyền đọc/ghi thư mục Drive.",
-      "NOTEBOOK_UNREACHABLE": "Không truy cập được notebook."
+      "NOTEBOOK_UNREACHABLE": "Không truy cập được notebook.",
+      "DELETE_NOT_CONFIRMED": "Gõ \"delete\" để xác nhận xoá thư mục trên máy.",
+      "DELETE_UNSAFE": "Không xoá thư mục {path}: thư mục này không an toàn để xoá ({reason}).",
+      "HAS_NESTED_WORKSPACES": "Không xoá được: thư mục chứa project khác đang có trong danh sách ({paths}). Gỡ các project đó trước."
     }
   }
 }

@@ -46,6 +46,11 @@
       "driveToggle": {
         "label": "Sync via Google Drive",
         "hint": "A Drive folder + a local copy."
+      },
+      "gitDetected": {
+        "title": "This folder is already a Git repo",
+        "author": "Commit author: {author}",
+        "apply": "Use this remote"
       }
     },
     "git": {
@@ -96,7 +101,15 @@
       "pullOnOpen": {
         "label": "Pull when opening the workspace",
         "hint": "Runs git pull --ff-only on open."
-      }
+      },
+      "tokenTitle": "Access token (PAT)",
+      "tokenDescription": "Use a Personal Access Token to clone/pull/push (and open PRs if the token allows).",
+      "tokenLabel": "Personal Access Token",
+      "tokenSave": "Save & use",
+      "tokenHint": "Needs repo read/write (GitHub: contents read/write; GitLab: read_repository + write_repository). Encrypted at rest, sent as a header only to this host, never written to the URL or .git/config.",
+      "tokenName": "Token · {host}",
+      "tokenOk": "Token is valid",
+      "tokenCheckFailed": "Token saved but the check did not pass"
     },
     "google": {
       "checking": "Checking Google sign-in…",
@@ -137,7 +150,7 @@
       },
       "driveFolder": "Drive Folder ID",
       "driveFolderHint": "Drive folder holding the Google Doc copies of the specs.",
-      "rpcHint": "Enter the cookie and SNlM0e token in Settings › NotebookLM Sync after creating the project.",
+      "rpcHint": "Connect NotebookLM in Settings › Integrations (paste cookie) before syncing.",
       "mapping": "Mapping: each spec file ↔ one source with the same name in the notebook.",
       "autoSyncOnApprove": {
         "label": "Sync to NBL automatically after Approve Diff"

@@ -6,16 +6,20 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -23,7 +27,11 @@ import type {
 import type {
   BrowseDirectoryParams,
   BrowseDirectoryResult,
+  CreateDirectoryInput,
+  CreatedDirectory,
   ErrorResponse,
+  GitConfigInfo,
+  ReadGitConfigParams,
   ValidationErrorResponse
 } from '../model';
 
@@ -167,3 +175,225 @@ export function useBrowseDirectory<TData = Awaited<ReturnType<typeof browseDirec
 
 
 
+export const getReadGitConfigUrl = (params: ReadGitConfigParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/filesystem/git-config?${stringifiedParams}` : `/api/filesystem/git-config`
+}
+
+/**
+ * @summary Đọc remote URL trong .git/config của thư mục để Wizard điền nhanh
+ */
+export const readGitConfig = async (params: ReadGitConfigParams, options?: RequestInit): Promise<GitConfigInfo> => {
+
+  const res = await fetch(getReadGitConfigUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: GitConfigInfo, status?: number} = new globalThis.Error();
+    const data : GitConfigInfo = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: GitConfigInfo = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getReadGitConfigQueryKey = (params?: ReadGitConfigParams,) => {
+    return [
+    `/api/filesystem/git-config`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getReadGitConfigQueryOptions = <TData = Awaited<ReturnType<typeof readGitConfig>>, TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }>(params: ReadGitConfigParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readGitConfig>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getReadGitConfigQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof readGitConfig>>> = ({ signal }) => readGitConfig(params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof readGitConfig>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ReadGitConfigQueryResult = NonNullable<Awaited<ReturnType<typeof readGitConfig>>>
+export type ReadGitConfigQueryError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }
+
+
+export function useReadGitConfig<TData = Awaited<ReturnType<typeof readGitConfig>>, TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }>(
+ params: ReadGitConfigParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readGitConfig>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof readGitConfig>>,
+          TError,
+          Awaited<ReturnType<typeof readGitConfig>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useReadGitConfig<TData = Awaited<ReturnType<typeof readGitConfig>>, TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }>(
+ params: ReadGitConfigParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readGitConfig>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof readGitConfig>>,
+          TError,
+          Awaited<ReturnType<typeof readGitConfig>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useReadGitConfig<TData = Awaited<ReturnType<typeof readGitConfig>>, TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }>(
+ params: ReadGitConfigParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readGitConfig>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Đọc remote URL trong .git/config của thư mục để Wizard điền nhanh
+ */
+
+export function useReadGitConfig<TData = Awaited<ReturnType<typeof readGitConfig>>, TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }>(
+ params: ReadGitConfigParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readGitConfig>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getReadGitConfigQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getCreateDirectoryUrl = () => {
+
+
+
+
+  return `/api/filesystem/directories`
+}
+
+/**
+ * @summary Tạo thư mục con (nút Thư mục mới trong dialog chọn thư mục)
+ */
+export const createDirectory = async (createDirectoryInput: CreateDirectoryInput, options?: RequestInit): Promise<CreatedDirectory> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getCreateDirectoryUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(createDirectoryInput)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: CreatedDirectory, status?: number} = new globalThis.Error();
+    const data : CreatedDirectory = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: CreatedDirectory = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getCreateDirectoryMutationKey = () => ['createDirectory'] as const;
+
+export const getCreateDirectoryMutationOptions = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDirectory>>, TError,CreateDirectoryMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createDirectory>>, TError,CreateDirectoryMutationVariables, TContext> => {
+
+const mutationKey = getCreateDirectoryMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createDirectory>>, CreateDirectoryMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createDirectory(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateDirectoryMutationResult = NonNullable<Awaited<ReturnType<typeof createDirectory>>>
+    export type CreateDirectoryMutationBody = CreateDirectoryInput
+    export type CreateDirectoryMutationError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }
+    export type CreateDirectoryMutationVariables = {data: CreateDirectoryInput}
+
+    /**
+ * @summary Tạo thư mục con (nút Thư mục mới trong dialog chọn thư mục)
+ */
+export const useCreateDirectory = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDirectory>>, TError,CreateDirectoryMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createDirectory>>,
+        TError,
+        CreateDirectoryMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateDirectoryMutationOptions(options), queryClient);
+    }

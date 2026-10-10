@@ -5,6 +5,7 @@
  * API local của Spec Studio. Lỗi chỉ trả mã (ErrorCode); FE tự dịch.
  * OpenAPI spec version: 1.0.0
  */
+import type { CliImageInput } from './cliImageInput';
 
 export interface StartCliRunBody {
   /** @minLength 1 */
@@ -27,4 +28,6 @@ export interface StartCliRunBody {
      * @items.maxLength 500
      */
   contextFiles?: string[];
+  /** @maxItems 5 */
+  images?: CliImageInput[];
 }

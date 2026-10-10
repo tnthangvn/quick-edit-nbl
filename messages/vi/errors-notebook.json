@@ -2,10 +2,10 @@
   "errors": {
     "NOTEBOOK": {
       "NOT_CONFIGURED": "Workspace chưa cấu hình NotebookLM.",
-      "CLI_NOT_FOUND": "Không tìm thấy CLI nlm trên máy (cài gói notebooklm-mcp-cli).",
-      "AUTH_REQUIRED": "Phiên NotebookLM đã hết hạn. Chạy \"nlm login\" rồi thử lại.",
+      "AUTH_REQUIRED": "Phiên NotebookLM đã hết hạn hoặc cookie không đúng. Dán lại cookie ở Settings › Integrations › NotebookLM.",
       "NOT_FOUND": "Không tìm thấy notebook hoặc không có quyền truy cập.",
-      "COMMAND_FAILED": "Thao tác với NotebookLM thất bại."
+      "COMMAND_FAILED": "Thao tác với NotebookLM thất bại.",
+      "CREDENTIALS_MISSING": "Chưa kết nối NotebookLM. Dán cookie ở Settings › Integrations › NotebookLM."
     }
   }
 }

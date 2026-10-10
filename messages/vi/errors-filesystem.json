@@ -1,7 +1,9 @@
 {
   "errors": {
     "FILESYSTEM": {
-      "DIRECTORY_NOT_FOUND": "Không tìm thấy thư mục {path}."
+      "DIRECTORY_NOT_FOUND": "Không tìm thấy thư mục {path}.",
+      "DIRECTORY_EXISTS": "Đã có thư mục hoặc file tên này: {path}.",
+      "DIRECTORY_NOT_WRITABLE": "Không có quyền tạo thư mục trong {path}."
     }
   }
 }

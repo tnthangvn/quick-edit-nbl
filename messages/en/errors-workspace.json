@@ -23,7 +23,10 @@
       "GIT_BRANCH_NOT_FOUND": "Branch {branch} not found on the remote.",
       "DRIVE_NOT_CONFIGURED": "Google OAuth for Drive is not configured.",
       "DRIVE_ACCESS_DENIED": "No read/write access to the Drive folder.",
-      "NOTEBOOK_UNREACHABLE": "Cannot access the notebook."
+      "NOTEBOOK_UNREACHABLE": "Cannot access the notebook.",
+      "DELETE_NOT_CONFIRMED": "Type \"delete\" to confirm deleting the folder on this machine.",
+      "DELETE_UNSAFE": "Refusing to delete {path}: this folder is not safe to delete ({reason}).",
+      "HAS_NESTED_WORKSPACES": "Cannot delete: the folder contains other listed projects ({paths}). Remove those first."
     }
   }
 }

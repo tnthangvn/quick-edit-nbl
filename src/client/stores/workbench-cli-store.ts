@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { CliLogStream, CliRunEvent, CliRunStatus, CliRunStatusEventError } from "@/client/api/generated/model";
+import type { CliRunEvent, CliRunStatus, CliRunStatusEventError } from "@/client/api/generated/model";
 
 /**
  * Lần chạy CLI Agent hiện tại (spec 3.4, chế độ CLI): event từ SSE `/api/agent/runs/{runId}/events`.
@@ -47,41 +47,6 @@ export function applyCliEvent(run: CliRun, event: CliRunEvent): CliRun {
     next.error = event.error;
   }
   return next;
-}
-
-export type CliTimelineItem =
-  | { kind: "log"; key: string; text: string; streams: CliLogStream[] }
-  | { kind: "tool"; key: string; name: string; input: string }
-  | { kind: "message"; key: string; text: string }
-  | { kind: "proposal"; key: string; file: string; isNewFile: boolean };
-
-/** Gộp event thành dòng thời gian hiển thị: LOG liền nhau gộp một khối, MESSAGE delta nối vào tin nhắn trước. */
-export function buildCliTimeline(events: readonly CliRunEvent[]): CliTimelineItem[] {
-  const items: CliTimelineItem[] = [];
-  for (const e of events) {
-    const last = items.at(-1);
-    switch (e.type) {
-      case "LOG":
-        if (last?.kind === "log") {
-          last.text = `${last.text}\n${e.text}`;
-          if (!last.streams.includes(e.stream)) last.streams.push(e.stream);
-        } else items.push({ kind: "log", key: `log-${e.seq}`, text: e.text, streams: [e.stream] });
-        break;
-      case "MESSAGE":
-        if (e.delta && last?.kind === "message") last.text += e.text;
-        else items.push({ kind: "message", key: `msg-${e.seq}`, text: e.text });
-        break;
-      case "TOOL_CALL":
-        items.push({ kind: "tool", key: `tool-${e.seq}`, name: e.name, input: e.input });
-        break;
-      case "PROPOSAL":
-        items.push({ kind: "proposal", key: `prop-${e.seq}`, file: e.file, isNewFile: e.isNewFile });
-        break;
-      default:
-        break;
-    }
-  }
-  return items;
 }
 
 /* ---------- Store ---------- */

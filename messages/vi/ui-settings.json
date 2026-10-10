@@ -105,10 +105,8 @@
       },
       "driveFolder": "Drive Folder ID",
       "driveFolderHint": "Thư mục Drive chứa bản Google Doc của spec.",
-      "cookie": "Cookie (SID, HSID, SSID)",
-      "cookieHint": "Chỉ lưu local. Cookie thường hết hạn sau vài tuần.",
-      "token": "SNlM0e Token",
-      "tokenHint": "Chỉ lưu local, dùng cho RPC endpoint.",
+      "cookie": "Cookie NotebookLM riêng (tuỳ chọn)",
+      "cookieHint": "Bỏ trống = dùng kết nối NotebookLM chung ở Settings › Integrations. Chỉ điền khi project này dùng tài khoản Google khác.",
       "autoSyncOnApprove": {
         "label": "Tự động sync lên NBL sau khi Approve Diff",
         "hint": "Chạy ngay sau khi ghi file."
@@ -176,6 +174,29 @@
         "waiting": "Đang chờ đăng nhập…",
         "signIn": "Sign In With Google",
         "signOut": "Sign Out"
+      },
+      "notebooklm": {
+        "title": "NotebookLM",
+        "description": "Kết nối bằng phiên đăng nhập Google của bạn; app gọi thẳng NotebookLM để thêm / sync / thay source, không cần cài CLI.",
+        "checking": "Đang kiểm tra…",
+        "notConnected": "Chưa kết nối.",
+        "connected": "Đã kết nối",
+        "check": "Kiểm tra",
+        "replace": "Đổi cookie",
+        "disconnect": "Ngắt kết nối",
+        "step1": "Mở notebooklm.google.com (đã đăng nhập) → F12 → tab Network.",
+        "step2": "Tải lại trang, chọn request bất kỳ tới notebooklm.google.com → Headers → Request Headers.",
+        "step3": "Copy toàn bộ giá trị Cookie rồi dán vào đây.",
+        "cookieLabel": "Cookie NotebookLM",
+        "warning": "Cookie là phiên đăng nhập Google của bạn: chỉ lưu trên máy này (mã hoá), không gửi đi đâu khác ngoài notebooklm.google.com. Hết hạn sau vài tuần thì dán lại.",
+        "cancel": "Huỷ",
+        "save": "Lưu & kiểm tra",
+        "saving": "Đang kiểm tra…",
+        "saved": "Đã kết nối NotebookLM · {count} notebook",
+        "saveFailed": "Cookie không dùng được",
+        "checkOk": "NotebookLM OK · {count} notebook",
+        "checkFailed": "Kết nối NotebookLM lỗi",
+        "removed": "Đã ngắt kết nối NotebookLM"
       }
     },
     "connectorForm": {

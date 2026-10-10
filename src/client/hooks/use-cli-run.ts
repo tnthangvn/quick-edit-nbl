@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { startCliRun, stopCliRun } from "@/client/api/generated";
-import type { CliRunEvent } from "@/client/api/generated/model";
+import type { CliImageInput, CliRunEvent } from "@/client/api/generated/model";
 import { useEventSource } from "@/client/sse/use-event-source";
 import { useCliRunStore } from "@/client/stores/workbench-cli-store";
 import { useWorkbenchConnectionStore } from "@/client/stores/workbench-connection-store";
@@ -36,11 +36,11 @@ export function useCliRunActions(workspaceId: string) {
   const starting = useRef(false);
 
   const start = useCallback(
-    async (input: { sessionId: string; profileId: string; prompt: string; contextFiles: string[] }) => {
+    async (input: { sessionId: string; profileId: string; prompt: string; contextFiles: string[]; images?: CliImageInput[] }) => {
       if (starting.current) return;
       starting.current = true;
       try {
-        const { runId } = await startCliRun({ workspaceId, ...input });
+        const { runId } = await startCliRun({ workspaceId, ...input, images: input.images ?? [] });
         useCliRunStore.getState().start({ runId, workspaceId, sessionId: input.sessionId, prompt: input.prompt, profileId: input.profileId });
       } finally {
         starting.current = false;

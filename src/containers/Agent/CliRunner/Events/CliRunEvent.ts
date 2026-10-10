@@ -32,11 +32,50 @@ export const CliRunToolCallEvent = z
   .object({
     type: z.literal("TOOL_CALL"),
     ...base,
+    /** Id của tool call do CLI cấp (Claude tool_use.id, codex item.id) để ghép với TOOL_RESULT; null nếu CLI không có (transcript cũ: thiếu → null). */
+    toolId: z.string().nullable().default(null),
     name: z.string(),
     /** Tóm tắt input của tool (đã cắt ngắn). */
     input: z.string(),
+    /** Đối tượng chính của tool (file_path, command, pattern, url...) để hiện một dòng; null nếu không tách được. */
+    target: z.string().nullable().default(null),
   })
   .meta({ id: "CliRunToolCallEvent" });
+
+export const CliRunToolResultEvent = z
+  .object({
+    type: z.literal("TOOL_RESULT"),
+    ...base,
+    /** Khớp TOOL_CALL.toolId. */
+    toolId: z.string(),
+    /** Output của tool (đã cắt ngắn). */
+    output: z.string(),
+    isError: z.boolean(),
+  })
+  .meta({ id: "CliRunToolResultEvent" });
+
+export const CliRunThinkingEvent = z
+  .object({
+    type: z.literal("THINKING"),
+    ...base,
+    text: z.string(),
+    /** true: nối tiếp vào THINKING trước. */
+    delta: z.boolean(),
+  })
+  .meta({ id: "CliRunThinkingEvent" });
+
+export const CliRunUsageEvent = z
+  .object({
+    type: z.literal("USAGE"),
+    ...base,
+    /** Thời gian CLI báo (ms); null nếu CLI không báo. */
+    durationMs: z.number().nonnegative().nullable(),
+    costUsd: z.number().nonnegative().nullable(),
+    inputTokens: z.number().int().nonnegative().nullable(),
+    outputTokens: z.number().int().nonnegative().nullable(),
+    numTurns: z.number().int().nonnegative().nullable(),
+  })
+  .meta({ id: "CliRunUsageEvent" });
 
 export const CliRunMessageEvent = z
   .object({
@@ -68,7 +107,17 @@ export const CliRunSessionEvent = z
   .meta({ id: "CliRunSessionEvent" });
 
 export const CliRunEvent = z
-  .discriminatedUnion("type", [CliRunStatusEvent, CliRunLogEvent, CliRunToolCallEvent, CliRunMessageEvent, CliRunProposalEvent, CliRunSessionEvent])
+  .discriminatedUnion("type", [
+    CliRunStatusEvent,
+    CliRunLogEvent,
+    CliRunToolCallEvent,
+    CliRunToolResultEvent,
+    CliRunThinkingEvent,
+    CliRunMessageEvent,
+    CliRunUsageEvent,
+    CliRunProposalEvent,
+    CliRunSessionEvent,
+  ])
   .meta({ id: "CliRunEvent" });
 export type CliRunEvent = z.infer<typeof CliRunEvent>;
 

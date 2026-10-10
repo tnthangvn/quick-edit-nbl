@@ -9,7 +9,7 @@ import * as zod from 'zod';
 
 
 /**
- * @summary Kiểm tra truy cập notebook NotebookLM (qua CLI nlm) và đếm source
+ * @summary Kiểm tra truy cập notebook NotebookLM (API nội bộ, cookie) và đếm source
  */
 
 
@@ -37,5 +37,53 @@ export const CheckNotebookResponse = zod.object({
   "ok": zod.boolean(),
   "sourceCount": zod.union([zod.int().min(checkNotebookResponseSourceCountOneMin).max(checkNotebookResponseSourceCountOneMax),zod.null()]),
   "title": zod.string().nullable()
+})
+
+/**
+ * @summary Đã dán cookie NotebookLM dùng chung chưa (bản che)
+ */
+export const GetNotebookConnectionResponse = zod.object({
+  "isSet": zod.boolean(),
+  "masked": zod.string().nullable()
+})
+
+/**
+ * @summary Dán cookie NotebookLM: thử kết nối rồi lưu (mã hoá)
+ */
+export const saveNotebookConnectionBodyCookieMin = 20;
+export const saveNotebookConnectionBodyCookieMax = 16384;
+
+
+
+export const SaveNotebookConnectionBody = zod.object({
+  "cookie": zod.string().min(saveNotebookConnectionBodyCookieMin).max(saveNotebookConnectionBodyCookieMax)
+})
+
+export const saveNotebookConnectionResponseNotebookCountMin = 0;
+export const saveNotebookConnectionResponseNotebookCountMax = 9007199254740991;
+
+
+
+export const SaveNotebookConnectionResponse = zod.object({
+  "isSet": zod.boolean(),
+  "masked": zod.string().nullable(),
+  "notebookCount": zod.int().min(saveNotebookConnectionResponseNotebookCountMin).max(saveNotebookConnectionResponseNotebookCountMax)
+})
+
+/**
+ * @summary Xoá cookie NotebookLM dùng chung
+ */
+export const DeleteNotebookConnectionResponse = zod.void()
+
+/**
+ * @summary Kiểm tra cookie NotebookLM dùng chung (đếm notebook)
+ */
+export const checkNotebookConnectionResponseNotebookCountMin = 0;
+export const checkNotebookConnectionResponseNotebookCountMax = 9007199254740991;
+
+
+
+export const CheckNotebookConnectionResponse = zod.object({
+  "notebookCount": zod.int().min(checkNotebookConnectionResponseNotebookCountMin).max(checkNotebookConnectionResponseNotebookCountMax)
 })
 

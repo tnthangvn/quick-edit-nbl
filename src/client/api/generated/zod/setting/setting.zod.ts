@@ -16,6 +16,7 @@ export const getSettingsResponseApiTemperatureMin = 0;
 export const getSettingsResponseApiTemperatureMax = 2;
 
 export const getSettingsResponseCliPermissionModeDefault = `BYPASS`;
+export const getSettingsResponseCliEffortDefault = `DEFAULT`;
 
 
 export const getSettingsResponseCliProfilesItemEnvDefault = {};
@@ -35,6 +36,7 @@ export const GetSettingsResponse = zod.object({
   "activeProfileId": zod.string(),
   "streamStdout": zod.boolean(),
   "permissionMode": zod.enum(['DEFAULT', 'PLAN', 'ACCEPT_EDITS', 'BYPASS']).default(getSettingsResponseCliPermissionModeDefault),
+  "effort": zod.enum(['DEFAULT', 'LOW', 'MEDIUM', 'HIGH', 'XHIGH', 'MAX']).default(getSettingsResponseCliEffortDefault),
   "profiles": zod.array(zod.object({
   "id": zod.string().min(1),
   "name": zod.string().min(1),
@@ -57,6 +59,7 @@ export const updateSettingsBodyApiTemperatureMax = 2;
 export const updateSettingsBodyApiApiKeyOneMax = 4096;
 
 export const updateSettingsBodyCliPermissionModeDefault = `BYPASS`;
+export const updateSettingsBodyCliEffortDefault = `DEFAULT`;
 
 
 export const updateSettingsBodyCliProfilesItemEnvDefault = {};
@@ -78,6 +81,7 @@ export const UpdateSettingsBody = zod.object({
   "activeProfileId": zod.string(),
   "streamStdout": zod.boolean(),
   "permissionMode": zod.enum(['DEFAULT', 'PLAN', 'ACCEPT_EDITS', 'BYPASS']).default(updateSettingsBodyCliPermissionModeDefault),
+  "effort": zod.enum(['DEFAULT', 'LOW', 'MEDIUM', 'HIGH', 'XHIGH', 'MAX']).default(updateSettingsBodyCliEffortDefault),
   "profiles": zod.array(zod.object({
   "id": zod.string().min(1),
   "name": zod.string().min(1),
@@ -95,6 +99,7 @@ export const updateSettingsResponseApiTemperatureMin = 0;
 export const updateSettingsResponseApiTemperatureMax = 2;
 
 export const updateSettingsResponseCliPermissionModeDefault = `BYPASS`;
+export const updateSettingsResponseCliEffortDefault = `DEFAULT`;
 
 
 export const updateSettingsResponseCliProfilesItemEnvDefault = {};
@@ -114,6 +119,7 @@ export const UpdateSettingsResponse = zod.object({
   "activeProfileId": zod.string(),
   "streamStdout": zod.boolean(),
   "permissionMode": zod.enum(['DEFAULT', 'PLAN', 'ACCEPT_EDITS', 'BYPASS']).default(updateSettingsResponseCliPermissionModeDefault),
+  "effort": zod.enum(['DEFAULT', 'LOW', 'MEDIUM', 'HIGH', 'XHIGH', 'MAX']).default(updateSettingsResponseCliEffortDefault),
   "profiles": zod.array(zod.object({
   "id": zod.string().min(1),
   "name": zod.string().min(1),
@@ -473,6 +479,7 @@ export const exportSettingsResponseAgentApiTemperatureMin = 0;
 export const exportSettingsResponseAgentApiTemperatureMax = 2;
 
 export const exportSettingsResponseAgentCliPermissionModeDefault = `BYPASS`;
+export const exportSettingsResponseAgentCliEffortDefault = `DEFAULT`;
 
 
 export const exportSettingsResponseAgentCliProfilesItemEnvDefault = {};
@@ -494,6 +501,7 @@ export const ExportSettingsResponse = zod.object({
   "activeProfileId": zod.string(),
   "streamStdout": zod.boolean(),
   "permissionMode": zod.enum(['DEFAULT', 'PLAN', 'ACCEPT_EDITS', 'BYPASS']).default(exportSettingsResponseAgentCliPermissionModeDefault),
+  "effort": zod.enum(['DEFAULT', 'LOW', 'MEDIUM', 'HIGH', 'XHIGH', 'MAX']).default(exportSettingsResponseAgentCliEffortDefault),
   "profiles": zod.array(zod.object({
   "id": zod.string().min(1),
   "name": zod.string().min(1),
@@ -530,6 +538,7 @@ export const importSettingsBodyAgentApiTemperatureMin = 0;
 export const importSettingsBodyAgentApiTemperatureMax = 2;
 
 export const importSettingsBodyAgentCliPermissionModeDefault = `BYPASS`;
+export const importSettingsBodyAgentCliEffortDefault = `DEFAULT`;
 
 
 export const importSettingsBodyAgentCliProfilesItemEnvDefault = {};
@@ -551,6 +560,7 @@ export const ImportSettingsBody = zod.object({
   "activeProfileId": zod.string(),
   "streamStdout": zod.boolean(),
   "permissionMode": zod.enum(['DEFAULT', 'PLAN', 'ACCEPT_EDITS', 'BYPASS']).default(importSettingsBodyAgentCliPermissionModeDefault),
+  "effort": zod.enum(['DEFAULT', 'LOW', 'MEDIUM', 'HIGH', 'XHIGH', 'MAX']).default(importSettingsBodyAgentCliEffortDefault),
   "profiles": zod.array(zod.object({
   "id": zod.string().min(1),
   "name": zod.string().min(1),

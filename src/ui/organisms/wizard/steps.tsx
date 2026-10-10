@@ -1,21 +1,24 @@
 "use client";
 
 import * as React from "react";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, GitBranch, Wand2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import type * as z from "zod";
-import { SyncStrategy } from "@/client/api/generated/model";
+import { useReadGitConfig } from "@/client/api/generated";
+import { SyncStrategy, type GitConfigInfo } from "@/client/api/generated/model";
 import type { CreateWorkspaceBody } from "@/client/api/generated/zod/workspace/workspace.zod";
 import { Field } from "@/ui/molecules/field";
 import { Badge } from "@/ui/primitives/badge";
-import { IconButton } from "@/ui/primitives/button";
+import { Button, IconButton } from "@/ui/primitives/button";
+import { Icon } from "@/ui/primitives/icon";
 import { Checkbox } from "@/ui/primitives/checkbox";
 import { ChoiceCard, ChoiceCardGroup } from "@/ui/primitives/choice-card";
 import { Input } from "@/ui/primitives/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/ui/primitives/input-group";
 import { Switch } from "@/ui/primitives/switch";
 import { FolderBrowserDialog } from "@/ui/organisms/filesystem/FolderBrowserDialog";
+import { DEFAULT_HOST } from "@/ui/organisms/connectors/connector-utils";
 import { fieldError } from "@/ui/organisms/settings/form-errors";
 import { DriveStorageFields, GitStorageFields, GoogleSignIn } from "@/ui/organisms/wizard/StorageFields";
 
@@ -40,14 +43,80 @@ export function InfoStep() {
 
 /* ---------------------------------------------------------------- 2. Nơi lưu */
 
+const PATH_DEBOUNCE_MS = 400;
+
+/** Đường dẫn tuyệt đối sau khi người dùng ngừng gõ một lúc (tránh đọc .git/config theo từng ký tự). */
+function useSettledPath(value: string | undefined): string | null {
+  const [settled, setSettled] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    const v = value?.trim() ?? "";
+    const id = setTimeout(() => setSettled(v.startsWith("/") ? v : null), PATH_DEBOUNCE_MS);
+    return () => clearTimeout(id);
+  }, [value]);
+  return settled;
+}
+
+/**
+ * Thư mục làm việc đã có `.git/config` có remote: gợi ý điền nhanh cấu hình Git (remote, provider, repo) bằng một nút,
+ * hiện tác giả commit (`[user]` của repo) nếu có. Nhánh không đoán: xoá trống và yêu cầu người dùng nhập.
+ */
+function GitConfigHint({ info, onApply }: { info: GitConfigInfo; onApply: () => void }) {
+  const t = useTranslations("wizard.storage.gitDetected");
+  const author = info.userName || info.userEmail ? [info.userName, info.userEmail && `<${info.userEmail}>`].filter(Boolean).join(" ") : null;
+  return (
+    <div role="status" className="flex items-start gap-3 rounded-lg border border-border bg-primary-soft/40 px-3 py-2.5">
+      <Icon icon={GitBranch} size="sm" tone="primary" className="mt-0.5" />
+      <div className="min-w-0 flex-1">
+        <p className="m-0 text-[13px] leading-[18px] font-medium">{t("title")}</p>
+        <p className="m-0 mt-0.5 truncate font-mono text-xs leading-4 text-muted-foreground" title={info.remote ?? undefined}>
+          {info.host && info.repo ? `${info.host}/${info.repo}` : info.remote}
+        </p>
+        {author ? <p className="m-0 mt-0.5 truncate text-xs leading-4 text-muted-foreground">{t("author", { author })}</p> : null}
+      </div>
+      <Button variant="tonal" size="sm" icon={Wand2} onClick={onApply}>
+        {t("apply")}
+      </Button>
+    </div>
+  );
+}
+
 /** Local luôn ngầm định có (path + specsDir dưới); Git/Drive bật thêm độc lập qua 2 switch, không loại trừ nhau. */
 export function StorageStep({ onGitToggle, onDriveToggle }: { onGitToggle: (enabled: boolean) => void; onDriveToggle: (enabled: boolean) => void }) {
   const t = useTranslations("wizard.storage");
   const tf = useTranslations("filesystem.browser");
-  const { register, control, setValue, getValues, formState } = useFormContext<WizardForm>();
+  const { register, control, setValue, getValues, setError, clearErrors, setFocus, formState } = useFormContext<WizardForm>();
   const git = useWatch({ control, name: "storage.git" });
   const drive = useWatch({ control, name: "storage.drive" });
   const [browserOpen, setBrowserOpen] = React.useState(false);
+  const settledPath = useSettledPath(useWatch({ control, name: "path" }));
+  const gitConfig = useReadGitConfig({ path: settledPath ?? "" }, { query: { enabled: settledPath !== null, retry: false, staleTime: 30_000 } });
+  const detected = gitConfig.data?.hasGit && gitConfig.data.remote ? gitConfig.data : null;
+  // Đã điền từ đúng remote này thì ẩn gợi ý.
+  const applied = Boolean(detected && git && git.remote === detected.remote);
+
+  // Lỗi "bắt buộc nhập nhánh" do applyGitConfig đặt tay: RHF không tự xoá khi chọn giá trị (Combobox) → xoá khi đã có nhánh.
+  const branch = useWatch({ control, name: "storage.git.branch" });
+  React.useEffect(() => {
+    if (branch?.trim()) clearErrors("storage.git.branch");
+  }, [branch, clearErrors]);
+
+  const applyGitConfig = () => {
+    if (!detected?.remote) return;
+    if (!getValues("storage.git")) onGitToggle(true);
+    const provider = detected.provider ?? "GENERIC";
+    const opts = { shouldDirty: true } as const;
+    setValue("storage.git.provider", provider, opts);
+    setValue("storage.git.host", detected.host && detected.host !== DEFAULT_HOST[provider] ? detected.host : undefined, opts);
+    setValue("storage.git.connectorId", null, opts);
+    setValue("storage.git.repo", detected.repo, opts);
+    setValue("storage.git.remote", detected.remote, opts);
+    setValue("storage.git.branch", "", opts);
+    // Nhánh do người dùng chọn: báo thiếu và đưa con trỏ vào ô nhánh.
+    requestAnimationFrame(() => {
+      setError("storage.git.branch", { type: "required", message: JSON.stringify({ code: "FIELD.REQUIRED" }) });
+      setFocus("storage.git.branch");
+    });
+  };
   return (
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
@@ -69,6 +138,8 @@ export function StorageStep({ onGitToggle, onDriveToggle }: { onGitToggle: (enab
         initialPath={getValues("path") || undefined}
         onSelect={(path) => setValue("path", path, { shouldDirty: true, shouldValidate: true })}
       />
+
+      {detected && !applied ? <GitConfigHint info={detected} onApply={applyGitConfig} /> : null}
 
       <Field layout="inline" label={t("gitToggle.label")} hint={t("gitToggle.hint")}>
         <Switch checked={Boolean(git)} onCheckedChange={onGitToggle} />

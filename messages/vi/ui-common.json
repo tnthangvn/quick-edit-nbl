@@ -128,7 +128,11 @@
     "composer": {
       "label": "Yêu cầu cho Agent",
       "placeholder": "Mô tả thay đổi bạn muốn cho spec…",
-      "hint": "để gửi"
+      "hint": "để gửi",
+      "mentionLabel": "Gợi ý file",
+      "mentionTitle": "Spec",
+      "attachments": "Ảnh đính kèm",
+      "removeAttachment": "Bỏ {name}"
     },
     "theme": {
       "toggle": "Đổi giao diện sáng/tối",
@@ -141,6 +145,27 @@
       "hide": "Ẩn",
       "setPlaceholder": "Đã lưu · nhập để thay",
       "maskedPlaceholder": "{masked} · nhập để thay"
+    },
+    "effort": {
+      "label": "Effort: {level}",
+      "title": "Effort",
+      "reset": "Mặc định",
+      "faster": "Nhanh hơn",
+      "smarter": "Kỹ hơn",
+      "DEFAULT": "Mặc định",
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "XHIGH": "Extra high",
+      "MAX": "Max",
+      "defaultHint": "Không truyền cờ effort, CLI tự chọn theo cấu hình của nó.",
+      "hint": {
+        "LOW": "Trả lời nhanh, ít suy luận. Hợp với sửa nhỏ.",
+        "MEDIUM": "Cân bằng tốc độ và chất lượng.",
+        "HIGH": "Suy luận kỹ hơn, chậm và tốn token hơn.",
+        "XHIGH": "Rất kỹ, dùng cho thay đổi lớn nhiều file.",
+        "MAX": "Mức cao nhất, chậm và tốn nhất."
+      }
     }
   }
 }

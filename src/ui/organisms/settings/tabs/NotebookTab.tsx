@@ -100,26 +100,15 @@ export function NotebookTab({ workspaceId, secrets, onSecretsChange, secretSet, 
           </Field>
           <GoogleSignIn workspaceId={workspaceId} />
         </>
-      ) : (
-        <>
-          <Field label={t("cookie")} hint={t("cookieHint")}>
-            <SecretInput
-              {...revealProps("NOTEBOOK_COOKIE")}
-              placeholder="SID=…; HSID=…; SSID=…"
-              value={secrets.NOTEBOOK_COOKIE ?? ""}
-              onChange={(e) => onSecretsChange({ ...secrets, NOTEBOOK_COOKIE: e.target.value })}
-            />
-          </Field>
-          <Field label={t("token")} hint={t("tokenHint")}>
-            <SecretInput
-              {...revealProps("NOTEBOOK_TOKEN")}
-              placeholder="SNlM0e"
-              value={secrets.NOTEBOOK_TOKEN ?? ""}
-              onChange={(e) => onSecretsChange({ ...secrets, NOTEBOOK_TOKEN: e.target.value })}
-            />
-          </Field>
-        </>
-      )}
+      ) : null}
+      <Field label={t("cookie")} hint={t("cookieHint")}>
+        <SecretInput
+          {...revealProps("NOTEBOOK_COOKIE")}
+          placeholder="SID=…; HSID=…; SSID=…; APISID=…; SAPISID=…"
+          value={secrets.NOTEBOOK_COOKIE ?? ""}
+          onChange={(e) => onSecretsChange({ ...secrets, NOTEBOOK_COOKIE: e.target.value })}
+        />
+      </Field>
 
       <div className="flex flex-col gap-3">
         {(["autoSyncOnApprove", "confirmBeforeSync"] as const).map((name) => (

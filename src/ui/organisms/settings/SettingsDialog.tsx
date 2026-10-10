@@ -61,6 +61,7 @@ function toSettingsForm(view: AgentSettingsView): SettingsForm {
       activeProfileId: view.cli.activeProfileId,
       streamStdout: view.cli.streamStdout,
       permissionMode: view.cli.permissionMode,
+      effort: view.cli.effort,
       profiles: view.cli.profiles,
     },
   };

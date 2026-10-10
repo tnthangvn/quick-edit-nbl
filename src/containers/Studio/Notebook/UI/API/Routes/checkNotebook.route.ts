@@ -9,6 +9,6 @@ export const checkNotebookRoute = defineRoute({
   method: "post",
   path: "/api/workspaces/{workspaceId}/notebook/check",
   tags: ["Notebook"],
-  summary: "Kiểm tra truy cập notebook NotebookLM (qua CLI nlm) và đếm source",
+  summary: "Kiểm tra truy cập notebook NotebookLM (API nội bộ, cookie) và đếm source",
   controller: CheckNotebookController,
 });

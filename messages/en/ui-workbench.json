@@ -71,7 +71,16 @@
       "draftHint": "Draft kept on this device · not written yet",
       "approveSave": "Approve & Save",
       "saving": "Saving…",
-      "saved": "Saved"
+      "saved": "Saved",
+      "viewMode": "View mode",
+      "preview": "Preview",
+      "source": "Edit",
+      "previewLabel": "Preview {file}",
+      "diff": "Diff",
+      "diffNoChanges": "No changes from the saved file",
+      "diffLabel": "Compare draft {file}",
+      "splitResize": "Drag to resize editor / preview",
+      "diffTitle": "Changes from saved file"
     },
     "diff": {
       "label": "Review agent changes",
@@ -86,7 +95,10 @@
       "reject": "Reject",
       "approveSave": "Approve & Save",
       "saving": "Saving…",
-      "rejected": "Discarded the proposal for {file}"
+      "rejected": "Discarded the proposal for {file}",
+      "diff": "Diff",
+      "previewOf": "Preview · {file}",
+      "editable": "editable"
     },
     "sync": {
       "label": "Sync activity",
@@ -140,13 +152,6 @@
       "hint": "Tick the related specs on the left, then describe the change you want.",
       "thinking": "Agent is working",
       "cliTitle": "{profile} · stdout",
-      "cliStarting": "Starting…",
-      "cliStatus": {
-        "RUNNING": "Running",
-        "DONE": "Done · exit {code}",
-        "FAILED": "Failed · exit {code}",
-        "STOPPED": "Stopped"
-      },
       "tool": {
         "running": "Running",
         "drafting": "Drafting",
@@ -157,7 +162,32 @@
         "reviewed": "Handled",
         "openDiff": "Open Diff"
       },
-      "untitled": "Untitled session"
+      "untitled": "Untitled session",
+      "record": {
+        "working": "Working",
+        "thinking": "Thinking",
+        "DONE": "Worked for {duration}",
+        "DONEShort": "Done",
+        "FAILED": "Failed after {duration}",
+        "FAILEDShort": "Failed",
+        "STOPPED": "Stopped after {duration}",
+        "STOPPEDShort": "Stopped",
+        "steps": "{count, plural, one {# step} other {# steps}}",
+        "thought": "Thought",
+        "tokens": "{input} in · {output} out",
+        "turns": "{count, plural, one {# turn} other {# turns}}",
+        "verb": {
+          "read": "Read",
+          "edit": "Edit",
+          "write": "Create",
+          "search": "Search",
+          "exec": "Run",
+          "web": "Web",
+          "plan": "Plan",
+          "task": "Subagent",
+          "other": "Tool"
+        }
+      }
     },
     "composer": {
       "placeholderApi": "Ask the Agent to edit specs…",
@@ -166,7 +196,17 @@
       "contextLabel": "{count, plural, one {# spec in context} other {# specs in context}}",
       "cliStartFailed": "Could not start the CLI Agent",
       "cliStopFailed": "Could not stop the CLI Agent",
-      "sessionFailed": "Could not create chat session"
+      "sessionFailed": "Could not create chat session",
+      "imageType": "Only PNG, JPEG, WebP or GIF images can be pasted.",
+      "imageTooLarge": "Image is larger than {max} MB.",
+      "imageLimit": "Up to {max} images per message."
+    },
+    "syncAll": {
+      "label": "Sync",
+      "started": "Queued {count} files to sync to {targets}",
+      "failed": "Could not sync {file}",
+      "selected": "Sync {count} selected files to {targets}",
+      "noneSelected": "Tick files in the sidebar to choose what to sync"
     }
   }
 }

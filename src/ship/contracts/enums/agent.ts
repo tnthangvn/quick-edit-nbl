@@ -22,3 +22,10 @@ export type CliOutputFormat = z.infer<typeof CliOutputFormat>;
  */
 export const CliPermissionMode = z.enum(["DEFAULT", "PLAN", "ACCEPT_EDITS", "BYPASS"]).meta({ id: "CliPermissionMode" });
 export type CliPermissionMode = z.infer<typeof CliPermissionMode>;
+
+/**
+ * Mức effort / reasoning của CLI agent (Quick Setting Toolbar). DEFAULT = không truyền cờ, CLI tự chọn.
+ * Claude Code / Antigravity: `--effort <low|medium|high|xhigh|max>`; Codex: `-c model_reasoning_effort=…` (tối đa high).
+ */
+export const CliEffort = z.enum(["DEFAULT", "LOW", "MEDIUM", "HIGH", "XHIGH", "MAX"]).meta({ id: "CliEffort" });
+export type CliEffort = z.infer<typeof CliEffort>;

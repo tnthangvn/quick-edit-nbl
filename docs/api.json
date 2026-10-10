@@ -373,7 +373,7 @@
         "tags": [
           "Workspace"
         ],
-        "summary": "Gỡ Workspace khỏi danh sách (không xoá file)",
+        "summary": "Gỡ Workspace khỏi danh sách; deleteFiles=true + confirm=delete thì xoá luôn thư mục trên máy (chỉ local)",
         "parameters": [
           {
             "in": "path",
@@ -384,14 +384,53 @@
               "maxLength": 64
             },
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "deleteFiles",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "confirm",
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            }
           }
         ],
         "responses": {
           "204": {
             "description": "No Content"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/json": {
                 "schema": {
@@ -2716,6 +2755,160 @@
         }
       }
     },
+    "/api/filesystem/git-config": {
+      "get": {
+        "operationId": "readGitConfig",
+        "tags": [
+          "FileSystem"
+        ],
+        "summary": "Đọc remote URL trong .git/config của thư mục để Wizard điền nhanh",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitConfigInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/filesystem/directories": {
+      "post": {
+        "operationId": "createDirectory",
+        "tags": [
+          "FileSystem"
+        ],
+        "summary": "Tạo thư mục con (nút Thư mục mới trong dialog chọn thư mục)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDirectoryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedDirectory"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/workspaces/{workspaceId}/pull": {
       "post": {
         "operationId": "pullWorkspace",
@@ -3278,7 +3471,7 @@
         "tags": [
           "Notebook"
         ],
-        "summary": "Kiểm tra truy cập notebook NotebookLM (qua CLI nlm) và đếm source",
+        "summary": "Kiểm tra truy cập notebook NotebookLM (API nội bộ, cookie) và đếm source",
         "parameters": [
           {
             "in": "path",
@@ -3383,6 +3576,189 @@
           },
           "503": {
             "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notebooklm/connection": {
+      "get": {
+        "operationId": "getNotebookConnection",
+        "tags": [
+          "Notebook"
+        ],
+        "summary": "Đã dán cookie NotebookLM dùng chung chưa (bản che)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotebookConnection"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "saveNotebookConnection",
+        "tags": [
+          "Notebook"
+        ],
+        "summary": "Dán cookie NotebookLM: thử kết nối rồi lưu (mã hoá)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotebookConnectionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotebookConnectionSaved"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteNotebookConnection",
+        "tags": [
+          "Notebook"
+        ],
+        "summary": "Xoá cookie NotebookLM dùng chung",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notebooklm/connection/check": {
+      "post": {
+        "operationId": "checkNotebookConnection",
+        "tags": [
+          "Notebook"
+        ],
+        "summary": "Kiểm tra cookie NotebookLM dùng chung (đếm notebook)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotebookConnectionCheck"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
             "content": {
               "application/json": {
                 "schema": {
@@ -4631,6 +5007,10 @@
                 "default": "BYPASS",
                 "$ref": "#/components/schemas/CliPermissionMode"
               },
+              "effort": {
+                "default": "DEFAULT",
+                "$ref": "#/components/schemas/CliEffort"
+              },
               "profiles": {
                 "minItems": 1,
                 "maxItems": 50,
@@ -4660,6 +5040,17 @@
           "PLAN",
           "ACCEPT_EDITS",
           "BYPASS"
+        ]
+      },
+      "CliEffort": {
+        "type": "string",
+        "enum": [
+          "DEFAULT",
+          "LOW",
+          "MEDIUM",
+          "HIGH",
+          "XHIGH",
+          "MAX"
         ]
       },
       "WorkspaceConfig": {
@@ -4993,6 +5384,10 @@
                   "permissionMode": {
                     "default": "BYPASS",
                     "$ref": "#/components/schemas/CliPermissionMode"
+                  },
+                  "effort": {
+                    "default": "DEFAULT",
+                    "$ref": "#/components/schemas/CliEffort"
                   },
                   "profiles": {
                     "type": "array",
@@ -5372,6 +5767,25 @@
           }
         }
       },
+      "CreateDirectoryInput": {
+        "type": "object",
+        "properties": {
+          "parent": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "parent",
+          "name"
+        ]
+      },
       "CheckNotebookBody": {
         "type": "object",
         "properties": {
@@ -5385,6 +5799,19 @@
             "$ref": "#/components/schemas/SyncStrategy"
           }
         }
+      },
+      "NotebookConnectionInput": {
+        "type": "object",
+        "properties": {
+          "cookie": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 16384
+          }
+        },
+        "required": [
+          "cookie"
+        ]
       },
       "ForceSyncBody": {
         "default": {},
@@ -5521,6 +5948,14 @@
               "minLength": 1,
               "maxLength": 500
             }
+          },
+          "images": {
+            "default": [],
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CliImageInput"
+            }
           }
         },
         "required": [
@@ -5528,6 +5963,35 @@
           "sessionId",
           "profileId",
           "prompt"
+        ]
+      },
+      "CliImageInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp",
+              "image/gif"
+            ]
+          },
+          "data": {
+            "type": "string",
+            "maxLength": 7000000,
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          }
+        },
+        "required": [
+          "name",
+          "mediaType",
+          "data"
         ]
       },
       "CreateAgentSessionBody": {
@@ -5747,6 +6211,9 @@
           "WORKSPACE.DRIVE_NOT_CONFIGURED",
           "WORKSPACE.DRIVE_ACCESS_DENIED",
           "WORKSPACE.NOTEBOOK_UNREACHABLE",
+          "WORKSPACE.DELETE_NOT_CONFIRMED",
+          "WORKSPACE.DELETE_UNSAFE",
+          "WORKSPACE.HAS_NESTED_WORKSPACES",
           "SPEC.NOT_FOUND",
           "SPEC.ALREADY_EXISTS",
           "SPEC.INVALID_NAME",
@@ -5770,6 +6237,8 @@
           "CONNECTOR.INVALID_URL",
           "CONNECTOR.INVALID_SECRET_KEY",
           "FILESYSTEM.DIRECTORY_NOT_FOUND",
+          "FILESYSTEM.DIRECTORY_EXISTS",
+          "FILESYSTEM.DIRECTORY_NOT_WRITABLE",
           "STORAGE.NOT_SUPPORTED",
           "STORAGE.CONFIG_MISSING",
           "STORAGE.PULL_CONFLICT",
@@ -5785,7 +6254,7 @@
           "STORAGE.DRIVE_NOT_FOUND",
           "STORAGE.DRIVE_REQUEST_FAILED",
           "NOTEBOOK.NOT_CONFIGURED",
-          "NOTEBOOK.CLI_NOT_FOUND",
+          "NOTEBOOK.CREDENTIALS_MISSING",
           "NOTEBOOK.AUTH_REQUIRED",
           "NOTEBOOK.NOT_FOUND",
           "NOTEBOOK.COMMAND_FAILED",
@@ -6410,6 +6879,10 @@
                 "default": "BYPASS",
                 "$ref": "#/components/schemas/CliPermissionMode"
               },
+              "effort": {
+                "default": "DEFAULT",
+                "$ref": "#/components/schemas/CliEffort"
+              },
               "profiles": {
                 "type": "array",
                 "items": {
@@ -6421,6 +6894,7 @@
               "activeProfileId",
               "streamStdout",
               "permissionMode",
+              "effort",
               "profiles"
             ],
             "additionalProperties": false
@@ -6975,6 +7449,76 @@
         ],
         "additionalProperties": false
       },
+      "GitConfigInfo": {
+        "type": "object",
+        "properties": {
+          "hasGit": {
+            "type": "boolean"
+          },
+          "remote": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GitProvider"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "host": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "repo": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "userName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "userEmail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "hasGit",
+          "remote",
+          "provider",
+          "host",
+          "repo",
+          "userName",
+          "userEmail"
+        ],
+        "additionalProperties": false
+      },
+      "CreatedDirectory": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
       "PullResultList": {
         "type": "object",
         "properties": {
@@ -7237,6 +7781,64 @@
         ],
         "additionalProperties": false
       },
+      "NotebookConnection": {
+        "type": "object",
+        "properties": {
+          "isSet": {
+            "type": "boolean"
+          },
+          "masked": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "isSet",
+          "masked"
+        ],
+        "additionalProperties": false
+      },
+      "NotebookConnectionSaved": {
+        "type": "object",
+        "properties": {
+          "isSet": {
+            "type": "boolean"
+          },
+          "masked": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notebookCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "isSet",
+          "masked",
+          "notebookCount"
+        ],
+        "additionalProperties": false
+      },
+      "NotebookConnectionCheck": {
+        "type": "object",
+        "properties": {
+          "notebookCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "notebookCount"
+        ],
+        "additionalProperties": false
+      },
       "PublishRun": {
         "type": "object",
         "properties": {
@@ -7419,7 +8021,16 @@
             "$ref": "#/components/schemas/CliRunToolCallEvent"
           },
           {
+            "$ref": "#/components/schemas/CliRunToolResultEvent"
+          },
+          {
+            "$ref": "#/components/schemas/CliRunThinkingEvent"
+          },
+          {
             "$ref": "#/components/schemas/CliRunMessageEvent"
+          },
+          {
+            "$ref": "#/components/schemas/CliRunUsageEvent"
           },
           {
             "$ref": "#/components/schemas/CliRunProposalEvent"
@@ -7435,7 +8046,10 @@
             "STATUS": "#/components/schemas/CliRunStatusEvent",
             "LOG": "#/components/schemas/CliRunLogEvent",
             "TOOL_CALL": "#/components/schemas/CliRunToolCallEvent",
+            "TOOL_RESULT": "#/components/schemas/CliRunToolResultEvent",
+            "THINKING": "#/components/schemas/CliRunThinkingEvent",
             "MESSAGE": "#/components/schemas/CliRunMessageEvent",
+            "USAGE": "#/components/schemas/CliRunUsageEvent",
             "PROPOSAL": "#/components/schemas/CliRunProposalEvent",
             "SESSION": "#/components/schemas/CliRunSessionEvent"
           }
@@ -7584,11 +8198,25 @@
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
           },
+          "toolId": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "name": {
             "type": "string"
           },
           "input": {
             "type": "string"
+          },
+          "target": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -7596,8 +8224,88 @@
           "runId",
           "seq",
           "at",
+          "toolId",
           "name",
-          "input"
+          "input",
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "CliRunToolResultEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "TOOL_RESULT"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "toolId": {
+            "type": "string"
+          },
+          "output": {
+            "type": "string"
+          },
+          "isError": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "runId",
+          "seq",
+          "at",
+          "toolId",
+          "output",
+          "isError"
+        ],
+        "additionalProperties": false
+      },
+      "CliRunThinkingEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "THINKING"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "text": {
+            "type": "string"
+          },
+          "delta": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "runId",
+          "seq",
+          "at",
+          "text",
+          "delta"
         ],
         "additionalProperties": false
       },
@@ -7635,6 +8343,98 @@
           "at",
           "text",
           "delta"
+        ],
+        "additionalProperties": false
+      },
+      "CliRunUsageEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "USAGE"
+          },
+          "runId": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "durationMs": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "costUsd": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inputTokens": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outputTokens": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "numTurns": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "runId",
+          "seq",
+          "at",
+          "durationMs",
+          "costUsd",
+          "inputTokens",
+          "outputTokens",
+          "numTurns"
         ],
         "additionalProperties": false
       },
@@ -8369,6 +9169,10 @@
                     "default": "BYPASS",
                     "$ref": "#/components/schemas/CliPermissionMode"
                   },
+                  "effort": {
+                    "default": "DEFAULT",
+                    "$ref": "#/components/schemas/CliEffort"
+                  },
                   "profiles": {
                     "type": "array",
                     "items": {
@@ -8380,6 +9184,7 @@
                   "activeProfileId",
                   "streamStdout",
                   "permissionMode",
+                  "effort",
                   "profiles"
                 ],
                 "additionalProperties": false
@@ -8610,6 +9415,10 @@
                 "default": "BYPASS",
                 "$ref": "#/components/schemas/CliPermissionMode"
               },
+              "effort": {
+                "default": "DEFAULT",
+                "$ref": "#/components/schemas/CliEffort"
+              },
               "profiles": {
                 "type": "array",
                 "items": {
@@ -8621,6 +9430,7 @@
               "activeProfileId",
               "streamStdout",
               "permissionMode",
+              "effort",
               "profiles"
             ],
             "additionalProperties": false

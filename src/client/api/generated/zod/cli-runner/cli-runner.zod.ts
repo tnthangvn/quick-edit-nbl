@@ -38,6 +38,15 @@ export const startCliRunBodyContextFilesItemMax = 500;
 export const startCliRunBodyContextFilesDefault = [];
 export const startCliRunBodyContextFilesMax = 50;
 
+export const startCliRunBodyImagesItemNameMax = 120;
+
+export const startCliRunBodyImagesItemDataMax = 7000000;
+
+
+export const startCliRunBodyImagesItemDataRegExp = new RegExp('^[A-Za-z0-9+/]+={0,2}$');
+export const startCliRunBodyImagesDefault = [];
+export const startCliRunBodyImagesMax = 5;
+
 
 
 export const StartCliRunBody = zod.object({
@@ -45,7 +54,12 @@ export const StartCliRunBody = zod.object({
   "sessionId": zod.string().min(1).max(startCliRunBodySessionIdMax),
   "profileId": zod.string().min(1),
   "prompt": zod.string().min(1).max(startCliRunBodyPromptMax),
-  "contextFiles": zod.array(zod.string().min(1).max(startCliRunBodyContextFilesItemMax)).max(startCliRunBodyContextFilesMax).default(startCliRunBodyContextFilesDefault)
+  "contextFiles": zod.array(zod.string().min(1).max(startCliRunBodyContextFilesItemMax)).max(startCliRunBodyContextFilesMax).default(startCliRunBodyContextFilesDefault),
+  "images": zod.array(zod.object({
+  "name": zod.string().min(1).max(startCliRunBodyImagesItemNameMax),
+  "mediaType": zod.enum(['image/png', 'image/jpeg', 'image/webp', 'image/gif']),
+  "data": zod.string().max(startCliRunBodyImagesItemDataMax).regex(startCliRunBodyImagesItemDataRegExp)
+})).max(startCliRunBodyImagesMax).default(startCliRunBodyImagesDefault)
 })
 
 export const StartCliRunResponse = zod.object({

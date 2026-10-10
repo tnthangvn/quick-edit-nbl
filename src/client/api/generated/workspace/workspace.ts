@@ -30,6 +30,7 @@ import type {
   ImportWorkspaceInput,
   ListWorkspacesParams,
   OpenedWorkspace,
+  RemoveWorkspaceParams,
   UpdateWorkspaceInput,
   ValidationErrorResponse,
   Workspace,
@@ -494,20 +495,29 @@ export const useUpdateWorkspace = <TError = globalThis.Error & { info?: ErrorRes
       > => {
       return useMutation(getUpdateWorkspaceMutationOptions(options), queryClient);
     }
-    export const getRemoveWorkspaceUrl = (workspaceId: string,) => {
+    export const getRemoveWorkspaceUrl = (workspaceId: string,
+    params?: RemoveWorkspaceParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/workspaces/${workspaceId}`
+  return stringifiedParams.length > 0 ? `/api/workspaces/${workspaceId}?${stringifiedParams}` : `/api/workspaces/${workspaceId}`
 }
 
 /**
- * @summary Gỡ Workspace khỏi danh sách (không xoá file)
+ * @summary Gỡ Workspace khỏi danh sách; deleteFiles=true + confirm=delete thì xoá luôn thư mục trên máy (chỉ local)
  */
-export const removeWorkspace = async (workspaceId: string, options?: RequestInit): Promise<void> => {
+export const removeWorkspace = async (workspaceId: string,
+    params?: RemoveWorkspaceParams, options?: RequestInit): Promise<void> => {
 
-  const res = await fetch(getRemoveWorkspaceUrl(workspaceId),
+  const res = await fetch(getRemoveWorkspaceUrl(workspaceId,params),
   {
     ...options,
     method: 'DELETE'
@@ -551,9 +561,9 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeWorkspace>>, RemoveWorkspaceMutationVariables> = (props) => {
-          const {workspaceId} = props ?? {};
+          const {workspaceId,params} = props ?? {};
 
-          return  removeWorkspace(workspaceId,fetchOptions)
+          return  removeWorkspace(workspaceId,params,fetchOptions)
         }
 
 
@@ -566,10 +576,10 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
     export type RemoveWorkspaceMutationResult = NonNullable<Awaited<ReturnType<typeof removeWorkspace>>>
 
     export type RemoveWorkspaceMutationError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }
-    export type RemoveWorkspaceMutationVariables = {workspaceId: string}
+    export type RemoveWorkspaceMutationVariables = {workspaceId: string;params?: RemoveWorkspaceParams}
 
     /**
- * @summary Gỡ Workspace khỏi danh sách (không xoá file)
+ * @summary Gỡ Workspace khỏi danh sách; deleteFiles=true + confirm=delete thì xoá luôn thư mục trên máy (chỉ local)
  */
 export const useRemoveWorkspace = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeWorkspace>>, TError,RemoveWorkspaceMutationVariables, TContext>, fetch?: RequestInit}

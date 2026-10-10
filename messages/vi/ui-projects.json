@@ -53,7 +53,15 @@
       "title": "Gỡ khỏi danh sách?",
       "description": "Gỡ {name} khỏi màn Projects. File trong thư mục vẫn giữ nguyên.",
       "confirm": "Remove",
-      "removed": "Đã gỡ {name} khỏi danh sách"
+      "removed": "Đã gỡ {name} khỏi danh sách",
+      "descriptionDelete": "Gỡ {name} khỏi màn Projects và xoá thư mục của nó trên máy này.",
+      "deleteFiles": "Xoá luôn thư mục trên máy",
+      "deleteWarning": "Xoá vĩnh viễn, không hoàn tác được.",
+      "deleteWhat": "Xoá toàn bộ <code>{path}</code> trên máy: file spec, .git, .spec-studio/.",
+      "deleteKeep": "Không đụng tới cloud: Git remote, Google Drive và NotebookLM giữ nguyên.",
+      "typeToConfirm": "Gõ <code>{word}</code> để xác nhận",
+      "confirmDelete": "Xoá thư mục",
+      "deleted": "Đã gỡ {name} và xoá thư mục trên máy"
     },
     "import": {
       "title": "Mở thư mục có sẵn",

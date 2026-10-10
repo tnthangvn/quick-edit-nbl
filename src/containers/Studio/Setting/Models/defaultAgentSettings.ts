@@ -8,7 +8,7 @@ export const DEFAULT_CLI_PROFILES: CliProfile[] = [
     name: "Claude Code",
     kind: "CLAUDE_CODE",
     command: "claude",
-    args: ["-p", "{prompt}", "--output-format", "stream-json", "--verbose", "--dangerously-skip-permissions"],
+    args: ["-p", "{prompt}", "--output-format", "stream-json", "--verbose", "--include-partial-messages", "--dangerously-skip-permissions"],
     outputFormat: "STREAM_JSON",
     env: {},
   },
@@ -71,6 +71,7 @@ export function defaultAgentSettings(): AgentSettings {
       activeProfileId: "claude-code",
       streamStdout: true,
       permissionMode: "BYPASS",
+      effort: "DEFAULT",
       profiles: structuredClone(DEFAULT_CLI_PROFILES),
     },
   };

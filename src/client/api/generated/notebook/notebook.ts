@@ -6,25 +6,53 @@
  * OpenAPI spec version: 1.0.0
  */
 import {
-  useMutation
+  useMutation,
+  useQuery
 } from '@tanstack/react-query';
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   MutationFunction,
   QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
   UseMutationOptions,
-  UseMutationResult
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
   CheckNotebookBody,
   ErrorResponse,
   NotebookCheckResult,
+  NotebookConnection,
+  NotebookConnectionCheck,
+  NotebookConnectionInput,
+  NotebookConnectionSaved,
   ValidationErrorResponse
 } from '../model';
 
 
 
 
+
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
+};
 
 export const getCheckNotebookUrl = (workspaceId: string,) => {
 
@@ -35,7 +63,7 @@ export const getCheckNotebookUrl = (workspaceId: string,) => {
 }
 
 /**
- * @summary Kiểm tra truy cập notebook NotebookLM (qua CLI nlm) và đếm source
+ * @summary Kiểm tra truy cập notebook NotebookLM (API nội bộ, cookie) và đếm source
  */
 export const checkNotebook = async (workspaceId: string,
     checkNotebookBody: CheckNotebookBody, options?: RequestInit): Promise<NotebookCheckResult> => {
@@ -116,7 +144,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
     export type CheckNotebookMutationVariables = {workspaceId: string;data: CheckNotebookBody}
 
     /**
- * @summary Kiểm tra truy cập notebook NotebookLM (qua CLI nlm) và đếm source
+ * @summary Kiểm tra truy cập notebook NotebookLM (API nội bộ, cookie) và đếm source
  */
 export const useCheckNotebook = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof checkNotebook>>, TError,CheckNotebookMutationVariables, TContext>, fetch?: RequestInit}
@@ -127,4 +155,393 @@ export const useCheckNotebook = <TError = globalThis.Error & { info?: ErrorRespo
         TContext
       > => {
       return useMutation(getCheckNotebookMutationOptions(options), queryClient);
+    }
+    export const getGetNotebookConnectionUrl = () => {
+
+
+
+
+  return `/api/notebooklm/connection`
+}
+
+/**
+ * @summary Đã dán cookie NotebookLM dùng chung chưa (bản che)
+ */
+export const getNotebookConnection = async ( options?: RequestInit): Promise<NotebookConnection> => {
+
+  const res = await fetch(getGetNotebookConnectionUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: NotebookConnection, status?: number} = new globalThis.Error();
+    const data : NotebookConnection = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: NotebookConnection = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getGetNotebookConnectionQueryKey = () => {
+    return [
+    `/api/notebooklm/connection`
+    ] as const;
+    }
+
+
+export const getGetNotebookConnectionQueryOptions = <TData = Awaited<ReturnType<typeof getNotebookConnection>>, TError = globalThis.Error & { info?: ErrorResponse; status?: number }>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotebookConnection>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetNotebookConnectionQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNotebookConnection>>> = ({ signal }) => getNotebookConnection({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNotebookConnection>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetNotebookConnectionQueryResult = NonNullable<Awaited<ReturnType<typeof getNotebookConnection>>>
+export type GetNotebookConnectionQueryError = globalThis.Error & { info?: ErrorResponse; status?: number }
+
+
+export function useGetNotebookConnection<TData = Awaited<ReturnType<typeof getNotebookConnection>>, TError = globalThis.Error & { info?: ErrorResponse; status?: number }>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotebookConnection>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getNotebookConnection>>,
+          TError,
+          Awaited<ReturnType<typeof getNotebookConnection>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetNotebookConnection<TData = Awaited<ReturnType<typeof getNotebookConnection>>, TError = globalThis.Error & { info?: ErrorResponse; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotebookConnection>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getNotebookConnection>>,
+          TError,
+          Awaited<ReturnType<typeof getNotebookConnection>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetNotebookConnection<TData = Awaited<ReturnType<typeof getNotebookConnection>>, TError = globalThis.Error & { info?: ErrorResponse; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotebookConnection>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Đã dán cookie NotebookLM dùng chung chưa (bản che)
+ */
+
+export function useGetNotebookConnection<TData = Awaited<ReturnType<typeof getNotebookConnection>>, TError = globalThis.Error & { info?: ErrorResponse; status?: number }>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getNotebookConnection>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetNotebookConnectionQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getSaveNotebookConnectionUrl = () => {
+
+
+
+
+  return `/api/notebooklm/connection`
+}
+
+/**
+ * @summary Dán cookie NotebookLM: thử kết nối rồi lưu (mã hoá)
+ */
+export const saveNotebookConnection = async (notebookConnectionInput: NotebookConnectionInput, options?: RequestInit): Promise<NotebookConnectionSaved> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+const res = await fetch(getSaveNotebookConnectionUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(notebookConnectionInput)
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: NotebookConnectionSaved, status?: number} = new globalThis.Error();
+    const data : NotebookConnectionSaved = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: NotebookConnectionSaved = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getSaveNotebookConnectionMutationKey = () => ['saveNotebookConnection'] as const;
+
+export const getSaveNotebookConnectionMutationOptions = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveNotebookConnection>>, TError,SaveNotebookConnectionMutationVariables, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof saveNotebookConnection>>, TError,SaveNotebookConnectionMutationVariables, TContext> => {
+
+const mutationKey = getSaveNotebookConnectionMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveNotebookConnection>>, SaveNotebookConnectionMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  saveNotebookConnection(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveNotebookConnectionMutationResult = NonNullable<Awaited<ReturnType<typeof saveNotebookConnection>>>
+    export type SaveNotebookConnectionMutationBody = NotebookConnectionInput
+    export type SaveNotebookConnectionMutationError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number }
+    export type SaveNotebookConnectionMutationVariables = {data: NotebookConnectionInput}
+
+    /**
+ * @summary Dán cookie NotebookLM: thử kết nối rồi lưu (mã hoá)
+ */
+export const useSaveNotebookConnection = <TError = globalThis.Error & { info?: ErrorResponse | ValidationErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveNotebookConnection>>, TError,SaveNotebookConnectionMutationVariables, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof saveNotebookConnection>>,
+        TError,
+        SaveNotebookConnectionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSaveNotebookConnectionMutationOptions(options), queryClient);
+    }
+    export const getDeleteNotebookConnectionUrl = () => {
+
+
+
+
+  return `/api/notebooklm/connection`
+}
+
+/**
+ * @summary Xoá cookie NotebookLM dùng chung
+ */
+export const deleteNotebookConnection = async ( options?: RequestInit): Promise<void> => {
+
+  const res = await fetch(getDeleteNotebookConnectionUrl(),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: void, status?: number} = new globalThis.Error();
+    const data : void = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: void = body ? JSON.parse(body) : undefined
+  return data
+}
+
+
+
+
+
+export const getDeleteNotebookConnectionMutationKey = () => ['deleteNotebookConnection'] as const;
+
+export const getDeleteNotebookConnectionMutationOptions = <TError = globalThis.Error & { info?: ErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteNotebookConnection>>, TError,void, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteNotebookConnection>>, TError,void, TContext> => {
+
+const mutationKey = getDeleteNotebookConnectionMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteNotebookConnection>>, void> = () => {
+
+
+          return  deleteNotebookConnection(fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteNotebookConnectionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteNotebookConnection>>>
+
+    export type DeleteNotebookConnectionMutationError = globalThis.Error & { info?: ErrorResponse; status?: number }
+
+
+    /**
+ * @summary Xoá cookie NotebookLM dùng chung
+ */
+export const useDeleteNotebookConnection = <TError = globalThis.Error & { info?: ErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteNotebookConnection>>, TError,void, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteNotebookConnection>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getDeleteNotebookConnectionMutationOptions(options), queryClient);
+    }
+    export const getCheckNotebookConnectionUrl = () => {
+
+
+
+
+  return `/api/notebooklm/connection/check`
+}
+
+/**
+ * @summary Kiểm tra cookie NotebookLM dùng chung (đếm notebook)
+ */
+export const checkNotebookConnection = async ( options?: RequestInit): Promise<NotebookConnectionCheck> => {
+
+  const res = await fetch(getCheckNotebookConnectionUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  if (!res.ok) {
+
+    const err: globalThis.Error & {info?: NotebookConnectionCheck, status?: number} = new globalThis.Error();
+    const data : NotebookConnectionCheck = body ? JSON.parse(body) : {}
+    err.info = data;
+    err.status = res.status;
+    throw err;
+  }
+  const data: NotebookConnectionCheck = body ? JSON.parse(body) : {}
+  return data
+}
+
+
+
+
+
+export const getCheckNotebookConnectionMutationKey = () => ['checkNotebookConnection'] as const;
+
+export const getCheckNotebookConnectionMutationOptions = <TError = globalThis.Error & { info?: ErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof checkNotebookConnection>>, TError,void, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof checkNotebookConnection>>, TError,void, TContext> => {
+
+const mutationKey = getCheckNotebookConnectionMutationKey();
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof checkNotebookConnection>>, void> = () => {
+
+
+          return  checkNotebookConnection(fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CheckNotebookConnectionMutationResult = NonNullable<Awaited<ReturnType<typeof checkNotebookConnection>>>
+
+    export type CheckNotebookConnectionMutationError = globalThis.Error & { info?: ErrorResponse; status?: number }
+
+
+    /**
+ * @summary Kiểm tra cookie NotebookLM dùng chung (đếm notebook)
+ */
+export const useCheckNotebookConnection = <TError = globalThis.Error & { info?: ErrorResponse; status?: number },
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof checkNotebookConnection>>, TError,void, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof checkNotebookConnection>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getCheckNotebookConnectionMutationOptions(options), queryClient);
     }

@@ -46,6 +46,11 @@
       "driveToggle": {
         "label": "Đồng bộ qua Google Drive",
         "hint": "Thư mục Drive + bản sao local."
+      },
+      "gitDetected": {
+        "title": "Thư mục này đã có Git repo",
+        "author": "Tác giả commit: {author}",
+        "apply": "Dùng remote này"
       }
     },
     "git": {
@@ -96,7 +101,15 @@
       "pullOnOpen": {
         "label": "Pull khi mở Workspace",
         "hint": "git pull --ff-only mỗi lần mở."
-      }
+      },
+      "tokenTitle": "Access token (PAT)",
+      "tokenDescription": "Dùng Personal Access Token để clone/pull/push (và tạo PR nếu token có quyền).",
+      "tokenLabel": "Personal Access Token",
+      "tokenSave": "Lưu & dùng",
+      "tokenHint": "Cần quyền đọc/ghi repo (GitHub: contents read/write; GitLab: read_repository + write_repository). Token mã hoá khi lưu, gửi qua header chỉ cho đúng host, không ghi vào URL hay .git/config.",
+      "tokenName": "Token · {host}",
+      "tokenOk": "Token hợp lệ",
+      "tokenCheckFailed": "Đã lưu token nhưng kiểm tra chưa thành công"
     },
     "google": {
       "checking": "Đang kiểm tra đăng nhập Google…",
@@ -137,7 +150,7 @@
       },
       "driveFolder": "Drive Folder ID",
       "driveFolderHint": "Thư mục Drive chứa bản Google Doc của spec.",
-      "rpcHint": "Nhập cookie và token SNlM0e ở Settings › NotebookLM Sync sau khi tạo project.",
+      "rpcHint": "Kết nối NotebookLM ở Settings › Integrations (dán cookie) trước khi đồng bộ.",
       "mapping": "Ánh xạ: mỗi file spec ↔ một source cùng tên trong notebook.",
       "autoSyncOnApprove": {
         "label": "Tự động sync lên NBL sau khi Approve Diff"

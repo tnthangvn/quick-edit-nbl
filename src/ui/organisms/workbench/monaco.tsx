@@ -80,13 +80,17 @@ type SpecMonacoDiffProps = {
   modifiedRef: React.RefObject<(() => string) | null>;
   onStats: (stats: DiffStats) => void;
   ariaLabel: string;
+  /** Chỉ xem (Diff bản nháp ↔ file đã lưu trong editor thường). */
+  readOnly?: boolean;
+  /** Diff một cột (panel hẹp cạnh editor). */
+  inline?: boolean;
 };
 
 /**
  * DiffEditor hai cột Original | Proposed (DiffView.md). Bên Original chỉ đọc. Giữ model khi unmount rồi tự dispose
  * (tránh lỗi "TextModel got disposed before DiffEditorWidget model got reset" của @monaco-editor/react).
  */
-export function SpecMonacoDiff({ workspaceId, file, original, proposed, instanceId, modifiedRef, onStats, ariaLabel }: SpecMonacoDiffProps) {
+export function SpecMonacoDiff({ workspaceId, file, original, proposed, instanceId, modifiedRef, onStats, ariaLabel, readOnly = false, inline = false }: SpecMonacoDiffProps) {
   const { resolved } = useThemeToggle();
   const epoch = useActivityEpoch();
   const cleanup = React.useRef<(() => void) | null>(null);
@@ -137,7 +141,7 @@ export function SpecMonacoDiff({ workspaceId, file, original, proposed, instance
         beforeMount={registerSpecStudioThemes}
         onMount={handleMount}
         loading={<MonacoLoading />}
-        options={{ ...MONACO_OPTIONS, originalEditable: false, readOnly: false, ariaLabel, renderOverviewRuler: false }}
+        options={{ ...MONACO_OPTIONS, originalEditable: false, readOnly, ariaLabel, renderOverviewRuler: false, renderSideBySide: !inline }}
       />
     </MonacoGate>
   );

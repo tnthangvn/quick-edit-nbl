@@ -4,7 +4,7 @@ import { lstat, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
 /** Thư mục không bao giờ chép vào sandbox / không quét khi so sánh. */
-export const SKIPPED_DIRS = new Set([".git", "node_modules"]);
+export const SKIPPED_DIRS = new Set([".git", "node_modules", ".attachments"]);
 /** File .md lớn hơn ngưỡng này bị bỏ qua khi so sánh. */
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 

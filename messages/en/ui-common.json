@@ -128,7 +128,11 @@
     "composer": {
       "label": "Request for the Agent",
       "placeholder": "Describe the change you want in the spec…",
-      "hint": "to send"
+      "hint": "to send",
+      "mentionLabel": "File suggestions",
+      "mentionTitle": "Specs",
+      "attachments": "Attached images",
+      "removeAttachment": "Remove {name}"
     },
     "theme": {
       "toggle": "Toggle light/dark theme",
@@ -141,6 +145,27 @@
       "hide": "Hide",
       "setPlaceholder": "Saved · type to replace",
       "maskedPlaceholder": "{masked} · type to replace"
+    },
+    "effort": {
+      "label": "Effort: {level}",
+      "title": "Effort",
+      "reset": "Default",
+      "faster": "Faster",
+      "smarter": "Smarter",
+      "DEFAULT": "Default",
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "XHIGH": "Extra high",
+      "MAX": "Max",
+      "defaultHint": "No effort flag; the CLI uses its own setting.",
+      "hint": {
+        "LOW": "Fast replies, light reasoning. Good for small edits.",
+        "MEDIUM": "Balanced speed and quality.",
+        "HIGH": "Deeper reasoning, slower and more tokens.",
+        "XHIGH": "Very thorough, for large multi-file changes.",
+        "MAX": "Highest effort, slowest and most expensive."
+      }
     }
   }
 }

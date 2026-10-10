@@ -1,7 +1,9 @@
 {
   "errors": {
     "FILESYSTEM": {
-      "DIRECTORY_NOT_FOUND": "Directory {path} not found."
+      "DIRECTORY_NOT_FOUND": "Directory {path} not found.",
+      "DIRECTORY_EXISTS": "A file or folder with this name already exists: {path}.",
+      "DIRECTORY_NOT_WRITABLE": "No permission to create a folder in {path}."
     }
   }
 }

@@ -1,10 +1,11 @@
 import "server-only";
 import { logger } from "@/ship/adapters/logger";
-import { NOTEBOOK_URL } from "@/ship/adapters/nlm";
+import { NOTEBOOK_URL } from "@/ship/adapters/notebooklm";
 import type { PublishTarget } from "@/ship/contracts/enums/sync";
 import type { PublishStep } from "@/ship/contracts/events";
 import { Action } from "@/ship/parents/Action";
 import { AppException } from "@/ship/parents/AppException";
+import { NotebookCredentialsMissingException } from "../../Notebook/Exceptions/NotebookCredentialsMissingException";
 import { NotebookNotConfiguredException } from "../../Notebook/Exceptions/NotebookNotConfiguredException";
 import { RefreshNotebookDriveSourceTask } from "../../Notebook/Tasks/RefreshNotebookDriveSourceTask";
 import { ReplaceNotebookTextSourceTask } from "../../Notebook/Tasks/ReplaceNotebookTextSourceTask";
@@ -160,7 +161,7 @@ export class ExecutePublishRunAction extends Action<{ runId: string }, void> {
 
     if (nbl.syncStrategy === "RPC") {
       progress(`replace source “${file}”`);
-      await this.replaceTextSource.run({ notebookId, title: file, content });
+      await this.replaceTextSource.run({ workspaceId: run.workspaceId, notebookId, title: file, content });
       return done;
     }
 
@@ -170,8 +171,14 @@ export class ExecutePublishRunAction extends Action<{ runId: string }, void> {
       progress(`ghi Google Doc ${file}…`);
       documentId = (await this.uploadDrive.run({ workspaceId: run.workspaceId, folderId: nbl.driveFolderId, name: file, content, asGoogleDoc: true })).fileId;
     }
-    progress(`refresh source “${file}”`);
-    await this.refreshDriveSource.run({ notebookId, documentId, title: file });
+    progress(`sync source “${file}”`);
+    try {
+      await this.refreshDriveSource.run({ workspaceId: run.workspaceId, notebookId, documentId, title: file });
+    } catch (err) {
+      // Chưa dán cookie NotebookLM: Google Doc đã cập nhật tại chỗ, người dùng bấm Sync trong NotebookLM (không coi là lỗi).
+      if (err instanceof NotebookCredentialsMissingException) return { ...done, detail: `Google Doc đã cập nhật · bấm Sync trong NotebookLM` };
+      throw err;
+    }
     return done;
   }
 }

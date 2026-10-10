@@ -28,3 +28,42 @@ export const BrowseDirectoryResponse = zod.object({
 }))
 })
 
+/**
+ * @summary Đọc remote URL trong .git/config của thư mục để Wizard điền nhanh
+ */
+export const readGitConfigQueryPathMax = 1024;
+
+
+
+export const ReadGitConfigQueryParams = zod.object({
+  "path": zod.string().min(1).max(readGitConfigQueryPathMax)
+})
+
+export const ReadGitConfigResponse = zod.object({
+  "hasGit": zod.boolean(),
+  "remote": zod.string().nullable(),
+  "provider": zod.union([zod.enum(['GITHUB', 'GITLAB', 'BITBUCKET', 'GITEA', 'GENERIC']),zod.null()]),
+  "host": zod.string().nullable(),
+  "repo": zod.string().nullable(),
+  "userName": zod.string().nullable(),
+  "userEmail": zod.string().nullable()
+})
+
+/**
+ * @summary Tạo thư mục con (nút Thư mục mới trong dialog chọn thư mục)
+ */
+export const createDirectoryBodyParentMax = 1024;
+
+export const createDirectoryBodyNameMax = 255;
+
+
+
+export const CreateDirectoryBody = zod.object({
+  "parent": zod.string().min(1).max(createDirectoryBodyParentMax),
+  "name": zod.string().min(1).max(createDirectoryBodyNameMax)
+})
+
+export const CreateDirectoryResponse = zod.object({
+  "path": zod.string()
+})
+

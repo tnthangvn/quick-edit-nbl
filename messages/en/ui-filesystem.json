@@ -9,7 +9,13 @@
       "notWritable": "This folder is not writable.",
       "pathPlaceholder": "/home/you/projects",
       "goTo": "Go",
-      "select": "Select this folder"
+      "select": "Select this folder",
+      "search": "Search folders",
+      "searchPlaceholder": "Search {count} folders…",
+      "noMatch": "No folders match “{query}”.",
+      "newFolder": "New folder",
+      "newFolderPlaceholder": "Folder name",
+      "create": "Create"
     }
   }
 }

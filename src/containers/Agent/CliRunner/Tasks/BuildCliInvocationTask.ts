@@ -6,7 +6,7 @@ import { logger } from "@/ship/adapters/logger";
 import { which } from "@/ship/adapters/process";
 import { resolveSecretValue } from "@/ship/adapters/secrets";
 import type { CliProfile } from "@/ship/contracts/agentSettings";
-import type { CliPermissionMode } from "@/ship/contracts/enums/agent";
+import type { CliEffort, CliPermissionMode } from "@/ship/contracts/enums/agent";
 import { Task } from "@/ship/parents/Task";
 import { CliNotInstalledException, CliPermissionUnsupportedException, CliSpecContextRequiredException } from "../Exceptions/CliRunnerExceptions";
 import type { CliInvocation } from "../Models/CliInvocation";
@@ -20,6 +20,8 @@ export type BuildCliInvocationInput = {
   resumeId?: string | null;
   /** Mức quyền chọn trên toolbar; DEFAULT / bỏ trống = theo args của profile. */
   permissionMode?: CliPermissionMode;
+  /** Effort chọn trên toolbar; DEFAULT / bỏ trống / CLI không hỗ trợ = không truyền cờ. */
+  effort?: CliEffort;
 };
 
 /** Cờ quyền của từng CLI: bị gỡ khỏi args của profile khi chọn mức khác DEFAULT. `true` = cờ có kèm giá trị. */
@@ -72,6 +74,48 @@ export function withPermissionArgs(kind: CliProfile["kind"], args: readonly stri
   }
   if (kind === "CODEX" && kept[0] === "exec") return ["exec", ...added, ...kept.slice(1)];
   return [...kept, ...added];
+}
+
+const EFFORT_VALUE: Record<Exclude<CliEffort, "DEFAULT">, string> = { LOW: "low", MEDIUM: "medium", HIGH: "high", XHIGH: "xhigh", MAX: "max" };
+/** Codex chỉ có tới high. */
+const CODEX_EFFORT: Record<Exclude<CliEffort, "DEFAULT">, string> = { LOW: "low", MEDIUM: "medium", HIGH: "high", XHIGH: "high", MAX: "high" };
+
+/** Loại CLI chỉnh được effort (khớp toolbar FE). */
+export function supportsEffort(kind: CliProfile["kind"]): boolean {
+  return kind === "CLAUDE_CODE" || kind === "ANTIGRAVITY" || kind === "CODEX";
+}
+
+/**
+ * Thay / thêm cờ effort theo loại CLI (args thô, trước `withResumeArgs`). DEFAULT giữ nguyên args của profile.
+ * Claude Code, Antigravity: `--effort <mức>`; Codex: `exec -c model_reasoning_effort="<mức>" …`.
+ */
+export function withEffortArgs(kind: CliProfile["kind"], args: readonly string[], effort: CliEffort | undefined): string[] {
+  if (!effort || effort === "DEFAULT" || !supportsEffort(kind)) return [...args];
+  if (kind === "CODEX") {
+    const kept: string[] = [];
+    for (let i = 0; i < args.length; i++) {
+      if (args[i] === "-c" && args[i + 1]?.startsWith("model_reasoning_effort=")) i++;
+      else kept.push(args[i]);
+    }
+    const flag = ["-c", `model_reasoning_effort="${CODEX_EFFORT[effort]}"`];
+    return kept[0] === "exec" ? ["exec", ...flag, ...kept.slice(1)] : [...flag, ...kept];
+  }
+  const kept: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--effort") i++;
+    else if (!args[i].startsWith("--effort=")) kept.push(args[i]);
+  }
+  return [...kept, "--effort", EFFORT_VALUE[effort]];
+}
+
+/**
+ * Claude Code `--output-format stream-json`: thêm `--include-partial-messages` (text / thinking hiện dần) nếu profile
+ * chưa có, để profile đã lưu từ bản cũ cũng được stream.
+ */
+export function withStreamingArgs(kind: CliProfile["kind"], args: readonly string[]): string[] {
+  if (kind !== "CLAUDE_CODE" || args.includes("--include-partial-messages")) return [...args];
+  const streamJson = args.some((a, i) => a === "--output-format=stream-json" || (a === "--output-format" && args[i + 1] === "stream-json"));
+  return streamJson ? [...args, "--include-partial-messages"] : [...args];
 }
 
 /**
@@ -134,7 +178,7 @@ async function resolveBinary(bin: string): Promise<string | undefined> {
  * (mảng tham số, không qua shell), resolve env "secret:<ref>".
  */
 export class BuildCliInvocationTask extends Task<BuildCliInvocationInput, CliInvocation> {
-  async run({ profile, prompt, contextFiles, resumeId, permissionMode }: BuildCliInvocationInput): Promise<CliInvocation> {
+  async run({ profile, prompt, contextFiles, resumeId, permissionMode, effort }: BuildCliInvocationInput): Promise<CliInvocation> {
     const [bin, ...preArgs] = profile.command.trim().split(/\s+/);
     const command = await resolveBinary(bin);
     if (!command) throw new CliNotInstalledException({ command: bin });
@@ -147,7 +191,7 @@ export class BuildCliInvocationTask extends Task<BuildCliInvocationInput, CliInv
       throw new CliPermissionUnsupportedException({ mode: permissionMode, profileId: profile.id });
     }
     const fullPrompt = buildCliPrompt(prompt, contextFiles);
-    const rawArgs = withResumeArgs(profile.kind, withPermissionArgs(profile.kind, profile.args, permissionMode), resumeId);
+    const rawArgs = withResumeArgs(profile.kind, withEffortArgs(profile.kind, withStreamingArgs(profile.kind, withPermissionArgs(profile.kind, profile.args, permissionMode)), effort), resumeId);
     const args = [...preArgs, ...rawArgs.map((a) => a.replaceAll("{prompt}", fullPrompt).replaceAll("{spec}", contextFiles[0] ?? ""))];
 
     const env: Record<string, string> = {};

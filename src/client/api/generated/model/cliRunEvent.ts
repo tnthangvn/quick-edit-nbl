@@ -10,6 +10,9 @@ import type { CliRunMessageEvent } from './cliRunMessageEvent';
 import type { CliRunProposalEvent } from './cliRunProposalEvent';
 import type { CliRunSessionEvent } from './cliRunSessionEvent';
 import type { CliRunStatusEvent } from './cliRunStatusEvent';
+import type { CliRunThinkingEvent } from './cliRunThinkingEvent';
 import type { CliRunToolCallEvent } from './cliRunToolCallEvent';
+import type { CliRunToolResultEvent } from './cliRunToolResultEvent';
+import type { CliRunUsageEvent } from './cliRunUsageEvent';
 
-export type CliRunEvent = CliRunStatusEvent | CliRunLogEvent | CliRunToolCallEvent | CliRunMessageEvent | CliRunProposalEvent | CliRunSessionEvent;
+export type CliRunEvent = CliRunStatusEvent | CliRunLogEvent | CliRunToolCallEvent | CliRunToolResultEvent | CliRunThinkingEvent | CliRunMessageEvent | CliRunUsageEvent | CliRunProposalEvent | CliRunSessionEvent;

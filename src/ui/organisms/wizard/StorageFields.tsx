@@ -2,11 +2,12 @@
 
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CircleCheck, LogIn, Plus } from "lucide-react";
+import { CircleCheck, KeyRound, LogIn, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import {
   getListConnectorsQueryKey,
+  useCheckConnector,
   useCreateConnector,
   useDetectConnectors,
   useListConnectorBranches,
@@ -18,6 +19,7 @@ import { useErrorMessage } from "@/client/api/useErrorMessage";
 import { useGoogleOAuth } from "@/client/hooks/use-google-oauth";
 import { connectorStateVariants } from "@/ui/molecules/connector-row";
 import { Field } from "@/ui/molecules/field";
+import { SecretInput } from "@/ui/molecules/secret-input";
 import { Badge } from "@/ui/primitives/badge";
 import { Button } from "@/ui/primitives/button";
 import { ChoiceCard, ChoiceCardGroup } from "@/ui/primitives/choice-card";
@@ -39,6 +41,8 @@ import { fieldError } from "@/ui/organisms/settings/form-errors";
 type StorageForm = { storage: { git?: GitStorageInput | null; drive?: Partial<DriveStorageConfig> | null } };
 
 const NO_CONNECTOR = "__none__";
+/** Lựa chọn tạm "Access token": nhập PAT ngay trong form, lưu thành connector TOKEN rồi chọn connector đó. */
+const NEW_TOKEN = "__token__";
 const emptyToUndefined = (v: unknown) => (typeof v === "string" && v.trim() === "" ? undefined : v);
 
 /* ---------------------------------------------------------------- Kết nối qua */
@@ -51,6 +55,40 @@ function ConnectorPicker({ provider, value, onChange }: { provider: GitProvider;
   const list = useListConnectors();
   const detect = useDetectConnectors({ query: { staleTime: 5 * 60_000 } });
   const [formOpen, setFormOpen] = React.useState(false);
+  const [tokenMode, setTokenMode] = React.useState(false);
+  const [token, setToken] = React.useState("");
+  const { control } = useFormContext<StorageForm>();
+  const host = useWatch({ control, name: "storage.git.host" });
+  const check = useCheckConnector({
+    mutation: {
+      onSuccess: (res) => {
+        void queryClient.invalidateQueries({ queryKey: getListConnectorsQueryKey() });
+        if (res.status === "CONNECTED") notify.info(t("tokenOk"), { description: [res.account, res.scopes.join(", ")].filter(Boolean).join(" · ") || undefined });
+        else notify.warning(t("tokenCheckFailed"));
+      },
+      onError: (err) => notify.error(t("tokenCheckFailed"), { description: errorMessage(err) }),
+    },
+  });
+  const createToken = useCreateConnector({
+    mutation: {
+      onSuccess: (c) => {
+        void queryClient.invalidateQueries({ queryKey: getListConnectorsQueryKey() });
+        setTokenMode(false);
+        setToken("");
+        onChange(c.id);
+        check.mutate({ connectorId: c.id });
+      },
+      onError: (err) => notify.error(errorMessage(err)),
+    },
+  });
+  const saveToken = () => {
+    const value = token.trim();
+    if (!value) return;
+    const effectiveHost = host?.trim() || DEFAULT_HOST[provider] || null;
+    createToken.mutate({
+      data: { name: t("tokenName", { host: effectiveHost ?? tc(`connector.provider.${provider}`) }), type: "TOKEN", provider, host: host?.trim() || null, token: value },
+    });
+  };
   const create = useCreateConnector({
     mutation: {
       onSuccess: (c) => {
@@ -88,13 +126,49 @@ function ConnectorPicker({ provider, value, onChange }: { provider: GitProvider;
             {t("loadingConnectors")}
           </span>
         ) : (
-          <ChoiceCardGroup value={value ?? NO_CONNECTOR} onValueChange={(v) => onChange(v === NO_CONNECTOR ? null : v)} aria-label={t("connectVia")}>
+          <ChoiceCardGroup
+            value={tokenMode ? NEW_TOKEN : (value ?? NO_CONNECTOR)}
+            onValueChange={(v) => {
+              setTokenMode(v === NEW_TOKEN);
+              if (v !== NEW_TOKEN) onChange(v === NO_CONNECTOR ? null : v);
+            }}
+            aria-label={t("connectVia")}
+          >
             {connectors.map((c) => (
               <ChoiceCard key={c.id} value={c.id} size="sm" title={c.name} description={c.host ?? c.url ?? c.command ?? undefined} meta={meta(c)} />
             ))}
+            <ChoiceCard value={NEW_TOKEN} size="sm" title={t("tokenTitle")} description={t("tokenDescription")} />
             <ChoiceCard value={NO_CONNECTOR} size="sm" title={t("sshTitle")} description={t("sshDescription")} />
           </ChoiceCardGroup>
         )}
+        {tokenMode ? (
+          <div className="flex flex-col gap-1.5 rounded-lg border border-border bg-card p-3">
+            <label className="flex items-center gap-1.5 text-[13px] leading-[18px] font-medium" htmlFor="wizard-git-token">
+              <Icon icon={KeyRound} size="sm" tone="muted" />
+              {t("tokenLabel")}
+            </label>
+            <div className="flex gap-2">
+              <SecretInput
+                id="wizard-git-token"
+                autoFocus
+                className="flex-1"
+                placeholder={provider === "GITLAB" ? "glpat-…" : "ghp_… / github_pat_…"}
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    saveToken();
+                  }
+                }}
+              />
+              <Button variant="primary" size="sm" className="h-auto" disabled={!token.trim()} loading={createToken.isPending} onClick={saveToken}>
+                {t("tokenSave")}
+              </Button>
+            </div>
+            <p className="m-0 text-xs leading-4 text-muted-foreground">{t("tokenHint")}</p>
+          </div>
+        ) : null}
         {list.isError ? <p className="m-0 text-xs text-destructive">{errorMessage(list.error)}</p> : null}
         {selected && toRowState(selected.status) === "NEEDS_LOGIN" ? <p className="m-0 text-xs text-muted-foreground">{t("needsLogin")}</p> : null}
         <div className="flex flex-wrap items-center gap-2">

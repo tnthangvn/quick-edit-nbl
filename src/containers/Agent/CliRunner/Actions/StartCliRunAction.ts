@@ -10,6 +10,8 @@ import { BuildCliInvocationTask } from "../Tasks/BuildCliInvocationTask";
 import { CreateCliRunTask } from "../Tasks/CreateCliRunTask";
 import { DiscardCliRunTask } from "../Tasks/DiscardCliRunTask";
 import { PrepareSandboxTask } from "../Tasks/PrepareSandboxTask";
+import { WriteCliAttachmentsTask } from "../Tasks/WriteCliAttachmentsTask";
+import { attachmentPaths, type CliImage } from "../Models/Sandbox";
 
 export type StartCliRunInput = {
   workspaceId: string;
@@ -17,7 +19,15 @@ export type StartCliRunInput = {
   profileId: string;
   prompt: string;
   contextFiles: string[];
+  /** Ảnh dán từ clipboard (tối đa 5). */
+  images?: CliImage[];
 };
+
+/** Thêm danh sách ảnh đính kèm vào cuối prompt gửi CLI (transcript vẫn lưu prompt gốc). */
+export function withAttachmentNote(prompt: string, paths: readonly string[]): string {
+  if (paths.length === 0) return prompt;
+  return `${prompt}\n\nẢnh đính kèm (đọc bằng công cụ đọc file):\n${paths.map((p) => `- ./${p}`).join("\n")}`;
+}
 
 /** Thời gian tối đa của một run CLI. */
 export const CLI_RUN_TIMEOUT_MS = 15 * 60_000;
@@ -37,11 +47,12 @@ export class StartCliRunAction extends Action<StartCliRunInput, { runId: string 
     private readonly prepareSandbox = new PrepareSandboxTask(),
     private readonly execute = new ExecuteCliRunSubAction(),
     private readonly timeoutMs = CLI_RUN_TIMEOUT_MS,
+    private readonly writeAttachments = new WriteCliAttachmentsTask(),
   ) {
     super();
   }
 
-  async run({ workspaceId, sessionId, profileId, prompt, contextFiles }: StartCliRunInput): Promise<{ runId: string }> {
+  async run({ workspaceId, sessionId, profileId, prompt, contextFiles, images = [] }: StartCliRunInput): Promise<{ runId: string }> {
     const workspace = await this.specs.getWorkspace(workspaceId);
     const session = await this.getSession.run({ sessionId, workspaceId });
     const { cli } = await this.settings.get(workspaceId);
@@ -52,9 +63,11 @@ export class StartCliRunAction extends Action<StartCliRunInput, { runId: string 
 
     const run = await this.createRun.run({ workspaceId });
     try {
-      const invocation = await this.buildInvocation.run({ profile, prompt, contextFiles, resumeId, permissionMode: cli.permissionMode });
+      const imagePaths = attachmentPaths(run.id, images);
+      const invocation = await this.buildInvocation.run({ profile, prompt: withAttachmentNote(prompt, imagePaths), contextFiles, resumeId, permissionMode: cli.permissionMode, effort: cli.effort });
       const specsDir = path.resolve(workspace.path, workspace.specsDir);
       const sandbox = await this.prepareSandbox.run({ specsDir, sessionId });
+      await this.writeAttachments.run({ dir: sandbox.dir, images, paths: imagePaths });
       run.push({ type: "STATUS", status: "RUNNING", exitCode: null, error: null });
       // Chạy nền: SubAction tự đẩy STATUS kết thúc và không ném lỗi.
       void this.execute.run({

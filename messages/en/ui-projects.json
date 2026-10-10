@@ -51,9 +51,17 @@
     },
     "remove": {
       "title": "Remove from list?",
-      "description": "Remove {name} from the Projects screen. Files in the folder are kept.",
+      "description": "Remove {name} from Projects. Files in the folder are kept.",
       "confirm": "Remove",
-      "removed": "Removed {name} from the list"
+      "removed": "Removed {name} from the list",
+      "descriptionDelete": "Remove {name} from Projects and delete its folder on this machine.",
+      "deleteFiles": "Also delete the folder on this machine",
+      "deleteWarning": "Permanent, cannot be undone.",
+      "deleteWhat": "Deletes everything in <code>{path}</code> on this machine: spec files, .git, .spec-studio/.",
+      "deleteKeep": "Cloud is untouched: Git remote, Google Drive and NotebookLM stay as they are.",
+      "typeToConfirm": "Type <code>{word}</code> to confirm",
+      "confirmDelete": "Delete folder",
+      "deleted": "Removed {name} and deleted its folder"
     },
     "import": {
       "title": "Open existing folder",

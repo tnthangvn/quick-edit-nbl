@@ -10,9 +10,17 @@ import { StartCliRunAction } from "../Actions/StartCliRunAction";
 import { StopCliRunAction } from "../Actions/StopCliRunAction";
 import { CliRunStore, type CliRun } from "../Data/Stores/CliRunStore";
 import type { CliRunEvent } from "../Events/CliRunEvent";
-import { isPermissionDeniedLine, parseCliLine } from "../Parsers/cliOutputParsers";
+import { createCliOutputParser, isPermissionDeniedLine, parseCliLine } from "../Parsers/cliOutputParsers";
 import { ExecuteCliRunSubAction } from "../SubActions/ExecuteCliRunSubAction";
-import { BuildCliInvocationTask, buildCliPrompt, supportedPermissionModes, withPermissionArgs, withResumeArgs } from "../Tasks/BuildCliInvocationTask";
+import {
+  BuildCliInvocationTask,
+  buildCliPrompt,
+  supportedPermissionModes,
+  withPermissionArgs,
+  withResumeArgs,
+  withEffortArgs,
+  withStreamingArgs,
+} from "../Tasks/BuildCliInvocationTask";
 import { CreateCliRunTask } from "../Tasks/CreateCliRunTask";
 import { DiffSandboxTask } from "../Tasks/DiffSandboxTask";
 import { DiscardCliRunTask } from "../Tasks/DiscardCliRunTask";
@@ -33,7 +41,7 @@ describe("parseCliLine", () => {
     });
     expect(parseCliLine("STREAM_JSON", line)).toEqual([
       { type: "MESSAGE", text: "Hi", delta: false },
-      { type: "TOOL_CALL", name: "Edit", input: '{"file_path":"a.md"}' },
+      { type: "TOOL_CALL", toolId: null, name: "Edit", input: '{"file_path":"a.md"}', target: "a.md" },
     ]);
     expect(parseCliLine("STREAM_JSON", '{"type":"system","subtype":"init"}')).toEqual([]);
     expect(parseCliLine("STREAM_JSON", '{"type":"result","subtype":"success","is_error":false}')).toEqual([]);
@@ -48,7 +56,7 @@ describe("parseCliLine", () => {
     ]);
     expect(parseCliLine("STREAM_JSON", '{"type":"message","role":"user","content":"x"}')).toEqual([]);
     expect(parseCliLine("STREAM_JSON", '{"type":"tool_use","tool_name":"write_file","parameters":{"path":"a.md"}}')).toEqual([
-      { type: "TOOL_CALL", name: "write_file", input: '{"path":"a.md"}' },
+      { type: "TOOL_CALL", toolId: null, name: "write_file", input: '{"path":"a.md"}', target: "a.md" },
     ]);
     expect(parseCliLine("STREAM_JSON", '{"type":"error","message":"authentication required"}')).toEqual([
       { type: "LOG", stream: "STDERR", text: "authentication required" },
@@ -60,13 +68,15 @@ describe("parseCliLine", () => {
       { type: "MESSAGE", text: "Xong", delta: false },
     ]);
     expect(parseCliLine("JSONL", '{"type":"item.started","item":{"id":"2","type":"command_execution","command":"ls"}}')).toEqual([
-      { type: "TOOL_CALL", name: "command_execution", input: "ls" },
+      { type: "TOOL_CALL", toolId: "2", name: "command_execution", input: "ls", target: "ls" },
     ]);
     expect(
       parseCliLine("JSONL", '{"type":"item.completed","item":{"type":"file_change","changes":[{"path":"a.md","kind":"update"}]}}'),
-    ).toEqual([{ type: "TOOL_CALL", name: "file_change", input: "update a.md" }]);
+    ).toEqual([{ type: "TOOL_CALL", toolId: null, name: "file_change", input: "update a.md", target: "update a.md" }]);
     expect(parseCliLine("JSONL", '{"type":"turn.failed","error":{"message":"boom"}}')).toEqual([{ type: "LOG", stream: "STDERR", text: "boom" }]);
-    expect(parseCliLine("JSONL", '{"type":"turn.completed","usage":{}}')).toEqual([]);
+    expect(parseCliLine("JSONL", '{"type":"turn.completed","usage":{"input_tokens":10,"output_tokens":5}}')).toMatchObject([
+      { type: "USAGE", inputTokens: 10, outputTokens: 5, costUsd: null },
+    ]);
   });
 
   it("bắt id phiên CLI: Claude init session_id, codex thread.started", () => {
@@ -82,11 +92,55 @@ describe("parseCliLine", () => {
     ]);
     expect(parseCliLine("STREAM_JSON", step({ step_type: "user_input", state: "DONE" }))).toEqual([]);
     const tool = { step_type: "tool", tool_name: "view_file", tool_info: { name: "view_file", parameters: { AbsolutePath: "/a.md" } } };
-    expect(parseCliLine("STREAM_JSON", step({ ...tool, state: "ACTIVE" }))).toEqual([{ type: "TOOL_CALL", name: "view_file", input: '{"AbsolutePath":"/a.md"}' }]);
+    expect(parseCliLine("STREAM_JSON", step({ ...tool, state: "ACTIVE" }))).toMatchObject([
+      { type: "TOOL_CALL", name: "view_file", input: '{"AbsolutePath":"/a.md"}', target: "/a.md" },
+    ]);
     expect(parseCliLine("STREAM_JSON", step({ ...tool, state: "DONE" }))).toEqual([]);
     expect(parseCliLine("STREAM_JSON", '{"event":"result","result":{"status":"SUCCESS","response":"ok"}}')).toEqual([]);
     expect(parseCliLine("STREAM_JSON", '{"event":"result","result":{"status":"ERROR","response":"quota"}}')).toEqual([
       { type: "LOG", stream: "STDERR", text: "quota" },
+    ]);
+  });
+
+  it("Claude --include-partial-messages: delta text/thinking, không lặp bản đầy đủ; tool_result ghép theo id; result → USAGE", () => {
+    const parse = createCliOutputParser("STREAM_JSON");
+    const ev = (event: object) => JSON.stringify({ type: "stream_event", event });
+    const all = [
+      ev({ type: "content_block_start", index: 0, content_block: { type: "thinking" } }),
+      ev({ type: "content_block_delta", index: 0, delta: { type: "thinking_delta", thinking: "Hmm" } }),
+      ev({ type: "content_block_delta", index: 0, delta: { type: "thinking_delta", thinking: " ok" } }),
+      ev({ type: "content_block_start", index: 1, content_block: { type: "text" } }),
+      ev({ type: "content_block_delta", index: 1, delta: { type: "text_delta", text: "Đang " } }),
+      ev({ type: "content_block_delta", index: 1, delta: { type: "text_delta", text: "sửa" } }),
+      JSON.stringify({
+        type: "assistant",
+        message: {
+          content: [
+            { type: "thinking", thinking: "Hmm ok" },
+            { type: "text", text: "Đang sửa" },
+            { type: "tool_use", id: "tu_1", name: "Edit", input: { file_path: "/s/a.md", old_string: "x" } },
+          ],
+        },
+      }),
+      JSON.stringify({ type: "user", message: { content: [{ type: "tool_result", tool_use_id: "tu_1", content: [{ type: "text", text: "done" }] }] } }),
+      JSON.stringify({ type: "result", subtype: "success", is_error: false, duration_ms: 1200, total_cost_usd: 0.01, num_turns: 2, usage: { input_tokens: 3, cache_read_input_tokens: 7, output_tokens: 4 } }),
+    ].flatMap(parse);
+    expect(all).toEqual([
+      { type: "THINKING", text: "Hmm", delta: false },
+      { type: "THINKING", text: " ok", delta: true },
+      { type: "MESSAGE", text: "Đang ", delta: false },
+      { type: "MESSAGE", text: "sửa", delta: true },
+      { type: "TOOL_CALL", toolId: "tu_1", name: "Edit", input: '{"file_path":"/s/a.md","old_string":"x"}', target: "/s/a.md" },
+      { type: "TOOL_RESULT", toolId: "tu_1", output: "done", isError: false },
+      { type: "USAGE", durationMs: 1200, costUsd: 0.01, inputTokens: 10, outputTokens: 4, numTurns: 2 },
+    ]);
+  });
+
+  it("codex: reasoning → THINKING, command_execution completed → TOOL_RESULT (exit code ≠ 0 là lỗi)", () => {
+    const parse = createCliOutputParser("JSONL");
+    expect(parse('{"type":"item.completed","item":{"id":"r","type":"reasoning","text":"plan"}}')).toEqual([{ type: "THINKING", text: "plan", delta: false }]);
+    expect(parse('{"type":"item.completed","item":{"id":"2","type":"command_execution","command":"ls","aggregated_output":"a.md","exit_code":1}}')).toEqual([
+      { type: "TOOL_RESULT", toolId: "2", output: "a.md", isError: true },
     ]);
   });
 
@@ -155,6 +209,15 @@ describe("withPermissionArgs", () => {
   const codex = ["exec", "--sandbox", "workspace-write", "--json", "{prompt}"];
 
   it("thay cờ quyền của profile bằng cờ của mức đã chọn", () => {
+    expect(withEffortArgs("CLAUDE_CODE", ["-p", "{prompt}", "--effort", "low"], "HIGH")).toEqual(["-p", "{prompt}", "--effort", "high"]);
+    expect(withEffortArgs("ANTIGRAVITY", ["-p", "{prompt}"], "MAX")).toEqual(["-p", "{prompt}", "--effort", "max"]);
+    expect(withEffortArgs("CODEX", ["exec", "--json", "{prompt}"], "XHIGH")).toEqual(["exec", "-c", 'model_reasoning_effort="high"', "--json", "{prompt}"]);
+    expect(withEffortArgs("CLAUDE_CODE", ["-p"], "DEFAULT")).toEqual(["-p"]);
+    expect(withEffortArgs("AIDER", ["--message"], "LOW")).toEqual(["--message"]);
+    expect(withStreamingArgs("CLAUDE_CODE", claude)).toEqual([...claude, "--include-partial-messages"]);
+    expect(withStreamingArgs("CLAUDE_CODE", [...claude, "--include-partial-messages"])).toEqual([...claude, "--include-partial-messages"]);
+    expect(withStreamingArgs("CLAUDE_CODE", ["-p", "{prompt}"])).toEqual(["-p", "{prompt}"]);
+    expect(withStreamingArgs("CODEX", claude)).toEqual(claude);
     expect(withPermissionArgs("CLAUDE_CODE", claude, "PLAN")).toEqual(["-p", "{prompt}", "--output-format", "stream-json", "--permission-mode", "plan"]);
     expect(withPermissionArgs("CLAUDE_CODE", ["-p", "{prompt}", "--permission-mode=plan"], "BYPASS")).toEqual(["-p", "{prompt}", "--dangerously-skip-permissions"]);
     expect(withPermissionArgs("ANTIGRAVITY", ["-p", "{prompt}", "--mode", "plan"], "BYPASS")).toEqual(["-p", "{prompt}", "--dangerously-skip-permissions"]);
@@ -250,7 +313,7 @@ describe("CLI run (fake CLI)", () => {
       ({
         activeMode: "CLI",
         api: { provider: "OLLAMA", model: "m", baseUrl: null, temperature: 0, systemPrompt: "", apiKeyRef: null },
-        cli: { activeProfileId: profiles[0]?.id ?? "", streamStdout, permissionMode: "DEFAULT", profiles },
+        cli: { activeProfileId: profiles[0]?.id ?? "", streamStdout, permissionMode: "DEFAULT", effort: "DEFAULT", profiles },
       }) satisfies AgentSettings,
   });
   const specs = (): SpecAccess => ({
@@ -428,5 +491,22 @@ describe("CLI run (fake CLI)", () => {
     const events = await done;
     expect(events).toContainEqual(expect.objectContaining({ type: "LOG", text: "token=***" }));
     expect(JSON.stringify(events)).not.toContain("sk-very-secret");
+  });
+});
+
+describe("ảnh đính kèm của CLI", () => {
+  it("đặt tên theo runId, ghi vào .attachments và ghi chú cuối prompt", async () => {
+    const { attachmentPaths } = await import("../Models/Sandbox");
+    const { WriteCliAttachmentsTask } = await import("../Tasks/WriteCliAttachmentsTask");
+    const { withAttachmentNote } = await import("../Actions/StartCliRunAction");
+    const images = [{ name: "clip.png", mediaType: "image/png" as const, data: Buffer.from("png").toString("base64") }];
+    const paths = attachmentPaths("r1", images);
+    expect(paths).toEqual([".attachments/r1-1.png"]);
+    expect(withAttachmentNote("Sửa spec", paths)).toBe("Sửa spec\n\nẢnh đính kèm (đọc bằng công cụ đọc file):\n- ./.attachments/r1-1.png");
+    expect(withAttachmentNote("x", [])).toBe("x");
+    const dir = await mkdtemp(path.join(os.tmpdir(), "cli-att-"));
+    await new WriteCliAttachmentsTask().run({ dir, images, paths });
+    expect(await readFile(path.join(dir, paths[0]), "utf8")).toBe("png");
+    await rm(dir, { recursive: true, force: true });
   });
 });

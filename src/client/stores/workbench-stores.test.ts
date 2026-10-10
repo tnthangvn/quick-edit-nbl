@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CliRunEvent, PublishRun, PublishStepOutput } from "@/client/api/generated/model";
-import { applyCliEvent, buildCliTimeline, newCliRun } from "./workbench-cli-store";
+import { applyCliEvent, newCliRun } from "./workbench-cli-store";
 import { draftKey, withContext, withDraft, withoutFiles, withRename, type WorkbenchEditorState } from "./workbench-editor-store";
 import { enqueueProposal, focusProposal, proposalKey, resolveProposal, type ProposalState } from "./workbench-proposal-store";
 import { withActiveSession } from "./workbench-session-store";
@@ -124,21 +124,6 @@ describe("workbench-cli-store", () => {
     expect(run.events).toHaveLength(2);
     expect(run.status).toBe("DONE");
     expect(run.exitCode).toBe(0);
-  });
-
-  it("dòng thời gian gộp LOG liền nhau và MESSAGE delta", () => {
-    const items = buildCliTimeline([
-      ev(0, { type: "LOG", stream: "STDOUT", text: "a" }),
-      ev(1, { type: "LOG", stream: "STDERR", text: "b" }),
-      ev(2, { type: "MESSAGE", text: "Xin ", delta: true }),
-      ev(3, { type: "MESSAGE", text: "chào", delta: true }),
-      ev(4, { type: "TOOL_CALL", name: "Edit", input: "a.md" }),
-      ev(5, { type: "MESSAGE", text: "Xong", delta: false }),
-      ev(6, { type: "PROPOSAL", file: "a.md", isNewFile: false }),
-    ]);
-    expect(items.map((i) => i.kind)).toEqual(["log", "message", "tool", "message", "proposal"]);
-    expect(items[0]).toMatchObject({ text: "a\nb", streams: ["STDOUT", "STDERR"] });
-    expect(items[1]).toMatchObject({ text: "Xin chào" });
   });
 });
 

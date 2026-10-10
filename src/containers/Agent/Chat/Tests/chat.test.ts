@@ -43,7 +43,7 @@ const settings = (api: Partial<AgentSettings["api"]> = {}): AgentSettingsAccess 
   get: async () => ({
     activeMode: "API",
     api: { provider: "GOOGLE", model: "gemini-test", baseUrl: null, temperature: 0.2, systemPrompt: "Bạn là trợ lý viết spec.", apiKeyRef: "llm:google", ...api },
-    cli: { activeProfileId: "", streamStdout: true, permissionMode: "DEFAULT", profiles: [] },
+    cli: { activeProfileId: "", streamStdout: true, permissionMode: "DEFAULT", effort: "DEFAULT", profiles: [] },
   }),
 });
 

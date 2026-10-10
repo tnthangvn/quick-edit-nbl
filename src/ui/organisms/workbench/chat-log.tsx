@@ -14,19 +14,25 @@ import {
 } from "@/client/api/generated";
 import type { CliRunEvent, CliRunStatus, CliRunStatusEventError, SpecSyncStatus } from "@/client/api/generated/model";
 import { useErrorMessage } from "@/client/api/useErrorMessage";
+import { useNow } from "@/client/hooks/use-now";
 import { specFileParam } from "@/client/hooks/use-workspace-events";
 import { chatErrorPayload, getSessionChat, isRestoredMessage, seedSessionChat } from "@/client/stores/workbench-chat";
-import { buildCliTimeline, useCliRunStore } from "@/client/stores/workbench-cli-store";
+import { buildCliTurn, shortTarget, type ToolKind, type TurnStep } from "@/client/stores/cli-turn";
+import { useCliRunStore } from "@/client/stores/workbench-cli-store";
 import { useWorkbenchEditorStore } from "@/client/stores/workbench-editor-store";
 import { useActiveSessionId, useAgentSessionStore } from "@/client/stores/workbench-session-store";
 import { proposalKey, useProposalStore } from "@/client/stores/workbench-proposal-store";
 import { ChatMessage } from "@/ui/molecules/chat-message";
+import { ExecutionRecord, LogStep, NoteStep, RunStats, ThinkingStep, ToolStep, type RecordState } from "@/ui/molecules/execution-record";
+import { Markdown } from "@/ui/molecules/markdown";
 import { Button } from "@/ui/primitives/button";
 import { Icon } from "@/ui/primitives/icon";
 import { Spinner } from "@/ui/primitives/spinner";
 import { useAgentSettings } from "./use-agent-settings";
 
 type ToolPart = Extract<UIMessage["parts"][number], { toolCallId: string }>;
+type FilePart = Extract<UIMessage["parts"][number], { type: "file" }>;
+const isImagePart = (p: UIMessage["parts"][number]): p is FilePart => p.type === "file" && p.mediaType.startsWith("image");
 type ProposeInput = { filename?: string; newContent?: string };
 type ProposeOutput = { proposed?: boolean; reason?: string; error?: string };
 
@@ -146,6 +152,14 @@ function ApiLog({ messages, status, error }: { messages: UIMessage[]; status: st
         m.role === "user" ? (
           <ChatMessage key={m.id} variant="user">
             {m.parts.filter(isTextUIPart).map((p) => p.text).join("\n")}
+            {m.parts.some(isImagePart) ? (
+              <span className="mt-2 flex flex-wrap gap-1.5">
+                {m.parts.filter(isImagePart).map((p, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element -- data: URL của ảnh đã dán
+                  <img key={i} src={p.url} alt={p.filename ?? ""} className="size-16 rounded-md border border-border object-cover" />
+                ))}
+              </span>
+            ) : null}
           </ChatMessage>
         ) : (
           <React.Fragment key={m.id}>
@@ -153,7 +167,7 @@ function ApiLog({ messages, status, error }: { messages: UIMessage[]; status: st
               if (isTextUIPart(part)) {
                 return part.text.trim() ? (
                   <ChatMessage key={i} variant="assistant">
-                    <span className="whitespace-pre-wrap">{part.text}</span>
+                    <Markdown>{part.text}</Markdown>
                   </ChatMessage>
                 ) : null;
               }
@@ -278,48 +292,131 @@ type CliRunBlockProps = {
   running: boolean;
 };
 
-/** Một lượt CLI: prompt + dòng thời gian (stdout, tool call, câu trả lời, đề xuất) + trạng thái kết thúc. */
-function CliRunBlock({ runId, prompt, profileId, events, status, exitCode, error, running }: CliRunBlockProps) {
+/** "850ms", "12s", "2m 05s"; null khi không có số liệu hoặc quá ngắn để có ý nghĩa. */
+function formatDuration(ms: number | null | undefined): string | null {
+  if (ms === null || ms === undefined || !Number.isFinite(ms) || ms < 100) return null;
+  if (ms < 1000) return `${Math.round(ms)}ms`;
+  const sec = ms / 1000;
+  if (sec < 60) return `${sec < 10 ? sec.toFixed(1) : Math.round(sec)}s`;
+  const m = Math.floor(sec / 60);
+  return `${m}m ${String(Math.round(sec % 60)).padStart(2, "0")}s`;
+}
+
+function formatTokens(n: number | null): string | null {
+  if (n === null) return null;
+  return n >= 1000 ? `${(n / 1000).toFixed(n >= 10_000 ? 0 : 1)}k` : String(n);
+}
+
+/**
+ * Một lượt CLI (tham khảo chat của open-design): prompt → execution record (suy nghĩ, tool, lời kể, stdout; gập khi xong)
+ * → câu trả lời cuối dạng Markdown → đề xuất sửa spec → dòng thống kê (thời gian, token, chi phí) → lỗi nếu có.
+ */
+function CliRunBlock({ runId, prompt, profileId, events, status, error, running }: CliRunBlockProps) {
   const t = useTranslations("workbench.chat");
-  const items = React.useMemo(() => buildCliTimeline(events), [events]);
+  const turn = React.useMemo(() => buildCliTurn(events, !running), [events, running]);
+  const now = useNow(running);
+
+  const startedMs = turn.startedAt ? Date.parse(turn.startedAt) : null;
+  const elapsed = startedMs === null ? null : (running ? now : Date.parse(turn.endedAt ?? turn.startedAt!)) - startedMs;
+  const duration = formatDuration(turn.usage?.durationMs ?? elapsed);
+  const state: RecordState = running ? "RUNNING" : status === "DONE" ? "DONE" : status === "STOPPED" ? "STOPPED" : "FAILED";
+  const lastStep = turn.steps.at(-1);
+
+  const title =
+    state === "RUNNING"
+      ? lastStep?.kind === "thinking"
+        ? t("record.thinking")
+        : t("record.working")
+      : duration
+        ? t(`record.${state}`, { duration })
+        : t(`record.${state}Short`);
+
+  const tokensIn = formatTokens(turn.usage?.inputTokens ?? null);
+  const tokensOut = formatTokens(turn.usage?.outputTokens ?? null);
+  const stats = [
+    profileId,
+    tokensIn || tokensOut ? t("record.tokens", { input: tokensIn ?? "?", output: tokensOut ?? "?" }) : null,
+    turn.usage?.costUsd ? `$${turn.usage.costUsd.toFixed(turn.usage.costUsd < 0.01 ? 4 : 2)}` : null,
+    turn.usage?.numTurns ? t("record.turns", { count: turn.usage.numTurns }) : null,
+  ];
+
   return (
     <>
       <ChatMessage variant="user">{prompt}</ChatMessage>
-      {items.length === 0 && running ? (
-        <ChatMessage variant="log" logTitle={t("cliTitle", { profile: profileId })} streaming>
-          {t("cliStarting")}
-        </ChatMessage>
-      ) : null}
-      {items.map((item) => {
-        switch (item.kind) {
-          case "log":
-            return (
-              <ChatMessage key={item.key} variant="log" logTitle={t("cliTitle", { profile: profileId })} streaming={running && item === items.at(-1)}>
-                {item.text}
-              </ChatMessage>
-            );
-          case "tool":
-            return (
-              <ChatMessage key={item.key} variant="tool" toolName={item.name}>
-                <code className="font-mono">{item.input}</code>
-              </ChatMessage>
-            );
-          case "message":
-            return (
-              <ChatMessage key={item.key} variant="assistant">
-                <span className="whitespace-pre-wrap">{item.text}</span>
-              </ChatMessage>
-            );
-          case "proposal":
-            return <CliProposalRow key={item.key} runId={runId} file={item.file} />;
-        }
-      })}
-      {!running ? (
-        <p className="m-0 text-xs leading-4 text-muted-foreground">{t(`cliStatus.${status}`, { code: exitCode ?? "—" })}</p>
-      ) : null}
-      {error ? <ErrorLine error={error} /> : null}
+      <ChatMessage variant="assistant">
+        <div className="flex min-w-0 flex-col gap-2">
+          <ExecutionRecord
+            state={state}
+            title={title}
+            meta={
+              state === "RUNNING"
+                ? formatDuration(elapsed)
+                : turn.toolCount > 0
+                  ? t("record.steps", { count: turn.toolCount })
+                  : null
+            }
+            empty={turn.steps.length === 0}
+            defaultOpen={!turn.answer && turn.proposals.length === 0}
+          >
+            {turn.steps.map((step, i) => (
+              <RunStep key={step.key} step={step} profileId={profileId} live={running && i === turn.steps.length - 1} />
+            ))}
+          </ExecutionRecord>
+          {turn.answer ? <Markdown>{turn.answer}</Markdown> : null}
+          {turn.proposals.length > 0 ? (
+            <div className="flex flex-col gap-1">
+              {turn.proposals.map((p) => (
+                <CliProposalRow key={p.key} runId={runId} file={p.file} />
+              ))}
+            </div>
+          ) : null}
+          {!running ? <RunStats items={stats} /> : null}
+          {error ? <ErrorLine error={error} /> : null}
+        </div>
+      </ChatMessage>
     </>
   );
+}
+
+const TOOL_VERB_KEYS: Record<ToolKind, string> = {
+  READ: "read",
+  EDIT: "edit",
+  WRITE: "write",
+  SEARCH: "search",
+  EXEC: "exec",
+  WEB: "web",
+  PLAN: "plan",
+  TASK: "task",
+  OTHER: "other",
+};
+
+function RunStep({ step, profileId, live }: { step: TurnStep; profileId: string; live: boolean }) {
+  const t = useTranslations("workbench.chat");
+  switch (step.kind) {
+    case "thinking":
+      return <ThinkingStep label={t("record.thought")} text={step.text} live={live} />;
+    case "text":
+      return step.text.trim() ? (
+        <NoteStep>
+          <Markdown className="text-xs leading-[18px] text-muted-foreground">{step.text.trim()}</Markdown>
+        </NoteStep>
+      ) : null;
+    case "log":
+      return <LogStep title={t("cliTitle", { profile: profileId })} text={step.text} live={live} />;
+    case "tool":
+      return (
+        <ToolStep
+          toolKind={step.toolKind}
+          verb={step.toolKind === "OTHER" ? step.name : t(`record.verb.${TOOL_VERB_KEYS[step.toolKind]}`)}
+          name={step.name}
+          target={step.target ? shortTarget(step.target) : null}
+          status={step.status}
+          meta={step.status === "ERROR" ? t("tool.error") : formatDuration(step.durationMs)}
+          output={step.output}
+          runningLabel={t("tool.running")}
+        />
+      );
+  }
 }
 
 /** Đề xuất của run CLI (khoá đề xuất = runId + file). */

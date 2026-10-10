@@ -1,81 +1,127 @@
 import { describe, expect, it } from "vitest";
-import { NlmClient, type NlmRunner } from "@/ship/adapters/nlm";
-import type { RunResult } from "@/ship/adapters/process";
+import { NotebookLmClient, NotebookLmError, extractRpcResult, normalizeCookie, parseBatchResponse, RPC } from "@/ship/adapters/notebooklm";
+import type { NotebookClientFactory } from "../Models/notebookCredentials";
 import { CheckNotebookTask } from "../Tasks/CheckNotebookTask";
 import { RefreshNotebookDriveSourceTask } from "../Tasks/RefreshNotebookDriveSourceTask";
 import { ReplaceNotebookTextSourceTask } from "../Tasks/ReplaceNotebookTextSourceTask";
 
-const ok = (stdout: unknown): RunResult => ({ exitCode: 0, stdout: typeof stdout === "string" ? stdout : JSON.stringify(stdout), stderr: "", timedOut: false });
-const fail = (error: string): RunResult => ({ exitCode: 1, stdout: JSON.stringify({ status: "error", error }), stderr: "", timedOut: false });
+const COOKIE = "SID=a; HSID=b; SSID=c; APISID=d; SAPISID=e; __Secure-1PSID=f";
+const HOME_HTML = `<script>WIZ_global_data = {"SNlM0e":"AT_TOKEN","cfb2h":"boq_bl_1","FdrFJe":"-123"}</script>`;
 
-/** Runner nlm giả: ghi lại lệnh, trả kết quả theo "nhóm lệnh" (vd "source list"). */
-function fakeNlm(responses: Record<string, RunResult>) {
-  const calls: string[][] = [];
-  const runner: NlmRunner = async (args) => {
-    calls.push([...args]);
-    return responses[args.slice(0, 2).join(" ")] ?? ok({});
-  };
-  return { calls, client: new NlmClient(runner) };
+/** Một response batchexecute với payload cho `rpcId` (hoặc lỗi mã `errorCode`). */
+function batch(rpcId: string, payload: unknown, errorCode?: number): string {
+  const item = errorCode === undefined ? ["wrb.fr", rpcId, JSON.stringify(payload), null, null, null, "generic"] : ["wrb.fr", rpcId, null, null, null, [errorCode], "generic"];
+  const line = JSON.stringify([item, ["di", 42]]);
+  return `)]}'\n\n${line.length}\n${line}\n25\n[["e",4,null,null,123]]\n`;
 }
 
-const SOURCES = [
-  { id: "s1", title: "a.md", type: "generated_text" },
-  { id: "s2", title: "b.md", type: "generated_text" },
-  { id: "s3", title: "a.md", type: "generated_text" },
+type Call = { url: string; rpcId: string | null; params: unknown; body: string | null };
+
+/** fetch giả: trang chủ trả HTML có token; batchexecute trả theo rpc id. */
+function fakeFetch(handlers: Record<string, (params: unknown) => string | Response>, homeUrl = "https://notebooklm.google.com/") {
+  const calls: Call[] = [];
+  const fn = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = String(input);
+    if (!url.includes("batchexecute")) {
+      const res = new Response(HOME_HTML, { status: 200 });
+      Object.defineProperty(res, "url", { value: homeUrl });
+      return res;
+    }
+    const rpcId = new URL(url).searchParams.get("rpcids");
+    const body = String(init?.body ?? "");
+    const fReq = JSON.parse(decodeURIComponent(/f\.req=([^&]*)/.exec(body)![1])) as [[[string, string]]];
+    const params = JSON.parse(fReq[0][0][1]) as unknown;
+    calls.push({ url, rpcId, params, body });
+    const out = handlers[rpcId ?? ""]?.(params) ?? batch(rpcId ?? "", []);
+    return typeof out === "string" ? new Response(out, { status: 200 }) : out;
+  }) as typeof fetch;
+  return { calls, fn };
+}
+
+/** `cookie = null` = chưa cấu hình cookie. */
+const client = (fn: typeof fetch, cookie: string | null = COOKIE) => new NotebookLmClient(async () => cookie ?? undefined, fn);
+const factory = (c: NotebookLmClient): NotebookClientFactory => () => c;
+
+/** Notebook có các source: [[id], title, metadata(type ở [4], drive doc id ở [0][0])]. */
+const notebook = (sources: [string, string, number, string?][]) => [
+  ["My NB", sources.map(([id, title, type, doc]) => [[id], title, [doc ? [doc] : null, null, null, null, type]]), "nb", "📘"],
 ];
 
-describe("Notebook qua CLI nlm (runner giả)", () => {
+describe("adapter NotebookLM (batchexecute)", () => {
+  it("parse response: bỏ )]}', đọc chunk, lấy payload theo rpc id; lỗi mã 16 → AUTH", () => {
+    expect(extractRpcResult(parseBatchResponse(batch("abc", { x: 1 })), "abc")).toEqual({ x: 1 });
+    expect(extractRpcResult(parseBatchResponse(batch("abc", [])), "other")).toBeNull();
+    expect(() => extractRpcResult(parseBatchResponse(batch("abc", null, 16)), "abc")).toThrow(NotebookLmError);
+  });
+
+  it("cookie: bỏ tiền tố 'Cookie:', thiếu cookie bắt buộc → AUTH", () => {
+    expect(normalizeCookie(`Cookie: ${COOKIE}\n`)).toBe(COOKIE);
+    expect(() => normalizeCookie("SID=a; HSID=b")).toThrow(expect.objectContaining({ kind: "AUTH", detail: expect.stringContaining("APISID") }));
+  });
+
+  it("gửi f.req + at (SNlM0e), bl/f.sid lấy từ trang chủ, source-path theo notebook", async () => {
+    const { calls, fn } = fakeFetch({ [RPC.GET_NOTEBOOK]: () => batch(RPC.GET_NOTEBOOK, notebook([["s1", "a.md", 4]])) });
+    const nb = await client(fn).getNotebook("nb");
+    expect(nb).toMatchObject({ id: "nb", title: "My NB", sourceCount: 1, sources: [{ id: "s1", title: "a.md", type: "pasted_text", driveDocId: null }] });
+    const url = new URL(calls[0].url);
+    expect(url.pathname).toBe("/_/LabsTailwindUi/data/batchexecute");
+    expect(Object.fromEntries(url.searchParams)).toMatchObject({ rpcids: "rLM1Ne", "source-path": "/notebook/nb", bl: "boq_bl_1", "f.sid": "-123", rt: "c" });
+    expect(calls[0].body).toContain("at=AT_TOKEN");
+    expect(calls[0].params).toEqual(["nb", null, [2], null, 0]);
+  });
+
+  it("chưa có cookie → NO_CREDENTIALS; trang chủ chuyển sang accounts.google.com → AUTH", async () => {
+    await expect(client(fakeFetch({}).fn, null).listNotebooks()).rejects.toMatchObject({ kind: "NO_CREDENTIALS" });
+    const expired = fakeFetch({}, "https://accounts.google.com/ServiceLogin");
+    await expect(client(expired.fn, "SID=1; HSID=1; SSID=1; APISID=1; SAPISID=2").listNotebooks()).rejects.toMatchObject({ kind: "AUTH" });
+  });
+});
+
+describe("task Notebook (client giả qua fetch)", () => {
   it("RPC: thêm source văn bản mới rồi xoá mọi source cũ cùng tên", async () => {
-    const { calls, client } = fakeNlm({ "source list": ok(SOURCES), "source add": ok({ source_id: "new1", title: "a.md" }) });
-    const out = await new ReplaceNotebookTextSourceTask(client).run({ notebookId: "nb", title: "a.md", content: "# A" });
+    const { calls, fn } = fakeFetch({
+      [RPC.GET_NOTEBOOK]: () => batch(RPC.GET_NOTEBOOK, notebook([["s1", "a.md", 4], ["s2", "b.md", 4], ["s3", "a.md", 4]])),
+      [RPC.ADD_SOURCE]: () => batch(RPC.ADD_SOURCE, [[[["new1"], "a.md"]]]),
+    });
+    const out = await new ReplaceNotebookTextSourceTask(factory(client(fn))).run({ workspaceId: "w", notebookId: "nb", title: "a.md", content: "# A" });
     expect(out).toEqual({ sourceId: "new1", replaced: 2 });
-    expect(calls).toEqual([
-      ["source", "list", "nb", "--json"],
-      ["source", "add", "nb", "--text", "# A", "--title", "a.md", "--wait", "--json"],
-      ["source", "delete", "s1", "s3", "--confirm", "--json"],
-    ]);
+    const add = calls.find((c) => c.rpcId === RPC.ADD_SOURCE)!;
+    expect(add.params).toEqual([[[null, ["a.md", "# A"], null, 2, null, null, null, null, null, null, 1]], "nb", [2], [1, null, null, null, null, null, null, null, null, null, [1]]]);
+    expect(calls.find((c) => c.rpcId === RPC.DELETE_SOURCES)!.params).toEqual([[["s1"], ["s3"]], [2]]);
   });
 
-  it("RPC: nội dung lớn đi qua file tạm thay vì argv", async () => {
-    const { calls, client } = fakeNlm({ "source list": ok([]), "source add": ok({ source_id: "n" }) });
-    await new ReplaceNotebookTextSourceTask(client).run({ notebookId: "nb", title: "big.md", content: "x".repeat(150_000) });
-    expect(calls[1]).toContain("--file");
-    expect(calls[1]).not.toContain("--text");
-  });
-
-  it("DRIVE_SYNC: source Drive đã có → sync; chưa có → thêm Google Doc và bỏ source văn bản cùng tên", async () => {
-    const existing = fakeNlm({ "source list": ok([{ id: "d1", title: "a.md", type: "google_docs" }]) });
-    expect(await new RefreshNotebookDriveSourceTask(existing.client).run({ notebookId: "nb", documentId: "doc", title: "a.md" })).toEqual({
+  it("DRIVE_SYNC: source Drive của Doc đã có → sync (giữ id); chưa có → thêm Google Doc, bỏ source văn bản cùng tên", async () => {
+    const existing = fakeFetch({ [RPC.GET_NOTEBOOK]: () => batch(RPC.GET_NOTEBOOK, notebook([["d1", "a.md", 1, "doc"]])) });
+    expect(await new RefreshNotebookDriveSourceTask(factory(client(existing.fn))).run({ workspaceId: "w", notebookId: "nb", documentId: "doc", title: "a.md" })).toEqual({
       sourceId: "d1",
       added: false,
     });
-    expect(existing.calls[1]).toEqual(["source", "sync", "nb", "--source-ids", "d1", "--confirm"]);
+    expect(existing.calls.find((c) => c.rpcId === RPC.SYNC_DRIVE_SOURCE)!.params).toEqual([null, ["d1"], [2]]);
 
-    const fresh = fakeNlm({ "source list": ok(SOURCES), "source add": ok({ source_id: "d9" }) });
-    expect(await new RefreshNotebookDriveSourceTask(fresh.client).run({ notebookId: "nb", documentId: "doc", title: "a.md" })).toEqual({
+    const fresh = fakeFetch({
+      [RPC.GET_NOTEBOOK]: () => batch(RPC.GET_NOTEBOOK, notebook([["s1", "a.md", 4]])),
+      [RPC.ADD_SOURCE]: () => batch(RPC.ADD_SOURCE, [[[["d9"], "a.md"]]]),
+    });
+    expect(await new RefreshNotebookDriveSourceTask(factory(client(fresh.fn))).run({ workspaceId: "w", notebookId: "nb", documentId: "doc", title: "a.md" })).toEqual({
       sourceId: "d9",
       added: true,
     });
-    expect(fresh.calls[1]).toEqual(["source", "add", "nb", "--drive", "doc", "--title", "a.md", "--wait", "--json"]);
-    expect(fresh.calls[2]).toEqual(["source", "delete", "s1", "s3", "--confirm", "--json"]);
+    const add = fresh.calls.find((c) => c.rpcId === RPC.ADD_SOURCE)!.params as unknown[][];
+    expect((add[0] as unknown[][])[0][0]).toEqual(["doc", "application/vnd.google-apps.document", 1, "a.md"]);
+    expect(fresh.calls.find((c) => c.rpcId === RPC.DELETE_SOURCES)!.params).toEqual([[["s1"]], [2]]);
   });
 
-  it("Check: ok / notebook không có → ok=false; lỗi đăng nhập, thiếu CLI, lỗi khác → mã NOTEBOOK.*", async () => {
+  it("Check: ok / notebook không có → ok=false; chưa có cookie, hết hạn → mã NOTEBOOK.*", async () => {
     const noDrive = async () => Promise.reject(new Error("không dùng"));
-    const found = fakeNlm({ "notebook get": ok({ notebook_id: "nb", title: "T", source_count: 4 }) });
-    expect(await new CheckNotebookTask(found.client, noDrive).run({ notebookId: "nb", syncStrategy: "RPC", workspaceId: "w" })).toEqual({
-      ok: true,
-      sourceCount: 4,
-      title: "T",
-    });
     const input = { notebookId: "nb", syncStrategy: "RPC" as const, workspaceId: "w" };
-    const missing = fakeNlm({ "notebook get": fail("API error (code 5): NOT_FOUND") });
-    expect(await new CheckNotebookTask(missing.client, noDrive).run(input)).toEqual({ ok: false, sourceCount: null, title: null });
-    const auth = fakeNlm({ "notebook get": fail("Authentication expired. Run nlm login") });
-    await expect(new CheckNotebookTask(auth.client, noDrive).run(input)).rejects.toMatchObject({ code: "NOTEBOOK.AUTH_REQUIRED" });
-    const notInstalled = new NlmClient(async () => ({ exitCode: -1, stdout: "", stderr: "", timedOut: false }));
-    await expect(new CheckNotebookTask(notInstalled, noDrive).run(input)).rejects.toMatchObject({ code: "NOTEBOOK.CLI_NOT_FOUND" });
-    const broken = fakeNlm({ "notebook get": fail("boom") });
-    await expect(new CheckNotebookTask(broken.client, noDrive).run(input)).rejects.toMatchObject({ code: "NOTEBOOK.COMMAND_FAILED", params: { detail: "boom" } });
+    const found = fakeFetch({ [RPC.GET_NOTEBOOK]: () => batch(RPC.GET_NOTEBOOK, notebook([["s1", "a.md", 4]])) });
+    expect(await new CheckNotebookTask(factory(client(found.fn)), noDrive).run(input)).toEqual({ ok: true, sourceCount: 1, title: "My NB" });
+    const missing = fakeFetch({ [RPC.GET_NOTEBOOK]: () => batch(RPC.GET_NOTEBOOK, null, 5) });
+    expect(await new CheckNotebookTask(factory(client(missing.fn)), noDrive).run(input)).toEqual({ ok: false, sourceCount: null, title: null });
+    await expect(new CheckNotebookTask(factory(client(found.fn, null)), noDrive).run(input)).rejects.toMatchObject({ code: "NOTEBOOK.CREDENTIALS_MISSING" });
+    const expired = fakeFetch({ [RPC.GET_NOTEBOOK]: () => new Response("", { status: 401 }) });
+    await expect(new CheckNotebookTask(factory(client(expired.fn, "SID=9; HSID=9; SSID=9; APISID=9; SAPISID=9")), noDrive).run(input)).rejects.toMatchObject({
+      code: "NOTEBOOK.AUTH_REQUIRED",
+    });
   });
 });

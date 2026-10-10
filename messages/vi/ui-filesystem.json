@@ -9,7 +9,13 @@
       "notWritable": "Không ghi được vào thư mục này.",
       "pathPlaceholder": "/home/you/projects",
       "goTo": "Đi tới",
-      "select": "Chọn thư mục này"
+      "select": "Chọn thư mục này",
+      "search": "Tìm thư mục",
+      "searchPlaceholder": "Tìm trong {count} thư mục…",
+      "noMatch": "Không có thư mục nào khớp “{query}”.",
+      "newFolder": "Thư mục mới",
+      "newFolderPlaceholder": "Tên thư mục",
+      "create": "Tạo"
     }
   }
 }

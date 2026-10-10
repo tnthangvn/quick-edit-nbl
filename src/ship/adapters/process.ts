@@ -16,7 +16,7 @@ export type RunOptions = {
 };
 
 /**
- * Chạy lệnh ngoài (git, gh, glab, claude, codex, agy, nlm...) KHÔNG qua shell: tham số truyền dạng mảng,
+ * Chạy lệnh ngoài (git, gh, glab, claude, codex, agy...) KHÔNG qua shell: tham số truyền dạng mảng,
  * không ghép chuỗi lệnh → không bị chèn lệnh. Không ném lỗi khi exit code ≠ 0; caller tự quyết định.
  */
 export async function run(command: string, args: readonly string[], opts: RunOptions = {}): Promise<RunResult> {

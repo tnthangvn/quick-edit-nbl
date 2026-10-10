@@ -9,6 +9,6 @@ export const removeWorkspaceRoute = defineRoute({
   method: "delete",
   path: "/api/workspaces/{workspaceId}",
   tags: ["Workspace"],
-  summary: "Gỡ Workspace khỏi danh sách (không xoá file)",
+  summary: "Gỡ Workspace khỏi danh sách; deleteFiles=true + confirm=delete thì xoá luôn thư mục trên máy (chỉ local)",
   controller: RemoveWorkspaceController,
 });

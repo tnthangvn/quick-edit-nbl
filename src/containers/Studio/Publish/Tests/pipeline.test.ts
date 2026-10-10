@@ -122,7 +122,7 @@ describe("ExecutePublishRunAction", () => {
     expect(brief(run.steps)).toEqual(["LOCAL:DONE", "DRIVE:DONE", "NOTEBOOK:DONE"]);
     expect(run.steps.map((s) => s.detail)).toEqual(["specs/a.md · 3 B", "Specs/a.md · đã ghi đè", "nb123456 · source a.md"]);
     expect(uploads).toEqual([{ name: "a.md", asGoogleDoc: true, folderId: "folder1" }]);
-    expect(refreshed).toEqual([{ notebookId: "nb123456789", documentId: "doc-folder1", title: "a.md" }]);
+    expect(refreshed).toEqual([expect.objectContaining({ notebookId: "nb123456789", documentId: "doc-folder1", title: "a.md" })]);
     expect(run.finished).toBe(true);
     expect(events.at(-1)).toMatchObject({ file: "a.md", syncStatus: "SYNCED" });
   });

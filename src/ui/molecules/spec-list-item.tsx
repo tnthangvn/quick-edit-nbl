@@ -15,7 +15,7 @@ import { Icon } from "@/ui/primitives/icon";
 /**
  * SpecListItem.md: checkbox → icon file → tên → trạng thái → menu 3 chấm.
  * Click dòng = mở file (`selected`: nền `sidebar-accent` + vạch `primary` bên trái). Checkbox = thêm vào context, độc lập.
- * Menu 3 chấm chỉ hiện khi hover / đang chọn / focus.
+ * Menu 3 chấm (Rename, Force Sync, Delete; thêm chức năng sau) chỉ hiện khi hover / đang chọn / focus.
  */
 const specListItemVariants = cva(
   "group/row relative flex h-(--size-row) items-center gap-2 rounded-md pr-1 pl-2 text-[13px] leading-[18px] font-medium text-sidebar-foreground transition-colors duration-(--duration-fast) ease-out",

@@ -9,7 +9,7 @@ import type { CliRun } from "../Data/Stores/CliRunStore";
 import type { CliRunEvent, CliRunEventDraft } from "../Events/CliRunEvent";
 import type { CliInvocation } from "../Models/CliInvocation";
 import type { Sandbox } from "../Models/Sandbox";
-import { isPermissionDeniedLine, parseCliLine } from "../Parsers/cliOutputParsers";
+import { createCliOutputParser, isPermissionDeniedLine } from "../Parsers/cliOutputParsers";
 import { DiffSandboxTask } from "../Tasks/DiffSandboxTask";
 import { EmitSpecProposalTask } from "../Tasks/EmitSpecProposalTask";
 import { RemoveSandboxTask } from "../Tasks/RemoveSandboxTask";
@@ -39,9 +39,12 @@ function redactDraft(draft: CliRunEventDraft, redact: (t: string) => string): Cl
   switch (draft.type) {
     case "LOG":
     case "MESSAGE":
+    case "THINKING":
       return { ...draft, text: redact(draft.text) };
     case "TOOL_CALL":
-      return { ...draft, input: redact(draft.input) };
+      return { ...draft, input: redact(draft.input), target: draft.target === null ? null : redact(draft.target) };
+    case "TOOL_RESULT":
+      return { ...draft, output: redact(draft.output) };
     default:
       return draft;
   }
@@ -83,6 +86,7 @@ export class ExecuteCliRunSubAction extends SubAction<ExecuteCliRunInput> {
     };
 
     let permissionDenied = false;
+    const parseLine = createCliOutputParser(outputFormat);
     try {
       const result = await this.runProcess.run({
         invocation,
@@ -91,7 +95,7 @@ export class ExecuteCliRunSubAction extends SubAction<ExecuteCliRunInput> {
         timeoutMs,
         onLine: (stream, line) => {
           if (isPermissionDeniedLine(line)) permissionDenied = true;
-          const drafts: CliRunEventDraft[] = stream === "STDERR" ? [{ type: "LOG", stream, text: line }] : parseCliLine(outputFormat, line);
+          const drafts: CliRunEventDraft[] = stream === "STDERR" ? [{ type: "LOG", stream, text: line }] : parseLine(line);
           drafts.forEach(emit);
         },
       });

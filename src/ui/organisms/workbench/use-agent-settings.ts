@@ -4,11 +4,11 @@ import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { getGetSettingsQueryKey, useGetSettings, useUpdateSettings } from "@/client/api/generated";
-import type { AgentMode, AgentSettingsView, CliPermissionMode, UpdateSettingsInput } from "@/client/api/generated/model";
+import type { AgentMode, AgentSettingsView, CliEffort, CliPermissionMode, UpdateSettingsInput } from "@/client/api/generated/model";
 import { useErrorMessage } from "@/client/api/useErrorMessage";
 import { notify } from "@/ui/primitives/sonner";
 
-type QuickPatch = { activeMode?: AgentMode; model?: string; activeProfileId?: string; permissionMode?: CliPermissionMode };
+type QuickPatch = { activeMode?: AgentMode; model?: string; activeProfileId?: string; permissionMode?: CliPermissionMode; effort?: CliEffort };
 
 /** View (GET) → input (PUT): giữ nguyên mọi trường, chỉ đổi phần chọn nhanh. Bỏ `apiKey` = giữ key đã lưu. */
 export function toSettingsInput(view: AgentSettingsView, patch: QuickPatch): UpdateSettingsInput {
@@ -25,6 +25,7 @@ export function toSettingsInput(view: AgentSettingsView, patch: QuickPatch): Upd
       activeProfileId: patch.activeProfileId ?? view.cli.activeProfileId,
       streamStdout: view.cli.streamStdout,
       permissionMode: patch.permissionMode ?? view.cli.permissionMode,
+      effort: patch.effort ?? view.cli.effort,
       profiles: view.cli.profiles,
     },
   };
@@ -32,7 +33,7 @@ export function toSettingsInput(view: AgentSettingsView, patch: QuickPatch): Upd
 
 /**
  * Cấu hình Agent dùng chung cho Quick Setting Toolbar / Composer / log chat (spec 3.4): chế độ API / CLI, model, CLI profile,
- * mức quyền của CLI.
+ * mức quyền và effort của CLI.
  * Trong lúc lưu hiển thị ngay giá trị mới (biến của mutation), không sửa cache tay.
  */
 export function useAgentSettings() {
@@ -53,6 +54,7 @@ export function useAgentSettings() {
   const model = pending?.api.model ?? view?.api.model ?? "";
   const profileId = pending?.cli.activeProfileId ?? view?.cli.activeProfileId ?? "";
   const permissionMode: CliPermissionMode = pending?.cli.permissionMode ?? view?.cli.permissionMode ?? "BYPASS";
+  const effort: CliEffort = pending?.cli.effort ?? view?.cli.effort ?? "DEFAULT";
   const { mutate } = update;
 
   const patch = useCallback(
@@ -62,5 +64,5 @@ export function useAgentSettings() {
     [view, mutate],
   );
 
-  return { view, loading: settings.isPending, mode, model, profileId, permissionMode, profiles: view?.cli.profiles ?? [], patch, saving: update.isPending };
+  return { view, loading: settings.isPending, mode, model, profileId, permissionMode, effort, profiles: view?.cli.profiles ?? [], patch, saving: update.isPending };
 }

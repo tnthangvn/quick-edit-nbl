@@ -71,7 +71,16 @@
       "draftHint": "Nháp tự lưu trên máy · chưa ghi file",
       "approveSave": "Approve & Save",
       "saving": "Đang lưu…",
-      "saved": "Đã lưu"
+      "saved": "Đã lưu",
+      "viewMode": "Chế độ xem",
+      "preview": "Preview",
+      "source": "Edit",
+      "previewLabel": "Preview {file}",
+      "diff": "Diff",
+      "diffNoChanges": "Chưa có thay đổi so với file đã lưu",
+      "diffLabel": "So sánh bản nháp {file}",
+      "splitResize": "Kéo để đổi độ rộng editor / preview",
+      "diffTitle": "Thay đổi so với file đã lưu"
     },
     "diff": {
       "label": "Duyệt thay đổi của Agent",
@@ -86,7 +95,10 @@
       "reject": "Reject",
       "approveSave": "Approve & Save",
       "saving": "Đang lưu…",
-      "rejected": "Đã huỷ đề xuất cho {file}"
+      "rejected": "Đã huỷ đề xuất cho {file}",
+      "diff": "Diff",
+      "previewOf": "Preview · {file}",
+      "editable": "sửa trực tiếp được"
     },
     "sync": {
       "label": "Tiến trình đồng bộ",
@@ -140,13 +152,6 @@
       "hint": "Tick các spec liên quan bên trái rồi mô tả thay đổi bạn muốn.",
       "thinking": "Agent đang xử lý",
       "cliTitle": "{profile} · stdout",
-      "cliStarting": "Đang khởi chạy…",
-      "cliStatus": {
-        "RUNNING": "Đang chạy",
-        "DONE": "Xong · exit {code}",
-        "FAILED": "Thất bại · exit {code}",
-        "STOPPED": "Đã dừng"
-      },
       "tool": {
         "running": "Đang chạy",
         "drafting": "Đang soạn",
@@ -157,7 +162,32 @@
         "reviewed": "Đã xử lý",
         "openDiff": "Mở Diff"
       },
-      "untitled": "Phiên chưa đặt tên"
+      "untitled": "Phiên chưa đặt tên",
+      "record": {
+        "working": "Đang làm việc",
+        "thinking": "Đang suy nghĩ",
+        "DONE": "Đã làm việc trong {duration}",
+        "DONEShort": "Đã làm xong",
+        "FAILED": "Dừng do lỗi sau {duration}",
+        "FAILEDShort": "Dừng do lỗi",
+        "STOPPED": "Đã dừng sau {duration}",
+        "STOPPEDShort": "Đã dừng",
+        "steps": "{count, plural, other {# bước}}",
+        "thought": "Suy nghĩ",
+        "tokens": "{input} vào · {output} ra",
+        "turns": "{count, plural, other {# lượt}}",
+        "verb": {
+          "read": "Đọc",
+          "edit": "Sửa",
+          "write": "Tạo",
+          "search": "Tìm",
+          "exec": "Chạy",
+          "web": "Web",
+          "plan": "Kế hoạch",
+          "task": "Subagent",
+          "other": "Tool"
+        }
+      }
     },
     "composer": {
       "placeholderApi": "Yêu cầu Agent sửa spec…",
@@ -166,7 +196,17 @@
       "contextLabel": "{count, plural, other {# spec trong context}}",
       "cliStartFailed": "Không chạy được CLI Agent",
       "cliStopFailed": "Không dừng được CLI Agent",
-      "sessionFailed": "Không tạo được phiên chat"
+      "sessionFailed": "Không tạo được phiên chat",
+      "imageType": "Chỉ dán được ảnh PNG, JPEG, WebP hoặc GIF.",
+      "imageTooLarge": "Ảnh lớn hơn {max} MB.",
+      "imageLimit": "Tối đa {max} ảnh mỗi tin nhắn."
+    },
+    "syncAll": {
+      "label": "Sync",
+      "started": "Đã xếp hàng đồng bộ {count} file lên {targets}",
+      "failed": "Không đồng bộ được {file}",
+      "selected": "Đồng bộ {count} file đang chọn lên {targets}",
+      "noneSelected": "Tick file ở sidebar để chọn file cần đồng bộ"
     }
   }
 }

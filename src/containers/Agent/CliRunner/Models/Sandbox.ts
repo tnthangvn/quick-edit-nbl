@@ -21,3 +21,13 @@ export type Sandbox = {
 
 /** Một file .md CLI đã sửa / tạo trong sandbox. */
 export type SandboxChange = { file: string; original: string; proposed: string; isNewFile: boolean };
+
+/** Ảnh người dùng dán vào composer, ghi vào `<sandbox>/.attachments/` để CLI đọc bằng tool đọc file. */
+export type CliImage = { name: string; mediaType: "image/png" | "image/jpeg" | "image/webp" | "image/gif"; data: string };
+
+export const ATTACHMENTS_DIR = ".attachments";
+const IMAGE_EXT: Record<CliImage["mediaType"], string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif" };
+
+/** Đường dẫn tương đối (với cwd = sandbox.dir) của từng ảnh trong một run; tên do app đặt, không lấy từ người dùng. */
+export const attachmentPaths = (runId: string, images: readonly CliImage[]): string[] =>
+  images.map((img, i) => `${ATTACHMENTS_DIR}/${runId}-${i + 1}.${IMAGE_EXT[img.mediaType]}`);

@@ -31,6 +31,7 @@ import { Switch } from "@/ui/primitives/switch";
 import { ConnectorFormDialog, type ConnectorDefaults } from "@/ui/organisms/connectors/ConnectorFormDialog";
 import { toRowState } from "@/ui/organisms/connectors/connector-utils";
 import { GoogleDriveConnector } from "@/ui/organisms/connectors/GoogleDriveConnector";
+import { NotebookLmConnector } from "@/ui/organisms/connectors/NotebookLmConnector";
 
 function SectionHeading({ title, description, action }: { title: React.ReactNode; description?: React.ReactNode; action?: React.ReactNode }) {
   return (
@@ -208,7 +209,7 @@ function DetectedClis({ connectors, onAdd }: { connectors: Connector[]; onAdd: (
 
 /* ---------------------------------------------------------------- Danh sách connector */
 
-/** Settings › Integrations (spec 3.0.2, Tab 5): connector Git provider, Google Drive, tự dò CLI, MCP server và tool cho Agent. */
+/** Settings › Integrations (spec 3.0.2, Tab 5): connector Git provider, Google Drive, NotebookLM, tự dò CLI, MCP server và tool cho Agent. */
 export function ConnectorManager() {
   const t = useTranslations("settings.integrations");
   const tc = useTranslations("common.actions");
@@ -298,6 +299,8 @@ export function ConnectorManager() {
       </section>
 
       <GoogleDriveConnector />
+
+      <NotebookLmConnector />
 
       <DetectedClis connectors={connectors} onAdd={(defaults) => setForm({ open: true, defaults })} />
 

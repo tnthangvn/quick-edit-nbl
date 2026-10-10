@@ -12,14 +12,15 @@ const globalForHandler = globalThis as unknown as { __specStudioPublishHandler?:
 const state = (globalForHandler.__specStudioPublishHandler ??= { registered: false, tails: new Map() });
 
 /**
- * Đăng ký (một lần cho cả tiến trình) handler chạy pipeline. Hàng đợi theo file: lần chạy sau nối vào
- * promise của lần trước nên Approve tiếp theo trên cùng file được xếp hàng, file khác chạy song song.
+ * Đăng ký (một lần cho cả tiến trình) handler chạy pipeline. Hàng đợi theo Workspace: lần chạy sau nối vào promise
+ * của lần trước nên các file cùng Workspace chạy lần lượt (Sync tất cả / Approve liên tiếp không tranh .git/index.lock),
+ * Workspace khác chạy song song.
  */
 export function ensurePublishRunHandler() {
   if (state.registered) return;
   state.registered = true;
-  eventBus.on<PublishRunQueuedPayload>(PUBLISH_RUN_QUEUED, ({ runId, workspaceId, file }) => {
-    const key = `${workspaceId}\u0000${file}`;
+  eventBus.on<PublishRunQueuedPayload>(PUBLISH_RUN_QUEUED, ({ runId, workspaceId }) => {
+    const key = workspaceId;
     const tail = (state.tails.get(key) ?? Promise.resolve())
       .then(() => new ExecutePublishRunAction().run({ runId }))
       .catch((err: unknown) => logger.error({ err, runId }, "pipeline publish lỗi ngoài dự kiến"));

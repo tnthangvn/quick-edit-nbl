@@ -3,7 +3,7 @@
 import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { FolderOpen } from "lucide-react";
+import { FolderOpen, Trash2, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import {
@@ -18,7 +18,9 @@ import { ImportWorkspaceBody, UpdateWorkspaceBody } from "@/client/api/generated
 import { extractApiError, useErrorMessage } from "@/client/api/useErrorMessage";
 import { Field } from "@/ui/molecules/field";
 import { Button } from "@/ui/primitives/button";
+import { Checkbox } from "@/ui/primitives/checkbox";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/ui/primitives/dialog";
+import { Icon } from "@/ui/primitives/icon";
 import { Input } from "@/ui/primitives/input";
 import { notify } from "@/ui/primitives/sonner";
 import { apiErrorMap, applyServerFieldErrors, fieldError } from "@/ui/organisms/settings/form-errors";
@@ -117,17 +119,35 @@ export function EditWorkspaceDialog({ open, onOpenChange, workspace, mode }: Edi
 
 type RemoveWorkspaceDialogProps = BaseProps & { workspace: Pick<Workspace, "id" | "name" | "path"> | null; onRemoved?: () => void };
 
-/** DELETE `removeWorkspace`: chỉ gỡ khỏi registry, không xoá file. */
+const DELETE_WORD = "delete";
+
+/**
+ * DELETE `removeWorkspace`. Mặc định chỉ gỡ khỏi danh sách (file giữ nguyên). Tick "Xoá luôn thư mục trên máy" thì phải gõ
+ * `delete` mới bấm được: xoá vĩnh viễn thư mục làm việc ở local, không đụng Git remote / Google Drive / NotebookLM.
+ */
 export function RemoveWorkspaceDialog({ open, onOpenChange, workspace, onRemoved }: RemoveWorkspaceDialogProps) {
   const t = useTranslations("projects.remove");
   const tc = useTranslations("common.actions");
   const errorMessage = useErrorMessage();
   const invalidate = useInvalidateWorkspaces();
+  const [deleteFiles, setDeleteFiles] = React.useState(false);
+  const [typed, setTyped] = React.useState("");
+  // Mở lại dialog: quay về chỉ gỡ khỏi danh sách.
+  const [wasOpen, setWasOpen] = React.useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setDeleteFiles(false);
+      setTyped("");
+    }
+  }
+  const confirmed = !deleteFiles || typed.trim() === DELETE_WORD;
+
   const remove = useRemoveWorkspace({
     mutation: {
       onSuccess: () => {
         invalidate();
-        notify.info(t("removed", { name: workspace?.name ?? "" }));
+        notify.info(deleteFiles ? t("deleted", { name: workspace?.name ?? "" }) : t("removed", { name: workspace?.name ?? "" }));
         onOpenChange(false);
         onRemoved?.();
       },
@@ -135,24 +155,61 @@ export function RemoveWorkspaceDialog({ open, onOpenChange, workspace, onRemoved
     },
   });
 
+  const submit = () => {
+    if (!workspace || !confirmed) return;
+    remove.mutate({ workspaceId: workspace.id, params: deleteFiles ? { deleteFiles: "true", confirm: typed.trim() } : undefined });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="sm">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("description", { name: workspace?.name ?? "" })}</DialogDescription>
+          <DialogDescription>{t(deleteFiles ? "descriptionDelete" : "description", { name: workspace?.name ?? "" })}</DialogDescription>
         </DialogHeader>
-        <DialogBody className="py-3">
+        <DialogBody className="flex flex-col gap-3 py-3">
           <p className="m-0 truncate font-mono text-xs text-muted-foreground" title={workspace?.path}>
             {workspace?.path}
           </p>
+          <Checkbox checked={deleteFiles} onCheckedChange={(v) => setDeleteFiles(v === true)}>
+            {t("deleteFiles")}
+          </Checkbox>
+          {deleteFiles ? (
+            <div role="alert" className="flex flex-col gap-2 rounded-md border border-destructive/40 bg-destructive-soft px-3 py-2.5">
+              <p className="m-0 flex items-start gap-1.5 text-xs leading-[18px] text-destructive">
+                <Icon icon={TriangleAlert} size="sm" className="mt-px" />
+                <span>{t("deleteWarning")}</span>
+              </p>
+              <ul className="m-0 list-disc pl-5 text-xs leading-[18px] text-foreground">
+                <li>{t.rich("deleteWhat", { path: workspace?.path ?? "", code: (c) => <code className="font-mono">{c}</code> })}</li>
+                <li>{t("deleteKeep")}</li>
+              </ul>
+              <Field label={t.rich("typeToConfirm", { word: DELETE_WORD, code: (c) => <code className="font-mono font-semibold text-destructive">{c}</code> })}>
+                <Input
+                  mono
+                  autoFocus
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={typed}
+                  placeholder={DELETE_WORD}
+                  onChange={(e) => setTyped(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      submit();
+                    }
+                  }}
+                />
+              </Field>
+            </div>
+          ) : null}
         </DialogBody>
         <DialogFooter className="justify-end">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             {tc("cancel")}
           </Button>
-          <Button variant="destructive" loading={remove.isPending} onClick={() => workspace && remove.mutate({ workspaceId: workspace.id })}>
-            {t("confirm")}
+          <Button variant="destructive" icon={deleteFiles ? Trash2 : undefined} loading={remove.isPending} disabled={!confirmed} onClick={submit}>
+            {deleteFiles ? t("confirmDelete") : t("confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

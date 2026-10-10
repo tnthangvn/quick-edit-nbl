@@ -28,7 +28,7 @@ import { MemorySecrets } from "./memorySecrets";
 const settingsInput = (over: Partial<UpdateSettingsInput["api"]> = {}): UpdateSettingsInput => ({
   activeMode: "API",
   api: { provider: "GOOGLE", model: "gemini-pro-latest", baseUrl: null, temperature: 0.2, systemPrompt: "x", ...over },
-  cli: { activeProfileId: "codex", streamStdout: true, permissionMode: "DEFAULT", profiles: DEFAULT_CLI_PROFILES },
+  cli: { activeProfileId: "codex", streamStdout: true, permissionMode: "DEFAULT", effort: "DEFAULT", profiles: DEFAULT_CLI_PROFILES },
 });
 
 describe("Setting", () => {

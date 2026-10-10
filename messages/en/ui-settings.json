@@ -105,10 +105,8 @@
       },
       "driveFolder": "Drive Folder ID",
       "driveFolderHint": "Drive folder holding the Google Doc copies of the specs.",
-      "cookie": "Cookie (SID, HSID, SSID)",
-      "cookieHint": "Stored locally only. Cookies usually expire after a few weeks.",
-      "token": "SNlM0e Token",
-      "tokenHint": "Stored locally only, used for the RPC endpoint.",
+      "cookie": "Project NotebookLM cookie (optional)",
+      "cookieHint": "Leave empty to use the shared NotebookLM connection in Settings › Integrations. Only set it when this project uses another Google account.",
       "autoSyncOnApprove": {
         "label": "Sync to NBL automatically after Approve Diff",
         "hint": "Runs right after the file is written."
@@ -176,6 +174,29 @@
         "waiting": "Waiting for sign-in…",
         "signIn": "Sign In With Google",
         "signOut": "Sign Out"
+      },
+      "notebooklm": {
+        "title": "NotebookLM",
+        "description": "Connect with your Google session; the app talks to NotebookLM directly to add / sync / replace sources, no CLI needed.",
+        "checking": "Checking…",
+        "notConnected": "Not connected.",
+        "connected": "Connected",
+        "check": "Check",
+        "replace": "Replace cookie",
+        "disconnect": "Disconnect",
+        "step1": "Open notebooklm.google.com (signed in) → F12 → Network tab.",
+        "step2": "Reload, pick any request to notebooklm.google.com → Headers → Request Headers.",
+        "step3": "Copy the whole Cookie value and paste it here.",
+        "cookieLabel": "NotebookLM cookie",
+        "warning": "The cookie is your Google session: stored encrypted on this machine only and sent nowhere except notebooklm.google.com. Paste again when it expires after a few weeks.",
+        "cancel": "Cancel",
+        "save": "Save & check",
+        "saving": "Checking…",
+        "saved": "NotebookLM connected · {count} notebooks",
+        "saveFailed": "Cookie not accepted",
+        "checkOk": "NotebookLM OK · {count} notebooks",
+        "checkFailed": "NotebookLM connection failed",
+        "removed": "NotebookLM disconnected"
       }
     },
     "connectorForm": {
